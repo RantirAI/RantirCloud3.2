@@ -5,6 +5,7 @@ Supabase is 100% remote.
 Aaron Byrne
 Ada Wong
 Adam Mokan
+AJ Matias
 Akash Manimaran
 Alaister Young
 Alan De Los Santos
@@ -51,6 +52,7 @@ Danny White
 Darren Cunningham
 Dave Wilson
 David A. Ventimiglia
+David Birdsong
 David Weitzman
 Deepthi Sigireddi
 Deji I
@@ -174,6 +176,7 @@ Ruan Maia
 Sam Meech-Ward
 Sam Rome
 Sam Rose
+Sara Read
 Sean Oliver
 Sean Thompson
 Sergio Cioban Filho
