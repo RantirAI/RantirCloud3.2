@@ -3,6 +3,7 @@ import { NextApiRequest, NextApiResponse } from 'next'
 import { z } from 'zod'
 
 import { IS_PLATFORM } from 'common'
+import { STUDIO_AUTH_ENABLED } from 'lib/constants'
 import type { AiOptInLevel } from 'hooks/misc/useOrgOptedIntoAi'
 import { getModel } from 'lib/ai/model'
 import { getOrgAIDetails } from 'lib/ai/org-ai-details'
@@ -37,7 +38,7 @@ export async function handlePost(req: NextApiRequest, res: NextApiResponse) {
   const authorization = req.headers.authorization
   const accessToken = authorization?.replace('Bearer ', '')
 
-  if (IS_PLATFORM && !accessToken) {
+  if ((IS_PLATFORM || STUDIO_AUTH_ENABLED) && !accessToken) {
     return res.status(401).json({ error: 'Authorization token is required' })
   }
 
