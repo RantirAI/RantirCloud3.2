@@ -1,5 +1,3 @@
-import { ConnectionType } from '@/components/interfaces/ConnectSheet/Connect.constants'
-import { ConnectionIcon } from '@/components/interfaces/ConnectSheet/ConnectionIcon'
 import { Box, Check, ChevronDown } from 'lucide-react'
 import { useState } from 'react'
 import {
@@ -15,6 +13,9 @@ import {
   Popover_Shadcn_,
   cn,
 } from 'ui'
+
+import { ConnectionType } from '@/components/interfaces/Connect/Connect.constants'
+import { ConnectionIcon } from '@/components/interfaces/Connect/ConnectionIcon'
 
 interface FrameworkSelectorProps {
   value: string
