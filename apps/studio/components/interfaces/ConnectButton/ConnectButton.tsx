@@ -20,7 +20,7 @@ export const ConnectButton = ({
 }: ConnectButtonProps) => {
   const connectSheetFlag = usePHFlag<string | boolean>('connectSheet')
   const isFlagResolved = connectSheetFlag !== undefined
-  const isConnectSheetEnabled = connectSheetFlag === true || connectSheetFlag === 'variation'
+  const isConnectSheetEnabled = false //connectSheetFlag === true || connectSheetFlag === 'variation'
 
   const { data: selectedProject } = useSelectedProjectQuery()
   const isActiveHealthy = selectedProject?.status === PROJECT_STATUS.ACTIVE_HEALTHY
