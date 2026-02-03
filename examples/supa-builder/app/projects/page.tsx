@@ -10,6 +10,7 @@ import { redirect } from 'next/navigation'
 import { createClient } from '@/lib/supabase/server'
 import { getProjects } from '@/app/actions/projects'
 import ProjectTable from '@/components/ProjectTable'
+import Header from '@/components/Header'
 
 export default async function ProjectsPage() {
   const supabase = await createClient()
@@ -52,41 +53,27 @@ export default async function ProjectsPage() {
   }
 
   return (
-    <div className="container mx-auto px-4 py-8 max-w-7xl">
-      {/* Header */}
-      <div className="flex items-center justify-between mb-8">
-        <div>
-          <h1 className="text-3xl font-bold mb-2">Projects</h1>
-          <p className="text-gray-600">
-            Manage your Supabase projects
-            {isAdmin && <span className="ml-2 px-2 py-1 bg-blue-100 text-blue-800 text-xs font-medium rounded">Admin</span>}
-          </p>
+    <div className="min-h-screen bg-[#0E0E0E]">
+      <Header userEmail={user.email} userRole={isAdmin ? 'admin' : 'builder'} />
+      <div className="container mx-auto px-6 py-12 max-w-7xl">
+        {/* Header */}
+        <div className="flex items-center justify-between mb-10">
+          <div>
+            <h1 className="text-4xl font-medium text-white mb-2">Projects</h1>
+            <p className="text-[#A0A0A0] text-base">
+              Manage your Supabase projects
+            </p>
+          </div>
+          <Link
+            href="/projects/new"
+            className="px-5 py-2.5 bg-[#3ECF8E] text-[#0E0E0E] rounded-md hover:bg-[#3ECF8E]/90 font-medium transition-colors text-sm"
+          >
+            Create Project
+          </Link>
         </div>
-        <Link
-          href="/projects/new"
-          className="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 font-medium"
-        >
-          Create Project
-        </Link>
-      </div>
 
-      {/* User Info */}
-      <div className="bg-gray-50 border border-gray-200 rounded-lg p-4 mb-6">
-        <p className="text-sm text-gray-700">
-          Logged in as: <strong>{user.email}</strong>
-        </p>
-      </div>
-
-      {/* Projects Table */}
-      <ProjectTable projects={projects} isAdmin={isAdmin} />
-
-      {/* Footer Info */}
-      <div className="mt-8 bg-blue-50 border border-blue-200 rounded-lg p-4">
-        <h3 className="font-medium text-blue-900 mb-2">About SupaBuilder</h3>
-        <p className="text-sm text-blue-800">
-          SupaBuilder is an enterprise self-service platform for provisioning Supabase Pico projects.
-          All projects are automatically created with the free (Pico) tier and can be managed through this interface.
-        </p>
+        {/* Projects Table */}
+        <ProjectTable projects={projects} isAdmin={isAdmin} />
       </div>
     </div>
   )

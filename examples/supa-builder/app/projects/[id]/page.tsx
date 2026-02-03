@@ -1,13 +1,18 @@
 /**
  * Project Detail Page
  *
- * Server component that displays detailed information about a single project.
+ * Server component that displays project information and Platform Kit UI.
  */
 
 import Link from 'next/link'
 import { redirect, notFound } from 'next/navigation'
 import { createClient } from '@/lib/supabase/server'
 import { getProject } from '@/app/actions/projects'
+import ProjectInfo from '@/components/ProjectInfo'
+import PlatformKitEmbed from '@/components/PlatformKitEmbed'
+import Header from '@/components/Header'
+import DeleteProjectButton from '@/components/DeleteProjectButton'
+import { ArrowLeft } from 'lucide-react'
 
 interface ProjectDetailPageProps {
   params: Promise<{
@@ -45,26 +50,18 @@ export default async function ProjectDetailPage({ params }: ProjectDetailPagePro
   })
   const isAdmin = role === 'admin'
 
-  // Get audit logs (if admin or creator)
-  const { data: auditLogs } = await supabase
-    .from('project_audit_logs')
-    .select('*')
-    .eq('project_id', project.id)
-    .order('created_at', { ascending: false })
-    .limit(10)
-
   const getStatusBadge = (status: typeof project.status) => {
     const styles = {
-      provisioning: 'bg-yellow-100 text-yellow-800 border-yellow-200',
-      active: 'bg-green-100 text-green-800 border-green-200',
-      paused: 'bg-gray-100 text-gray-800 border-gray-200',
-      failed: 'bg-red-100 text-red-800 border-red-200',
-      deleted: 'bg-red-100 text-red-800 border-red-200',
+      provisioning: 'bg-amber-500/10 text-amber-500 border-amber-500/20',
+      active: 'bg-[#3ECF8E]/10 text-[#3ECF8E] border-[#3ECF8E]/20',
+      paused: 'bg-gray-500/10 text-gray-400 border-gray-500/20',
+      failed: 'bg-red-500/10 text-red-500 border-red-500/20',
+      deleted: 'bg-red-500/10 text-red-500 border-red-500/20',
     }
 
     return (
       <span
-        className={`px-3 py-1 rounded-full text-sm font-medium border ${
+        className={`px-2.5 py-1 rounded-full text-xs font-medium border ${
           styles[status] || styles.active
         }`}
       >
@@ -74,151 +71,67 @@ export default async function ProjectDetailPage({ params }: ProjectDetailPagePro
   }
 
   return (
-    <div className="container mx-auto px-4 py-8 max-w-6xl">
-      {/* Header */}
-      <div className="mb-8">
-        <Link
-          href="/projects"
-          className="text-blue-600 hover:text-blue-800 text-sm mb-4 inline-block"
-        >
-          ← Back to Projects
-        </Link>
-        <div className="flex items-center justify-between">
-          <div>
-            <h1 className="text-3xl font-bold mb-2">{project.project_name}</h1>
-            <p className="text-gray-600">Project Reference: {project.project_ref}</p>
-          </div>
-          {getStatusBadge(project.status)}
-        </div>
-      </div>
-
-      {/* Project Details Grid */}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
-        {/* Basic Information */}
-        <div className="bg-white border border-gray-200 rounded-lg p-6">
-          <h2 className="text-lg font-semibold mb-4">Basic Information</h2>
-          <dl className="space-y-3">
+    <div className="min-h-screen bg-[#0E0E0E]">
+      <Header userEmail={user.email} userRole={isAdmin ? 'admin' : 'builder'} />
+      <div className="container mx-auto px-6 py-8 max-w-[1600px]">
+        {/* Header */}
+        <div className="mb-6">
+          <Link
+            href="/projects"
+            className="inline-flex items-center gap-2 text-[#808080] hover:text-[#D0D0D0] text-sm mb-4 transition-colors"
+          >
+            <ArrowLeft className="w-4 h-4" />
+            Back to Projects
+          </Link>
+          <div className="flex items-center justify-between">
             <div>
-              <dt className="text-sm font-medium text-gray-500">Organization ID</dt>
-              <dd className="text-sm text-gray-900">{project.organization_id}</dd>
+              <h1 className="text-3xl font-medium text-white mb-1">{project.project_name}</h1>
+              <p className="text-[#808080] text-sm font-mono">{project.project_ref}</p>
             </div>
-            <div>
-              <dt className="text-sm font-medium text-gray-500">Region</dt>
-              <dd className="text-sm text-gray-900">{project.region}</dd>
-            </div>
-            <div>
-              <dt className="text-sm font-medium text-gray-500">Created By</dt>
-              <dd className="text-sm text-gray-900">{project.creator_email}</dd>
-            </div>
-            <div>
-              <dt className="text-sm font-medium text-gray-500">Created At</dt>
-              <dd className="text-sm text-gray-900">
-                {new Date(project.created_at).toLocaleString()}
-              </dd>
-            </div>
-            {project.purpose && (
-              <div>
-                <dt className="text-sm font-medium text-gray-500">Purpose</dt>
-                <dd className="text-sm text-gray-900">{project.purpose}</dd>
-              </div>
-            )}
-          </dl>
-        </div>
-
-        {/* Credentials */}
-        <div className="bg-white border border-gray-200 rounded-lg p-6">
-          <h2 className="text-lg font-semibold mb-4">API Credentials</h2>
-          <div className="space-y-4">
-            <div>
-              <label className="text-sm font-medium text-gray-500 block mb-1">
-                Supabase URL
-              </label>
-              <code className="block text-xs bg-gray-100 px-3 py-2 rounded border border-gray-200 break-all">
-                https://{project.project_ref}.supabase.co
-              </code>
-            </div>
-            <div>
-              <label className="text-sm font-medium text-gray-500 block mb-1">
-                Anon Key
-              </label>
-              <code className="block text-xs bg-gray-100 px-3 py-2 rounded border border-gray-200 break-all">
-                {project.anon_key}
-              </code>
-            </div>
-            {isAdmin && (
-              <div className="bg-yellow-50 border border-yellow-200 rounded p-3 mt-4">
-                <p className="text-xs text-yellow-800">
-                  <strong>Admin Note:</strong> Service role key is encrypted in the database.
-                  Contact system administrator for access.
-                </p>
-              </div>
-            )}
+            {getStatusBadge(project.status)}
           </div>
         </div>
-      </div>
 
-      {/* Description */}
-      {project.description && (
-        <div className="bg-white border border-gray-200 rounded-lg p-6 mb-8">
-          <h2 className="text-lg font-semibold mb-4">Description</h2>
-          <p className="text-sm text-gray-700 whitespace-pre-wrap">{project.description}</p>
+        {/* Project Info - Collapsible */}
+        <div className="mb-6">
+          <ProjectInfo project={project} />
         </div>
-      )}
 
-      {/* Quick Links */}
-      <div className="bg-white border border-gray-200 rounded-lg p-6 mb-8">
-        <h2 className="text-lg font-semibold mb-4">Quick Links</h2>
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-          <a
-            href={`https://supabase.com/dashboard/project/${project.project_ref}`}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="text-center px-4 py-3 border border-gray-200 rounded-lg hover:bg-gray-50"
-          >
-            <span className="text-sm font-medium text-blue-600">Dashboard →</span>
-          </a>
-          <a
-            href={`https://supabase.com/dashboard/project/${project.project_ref}/editor`}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="text-center px-4 py-3 border border-gray-200 rounded-lg hover:bg-gray-50"
-          >
-            <span className="text-sm font-medium text-blue-600">Table Editor →</span>
-          </a>
-          <a
-            href={`https://supabase.com/dashboard/project/${project.project_ref}/auth/users`}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="text-center px-4 py-3 border border-gray-200 rounded-lg hover:bg-gray-50"
-          >
-            <span className="text-sm font-medium text-blue-600">Auth Users →</span>
-          </a>
-        </div>
-      </div>
+        {/* Admin Actions */}
+        {isAdmin && project.status !== 'deleted' && (
+          <div className="mb-6">
+            <DeleteProjectButton
+              projectId={project.id}
+              projectName={project.project_name}
+            />
+          </div>
+        )}
 
-      {/* Audit Logs */}
-      {auditLogs && auditLogs.length > 0 && (
-        <div className="bg-white border border-gray-200 rounded-lg p-6">
-          <h2 className="text-lg font-semibold mb-4">Recent Activity</h2>
-          <div className="space-y-3">
-            {auditLogs.map((log) => (
-              <div key={log.id} className="flex items-start gap-3 text-sm border-b border-gray-100 pb-3 last:border-0">
-                <span className="px-2 py-1 bg-gray-100 text-gray-700 rounded text-xs font-medium">
-                  {log.action}
-                </span>
-                <div className="flex-1">
-                  <p className="text-gray-900">
-                    {log.actor_email}
-                  </p>
-                  <p className="text-xs text-gray-500">
-                    {new Date(log.created_at).toLocaleString()}
-                  </p>
+        {/* Platform Kit UI */}
+        {project.status === 'active' ? (
+          <PlatformKitEmbed projectRef={project.project_ref} />
+        ) : (
+          <div className="bg-[#1C1C1C] border border-[#2C2C2C] rounded-lg p-12 text-center">
+            <div className="max-w-md mx-auto">
+              <h2 className="text-xl font-medium text-white mb-2">
+                {project.status === 'provisioning' && 'Project Provisioning'}
+                {project.status === 'paused' && 'Project Paused'}
+                {project.status === 'failed' && 'Provisioning Failed'}
+              </h2>
+              <p className="text-[#A0A0A0] mb-6">
+                {project.status === 'provisioning' && 'Your project is being provisioned. This usually takes 1-2 minutes.'}
+                {project.status === 'paused' && 'This project has been paused. Contact an admin to resume it.'}
+                {project.status === 'failed' && 'Project provisioning failed. Please contact support.'}
+              </p>
+              {project.status === 'provisioning' && (
+                <div className="flex justify-center">
+                  <div className="w-8 h-8 border-2 border-[#3ECF8E] border-t-transparent rounded-full animate-spin"></div>
                 </div>
-              </div>
-            ))}
+              )}
+            </div>
           </div>
-        </div>
-      )}
+        )}
+      </div>
     </div>
   )
 }

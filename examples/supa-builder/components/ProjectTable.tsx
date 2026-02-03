@@ -10,6 +10,7 @@
 import { useState } from 'react'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
+import { Trash2, Loader2 } from 'lucide-react'
 import {
   pauseProject,
   resumeProject,
@@ -82,16 +83,16 @@ export default function ProjectTable({ projects, isAdmin }: ProjectTableProps) {
 
   const getStatusBadge = (status: Project['status']) => {
     const styles = {
-      provisioning: 'bg-yellow-100 text-yellow-800 border-yellow-200',
-      active: 'bg-green-100 text-green-800 border-green-200',
-      paused: 'bg-gray-100 text-gray-800 border-gray-200',
-      failed: 'bg-red-100 text-red-800 border-red-200',
-      deleted: 'bg-red-100 text-red-800 border-red-200',
+      provisioning: 'bg-amber-500/10 text-amber-500 border-amber-500/20',
+      active: 'bg-[#3ECF8E]/10 text-[#3ECF8E] border-[#3ECF8E]/20',
+      paused: 'bg-gray-500/10 text-gray-400 border-gray-500/20',
+      failed: 'bg-red-500/10 text-red-500 border-red-500/20',
+      deleted: 'bg-red-500/10 text-red-500 border-red-500/20',
     }
 
     return (
       <span
-        className={`px-2 py-1 rounded-full text-xs font-medium border ${
+        className={`px-2.5 py-1 rounded-full text-xs font-medium border ${
           styles[status] || styles.active
         }`}
       >
@@ -102,11 +103,11 @@ export default function ProjectTable({ projects, isAdmin }: ProjectTableProps) {
 
   if (projects.length === 0) {
     return (
-      <div className="text-center py-12 bg-gray-50 rounded-lg border border-gray-200">
-        <p className="text-gray-500 mb-4">No projects found</p>
+      <div className="text-center py-16 bg-[#1C1C1C] rounded-lg border border-[#2C2C2C]">
+        <p className="text-[#A0A0A0] mb-6 text-base">No projects found</p>
         <Link
           href="/projects/new"
-          className="inline-block px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 font-medium"
+          className="inline-block px-5 py-2.5 bg-[#3ECF8E] text-[#0E0E0E] rounded-md hover:bg-[#3ECF8E]/90 font-medium transition-colors"
         >
           Create Your First Project
         </Link>
@@ -118,110 +119,95 @@ export default function ProjectTable({ projects, isAdmin }: ProjectTableProps) {
     <div className="space-y-4">
       {/* Error Display */}
       {error && (
-        <div className="bg-red-50 border border-red-200 text-red-800 rounded-lg p-4">
+        <div className="bg-red-500/10 border border-red-500/20 text-red-500 rounded-lg p-4">
           <p className="font-medium">Error</p>
           <p className="text-sm">{error}</p>
         </div>
       )}
 
       {/* Table */}
-      <div className="overflow-x-auto border border-gray-200 rounded-lg">
-        <table className="min-w-full divide-y divide-gray-200">
-          <thead className="bg-gray-50">
-            <tr>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+      <div className="overflow-x-auto border border-[#2C2C2C] rounded-lg bg-[#1C1C1C]">
+        <table className="min-w-full divide-y divide-[#2C2C2C]">
+          <thead>
+            <tr className="border-b border-[#2C2C2C]">
+              <th className="px-6 py-3.5 text-left text-xs font-medium text-[#808080] uppercase tracking-wider">
                 Project Name
               </th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+              <th className="px-6 py-3.5 text-left text-xs font-medium text-[#808080] uppercase tracking-wider">
                 Reference
               </th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+              <th className="px-6 py-3.5 text-left text-xs font-medium text-[#808080] uppercase tracking-wider">
                 Region
               </th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+              <th className="px-6 py-3.5 text-left text-xs font-medium text-[#808080] uppercase tracking-wider">
                 Status
               </th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+              <th className="px-6 py-3.5 text-left text-xs font-medium text-[#808080] uppercase tracking-wider">
                 Creator
               </th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+              <th className="px-6 py-3.5 text-left text-xs font-medium text-[#808080] uppercase tracking-wider">
                 Created
               </th>
-              <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
+              <th className="px-6 py-3.5 text-right text-xs font-medium text-[#808080] uppercase tracking-wider">
                 Actions
               </th>
             </tr>
           </thead>
-          <tbody className="bg-white divide-y divide-gray-200">
+          <tbody className="divide-y divide-[#2C2C2C]">
             {projects.map((project) => (
-              <tr key={project.id} className="hover:bg-gray-50">
+              <tr key={project.id} className="hover:bg-[#2C2C2C]/30 transition-colors">
                 <td className="px-6 py-4 whitespace-nowrap">
                   <Link
                     href={`/projects/${project.id}`}
-                    className="text-blue-600 hover:text-blue-800 font-medium"
+                    className="text-[#3ECF8E] hover:text-[#3ECF8E]/80 font-medium transition-colors"
                   >
                     {project.project_name}
                   </Link>
                   {project.purpose && (
-                    <p className="text-xs text-gray-500 mt-1">{project.purpose}</p>
+                    <p className="text-xs text-[#808080] mt-1">{project.purpose}</p>
                   )}
                 </td>
                 <td className="px-6 py-4 whitespace-nowrap">
-                  <code className="text-xs bg-gray-100 px-2 py-1 rounded">
+                  <code className="text-xs bg-[#2C2C2C] text-[#A0A0A0] px-2.5 py-1 rounded font-mono">
                     {project.project_ref}
                   </code>
                 </td>
-                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-700">
+                <td className="px-6 py-4 whitespace-nowrap text-sm text-[#D0D0D0]">
                   {project.region}
                 </td>
                 <td className="px-6 py-4 whitespace-nowrap">
                   {getStatusBadge(project.status)}
                 </td>
-                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-700">
+                <td className="px-6 py-4 whitespace-nowrap text-sm text-[#D0D0D0]">
                   {project.creator_email}
                 </td>
-                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                <td className="px-6 py-4 whitespace-nowrap text-sm text-[#A0A0A0]">
                   {new Date(project.created_at).toLocaleDateString()}
                 </td>
-                <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium space-x-2">
-                  <Link
-                    href={`/projects/${project.id}`}
-                    className="text-blue-600 hover:text-blue-800"
-                  >
-                    View
-                  </Link>
+                <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
+                  <div className="flex items-center justify-end gap-3">
+                    <Link
+                      href={`/projects/${project.id}`}
+                      className="text-[#3ECF8E] hover:text-[#3ECF8E]/80 transition-colors"
+                    >
+                      View
+                    </Link>
 
-                  {isAdmin && (
-                    <>
-                      {project.status === 'active' && (
-                        <button
-                          onClick={() => handlePause(project.id)}
-                          disabled={loadingAction === project.id}
-                          className="text-yellow-600 hover:text-yellow-800 disabled:text-gray-400"
-                        >
-                          {loadingAction === project.id ? 'Loading...' : 'Pause'}
-                        </button>
-                      )}
-
-                      {project.status === 'paused' && (
-                        <button
-                          onClick={() => handleResume(project.id)}
-                          disabled={loadingAction === project.id}
-                          className="text-green-600 hover:text-green-800 disabled:text-gray-400"
-                        >
-                          {loadingAction === project.id ? 'Loading...' : 'Resume'}
-                        </button>
-                      )}
-
+                    {isAdmin && project.status !== 'deleted' && (
                       <button
                         onClick={() => handleDelete(project.id)}
                         disabled={loadingAction === project.id}
-                        className="text-red-600 hover:text-red-800 disabled:text-gray-400"
+                        className="text-red-500 hover:text-red-400 disabled:text-[#505050] transition-colors p-1 rounded hover:bg-red-500/10"
+                        title="Delete project"
                       >
-                        {loadingAction === project.id ? 'Loading...' : 'Delete'}
+                        {loadingAction === project.id ? (
+                          <Loader2 className="w-4 h-4 animate-spin" />
+                        ) : (
+                          <Trash2 className="w-4 h-4" />
+                        )}
                       </button>
-                    </>
-                  )}
+                    )}
+                  </div>
                 </td>
               </tr>
             ))}
@@ -229,12 +215,6 @@ export default function ProjectTable({ projects, isAdmin }: ProjectTableProps) {
         </table>
       </div>
 
-      {/* Legend */}
-      <div className="text-xs text-gray-500 mt-4">
-        <p>
-          <strong>Note:</strong> {isAdmin ? 'As an admin, you can pause, resume, and delete projects.' : 'Contact an admin to pause, resume, or delete projects.'}
-        </p>
-      </div>
     </div>
   )
 }

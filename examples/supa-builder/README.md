@@ -142,6 +142,8 @@ supabase functions deploy create-project
 
 # Verify deployment
 supabase functions list
+
+# Make sure to turn of JWT verification in the Supabsae Dashboard -> Edge Functions
 ```
 
 ### Step 9: Configure SSO Authentication

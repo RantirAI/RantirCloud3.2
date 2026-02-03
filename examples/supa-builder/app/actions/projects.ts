@@ -42,6 +42,12 @@ export interface ActionResult<T = unknown> {
   success: boolean
   data?: T
   error?: string
+  errorDetails?: {
+    statusCode?: number
+    statusText?: string
+    requestUrl?: string
+    responseBody?: unknown
+  }
 }
 
 // ============================================================================
@@ -51,6 +57,8 @@ export interface ActionResult<T = unknown> {
 export async function createProject(
   input: CreateProjectInput
 ): Promise<ActionResult<{ project_id: string; project_ref: string; anon_key: string }>> {
+  const functionUrl = process.env.NEXT_PUBLIC_SUPABASE_URL + '/functions/v1/create-project'
+
   try {
     const supabase = await createClient()
 
@@ -61,32 +69,110 @@ export async function createProject(
     } = await supabase.auth.getSession()
 
     if (sessionError || !session) {
+      console.error('[createProject] Session error:', sessionError)
       return {
         success: false,
         error: 'You must be logged in to create a project',
       }
     }
 
-    // Call edge function to create project
-    const functionUrl = process.env.NEXT_PUBLIC_SUPABASE_URL + '/functions/v1/create-project'
-
-    const response = await fetch(functionUrl, {
-      method: 'POST',
-      headers: {
-        'Authorization': `Bearer ${session.access_token}`,
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify(input),
+    // Log the request we're about to make
+    console.log('[createProject] Calling edge function:', {
+      url: functionUrl,
+      project_name: input.project_name,
+      organization_id: input.organization_id,
+      region: input.region,
+      hasToken: !!session.access_token,
+      tokenLength: session.access_token?.length,
     })
 
-    const result = await response.json()
-
-    if (!response.ok || !result.success) {
+    // Call edge function to create project
+    let response: Response
+    try {
+      response = await fetch(functionUrl, {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${session.access_token}`,
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(input),
+      })
+    } catch (fetchError) {
+      // Network error - couldn't reach edge function
+      console.error('[createProject] Network error reaching edge function:', {
+        error: fetchError,
+        url: functionUrl,
+        message: fetchError instanceof Error ? fetchError.message : String(fetchError),
+      })
       return {
         success: false,
-        error: result.error || 'Failed to create project',
+        error: `Network error: Could not reach edge function. ${fetchError instanceof Error ? fetchError.message : 'Unknown error'}`,
+        errorDetails: {
+          requestUrl: functionUrl,
+        },
       }
     }
+
+    // Log response status
+    console.log('[createProject] Edge function response:', {
+      status: response.status,
+      statusText: response.statusText,
+      ok: response.ok,
+      headers: Object.fromEntries(response.headers.entries()),
+    })
+
+    // Try to parse response body
+    let result: any
+    const responseText = await response.text()
+    console.log('[createProject] Response body:', responseText)
+
+    try {
+      result = JSON.parse(responseText)
+    } catch (parseError) {
+      console.error('[createProject] Failed to parse response as JSON:', {
+        parseError,
+        responseText: responseText.substring(0, 500), // Log first 500 chars
+        statusCode: response.status,
+      })
+      return {
+        success: false,
+        error: `Invalid response from edge function (HTTP ${response.status}). Response was not valid JSON.`,
+        errorDetails: {
+          statusCode: response.status,
+          statusText: response.statusText,
+          requestUrl: functionUrl,
+          responseBody: responseText.substring(0, 500),
+        },
+      }
+    }
+
+    // Check if request was successful
+    if (!response.ok || !result.success) {
+      const errorMessage = result.error || result.message || 'Failed to create project'
+      console.error('[createProject] Edge function returned error:', {
+        status: response.status,
+        statusText: response.statusText,
+        error: errorMessage,
+        fullResponse: result,
+      })
+
+      return {
+        success: false,
+        error: `${errorMessage} (HTTP ${response.status})`,
+        errorDetails: {
+          statusCode: response.status,
+          statusText: response.statusText,
+          requestUrl: functionUrl,
+          responseBody: result,
+        },
+      }
+    }
+
+    // Success!
+    console.log('[createProject] Project created successfully:', {
+      project_id: result.project_id,
+      project_ref: result.project_ref,
+    })
 
     // Revalidate projects page
     revalidatePath('/projects')
@@ -100,10 +186,17 @@ export async function createProject(
       },
     }
   } catch (error) {
-    console.error('Error creating project:', error)
+    console.error('[createProject] Unexpected error:', {
+      error,
+      message: error instanceof Error ? error.message : String(error),
+      stack: error instanceof Error ? error.stack : undefined,
+    })
     return {
       success: false,
       error: error instanceof Error ? error.message : 'Unknown error occurred',
+      errorDetails: {
+        requestUrl: functionUrl,
+      },
     }
   }
 }
@@ -321,35 +414,74 @@ export async function resumeProject(projectId: string): Promise<ActionResult> {
 // ============================================================================
 
 export async function deleteProject(projectId: string): Promise<ActionResult> {
+  const functionUrl = process.env.NEXT_PUBLIC_SUPABASE_URL + '/functions/v1/delete-project'
+
   try {
     const supabase = await createClient()
 
-    // Get current user
+    // Get current session
     const {
-      data: { user },
-      error: authError,
-    } = await supabase.auth.getUser()
+      data: { session },
+      error: sessionError,
+    } = await supabase.auth.getSession()
 
-    if (authError || !user) {
+    if (sessionError || !session) {
+      console.error('[deleteProject] Session error:', sessionError)
       return {
         success: false,
         error: 'You must be logged in to delete projects',
       }
     }
 
-    // Soft delete using helper function
-    const { error } = await supabase.rpc('soft_delete_project', {
-      p_project_id: projectId,
-      p_actor_id: user.id,
-      p_actor_email: user.email!,
+    console.log('[deleteProject] Calling edge function:', {
+      url: functionUrl,
+      project_id: projectId,
     })
 
-    if (error) {
+    // Call edge function to delete project
+    const response = await fetch(functionUrl, {
+      method: 'POST',
+      headers: {
+        'Authorization': `Bearer ${session.access_token}`,
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({ project_id: projectId }),
+    })
+
+    console.log('[deleteProject] Edge function response:', {
+      status: response.status,
+      statusText: response.statusText,
+      ok: response.ok,
+    })
+
+    // Try to parse response body
+    let result: any
+    const responseText = await response.text()
+    console.log('[deleteProject] Response body:', responseText)
+
+    try {
+      result = JSON.parse(responseText)
+    } catch (parseError) {
+      console.error('[deleteProject] Failed to parse response as JSON')
       return {
         success: false,
-        error: error.message,
+        error: `Invalid response from edge function (HTTP ${response.status})`,
       }
     }
+
+    // Check if request was successful
+    if (!response.ok || !result.success) {
+      const errorMessage = result.error || result.message || 'Failed to delete project'
+      console.error('[deleteProject] Edge function returned error:', errorMessage)
+
+      return {
+        success: false,
+        error: `${errorMessage} (HTTP ${response.status})`,
+      }
+    }
+
+    // Success!
+    console.log('[deleteProject] Project deleted successfully:', projectId)
 
     // Revalidate projects page
     revalidatePath('/projects')
@@ -358,7 +490,7 @@ export async function deleteProject(projectId: string): Promise<ActionResult> {
       success: true,
     }
   } catch (error) {
-    console.error('Error deleting project:', error)
+    console.error('[deleteProject] Unexpected error:', error)
     return {
       success: false,
       error: error instanceof Error ? error.message : 'Unknown error occurred',

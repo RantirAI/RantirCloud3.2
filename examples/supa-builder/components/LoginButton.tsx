@@ -18,23 +18,23 @@ interface LoginButtonProps {
 const providerConfig = {
   google: {
     name: 'Google',
-    icon: '🔐',
-    color: 'bg-white hover:bg-gray-50 text-gray-900 border border-gray-300',
+    icon: '🔒',
+    color: 'bg-transparent hover:bg-[#2a2a2a] text-white border border-[#3a3a3a]',
   },
   azure: {
     name: 'Azure AD',
     icon: '🔷',
-    color: 'bg-blue-600 hover:bg-blue-700 text-white',
+    color: 'bg-transparent hover:bg-[#2a2a2a] text-white border border-[#3a3a3a]',
   },
   github: {
     name: 'GitHub',
     icon: '⚫',
-    color: 'bg-gray-800 hover:bg-gray-900 text-white',
+    color: 'bg-transparent hover:bg-[#2a2a2a] text-white border border-[#3a3a3a]',
   },
   gitlab: {
     name: 'GitLab',
     icon: '🦊',
-    color: 'bg-orange-600 hover:bg-orange-700 text-white',
+    color: 'bg-transparent hover:bg-[#2a2a2a] text-white border border-[#3a3a3a]',
   },
 }
 
@@ -75,14 +75,14 @@ export default function LoginButton({ provider }: LoginButtonProps) {
       <button
         onClick={handleLogin}
         disabled={isLoading}
-        className={`w-full px-6 py-3 rounded-lg font-medium transition-all shadow-sm disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-3 ${config.color}`}
+        className={`w-full px-6 py-3 rounded-md font-medium transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-3 ${config.color}`}
       >
-        <span className="text-xl">{config.icon}</span>
+        {config.icon && <span className="text-lg">{config.icon}</span>}
         {isLoading ? `Signing in...` : `Continue with ${config.name}`}
       </button>
 
       {error && (
-        <p className="mt-2 text-sm text-red-600">
+        <p className="mt-3 text-sm text-red-400">
           {error}
         </p>
       )}

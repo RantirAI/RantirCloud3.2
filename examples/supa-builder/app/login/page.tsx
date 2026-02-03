@@ -23,45 +23,20 @@ export default async function LoginPage() {
   }
 
   return (
-    <div className="flex min-h-screen flex-col items-center justify-center p-8 bg-gradient-to-b from-gray-50 to-white">
-      <div className="w-full max-w-md space-y-8">
+    <div className="min-h-screen bg-[#1a1a1a] flex items-center justify-center px-8">
+      <div className="w-full max-w-md">
         {/* Header */}
-        <div className="text-center">
-          <h1 className="text-4xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent mb-2">
+        <div className="text-center mb-12">
+          <h1 className="text-5xl font-bold text-white mb-6">
             SupaBuilder
           </h1>
-          <p className="text-gray-600">
-            Sign in to manage your Supabase projects
+          <p className="text-[#a0a0a0] text-base leading-relaxed">
+            Enable your team to create and manage Supabase projects with proper governance, audit trails, and role-based access control.
           </p>
         </div>
 
-        {/* Login Card */}
-        <div className="bg-white border border-gray-200 rounded-lg shadow-lg p-8">
-          <h2 className="text-2xl font-semibold mb-6 text-center">
-            Sign In
-          </h2>
-
-          {/* SSO Login Buttons */}
-          <div className="space-y-4">
-            <LoginButton provider="google" />
-
-            {/* Add more providers as needed */}
-            {/* <LoginButton provider="azure" /> */}
-            {/* <LoginButton provider="github" /> */}
-          </div>
-
-          {/* Info Text */}
-          <div className="mt-6 text-center text-sm text-gray-500">
-            <p>Sign in with your organization account</p>
-          </div>
-        </div>
-
-        {/* Footer Info */}
-        <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
-          <p className="text-sm text-blue-800 text-center">
-            <strong>First-time users:</strong> The first person to sign in from your organization will automatically receive admin privileges.
-          </p>
-        </div>
+        {/* Sign In Button */}
+        <LoginButton provider="google" />
       </div>
     </div>
   )

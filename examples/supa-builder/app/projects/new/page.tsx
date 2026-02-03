@@ -8,6 +8,8 @@ import { redirect } from 'next/navigation'
 import Link from 'next/link'
 import { createClient } from '@/lib/supabase/server'
 import ProjectForm from '@/components/ProjectForm'
+import Header from '@/components/Header'
+import { ArrowLeft } from 'lucide-react'
 
 export default async function NewProjectPage() {
   const supabase = await createClient()
@@ -29,12 +31,25 @@ export default async function NewProjectPage() {
     .eq('user_id', user.id)
     .single()
 
-  if (!userRole) {
+  // Check if user has organization assigned
+  if (!userRole || !userRole.organization_id) {
     return (
-      <div className="container mx-auto px-4 py-8">
-        <div className="bg-red-50 border border-red-200 text-red-800 rounded-lg p-4">
-          <p className="font-medium">No organization assigned</p>
-          <p className="text-sm">Please contact an administrator to assign you to an organization.</p>
+      <div className="min-h-screen bg-[#0E0E0E]">
+        <Header userEmail={user.email} userRole={userRole?.role} />
+        <div className="container mx-auto px-6 py-12 max-w-2xl">
+          <div className="bg-red-500/10 border border-red-500/20 text-red-500 rounded-lg p-6 text-center">
+            <h2 className="text-xl font-medium mb-2">No Organization Assigned</h2>
+            <p className="text-sm text-red-400 mb-4">
+              You need to be assigned to an organization before you can create projects.
+            </p>
+            <Link
+              href="/projects"
+              className="inline-flex items-center gap-2 text-sm text-[#3ECF8E] hover:text-[#3ECF8E]/80"
+            >
+              <ArrowLeft className="w-4 h-4" />
+              Back to Projects
+            </Link>
+          </div>
         </div>
       </div>
     )
@@ -44,37 +59,30 @@ export default async function NewProjectPage() {
   const adminProjectRegion = process.env.ADMIN_PROJECT_REGION || 'us-east-1'
 
   return (
-    <div className="container mx-auto px-4 py-8 max-w-4xl">
-      {/* Header */}
-      <div className="mb-8">
-        <Link
-          href="/projects"
-          className="text-blue-600 hover:text-blue-800 text-sm mb-4 inline-block"
-        >
-          ← Back to Projects
-        </Link>
-        <h1 className="text-3xl font-bold mb-2">Create New Project</h1>
-        <p className="text-gray-600">
-          Create a new Supabase Pico project for your organization
-        </p>
-      </div>
+    <div className="min-h-screen bg-[#0E0E0E]">
+      <Header userEmail={user.email} userRole={userRole.role} />
+      <div className="container mx-auto px-6 py-12 max-w-3xl">
+        {/* Header */}
+        <div className="mb-10">
+          <Link
+            href="/projects"
+            className="inline-flex items-center gap-2 text-[#808080] hover:text-[#D0D0D0] text-sm mb-6 transition-colors"
+          >
+            <ArrowLeft className="w-4 h-4" />
+            Back to Projects
+          </Link>
+          <h1 className="text-4xl font-medium text-white mb-2">Create New Project</h1>
+          <p className="text-[#A0A0A0] text-base">
+            Create a new Supabase Pico project for your organization
+          </p>
+        </div>
 
-      {/* Info Box */}
-      <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-6">
-        <h3 className="font-medium text-blue-900 mb-2">What you need to know</h3>
-        <ul className="text-sm text-blue-800 space-y-1">
-          <li>• Projects are created on the Pico (free) tier</li>
-          <li>• Project provisioning typically completes in 1-2 minutes</li>
-          <li>• All projects include PostgreSQL database, Auth, Storage, and Realtime</li>
-          <li>• Projects will be created in the {adminProjectRegion} region</li>
-        </ul>
+        {/* Form */}
+        <ProjectForm
+          defaultOrganizationId={userRole.organization_id}
+          defaultRegion={adminProjectRegion}
+        />
       </div>
-
-      {/* Form */}
-      <ProjectForm
-        defaultOrganizationId={userRole.organization_id}
-        defaultRegion={adminProjectRegion}
-      />
     </div>
   )
 }

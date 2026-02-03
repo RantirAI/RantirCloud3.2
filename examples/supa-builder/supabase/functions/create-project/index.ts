@@ -139,39 +139,10 @@ Deno.serve(async (req: Request): Promise<Response> => {
     }
 
     // =========================================================================
-    // 4. CREATE PROVISIONAL PROJECT RECORD
+    // 4. CALL MANAGEMENT API
     // =========================================================================
 
-    const { data: provisionalProject, error: insertError } = await supabaseWithAuth
-      .from('projects')
-      .insert({
-        project_name,
-        organization_id,
-        region,
-        purpose,
-        description,
-        creator_id: user.id,
-        creator_email: user.email!,
-        status: 'provisioning',
-        // Temporary values, will be updated after API call
-        project_ref: 'pending',
-        anon_key: 'pending',
-        service_role_key_encrypted: 'pending',
-      })
-      .select('id')
-      .single()
-
-    if (insertError || !provisionalProject) {
-      console.error('Error creating provisional project:', insertError)
-      return jsonError('Failed to create project record', 500)
-    }
-
-    const projectId = provisionalProject.id
-
     try {
-      // =========================================================================
-      // 5. CALL MANAGEMENT API
-      // =========================================================================
 
       const managementAccessToken = Deno.env.get('MANAGEMENT_ACCESS_TOKEN')
       if (!managementAccessToken) {
@@ -237,6 +208,16 @@ Deno.serve(async (req: Request): Promise<Response> => {
       console.log(`Project created: ${newProject.id}`)
 
       const projectRef = newProject.id
+      // Extract organization_id from Management API response
+      const actualOrgId = newProject.organization_id || organization_id
+      console.log(`Organization ID from Management API: ${actualOrgId}`)
+      console.log(`Organization ID from request: ${organization_id}`)
+      console.log(`Organization ID from API response: ${newProject.organization_id}`)
+
+      // Validate that we have a valid organization_id
+      if (!actualOrgId || actualOrgId === 'undefined') {
+        throw new Error(`Invalid organization_id: ${actualOrgId}`)
+      }
 
       // Wait for project to be ready and fetch API keys
       // The project needs time to provision before keys are available
@@ -291,23 +272,33 @@ Deno.serve(async (req: Request): Promise<Response> => {
       }
 
       // =========================================================================
-      // 7. UPDATE PROJECT RECORD WITH CREDENTIALS
+      // 7. CREATE PROJECT RECORD
       // =========================================================================
 
-      const { error: updateError } = await supabaseWithAuth
+      const { data: createdProject, error: insertError } = await supabaseWithAuth
         .from('projects')
-        .update({
+        .insert({
+          project_name,
+          organization_id: actualOrgId,
+          region,
+          purpose,
+          description,
+          creator_id: user.id,
+          creator_email: user.email!,
           project_ref: projectRef,
           anon_key: anonKey,
           service_role_key_encrypted: encryptedKey,
           status: 'active',
           management_api_response: newProject,
         })
-        .eq('id', projectId)
+        .select('id')
+        .single()
 
-      if (updateError) {
-        throw new Error(`Failed to update project: ${updateError.message}`)
+      if (insertError || !createdProject) {
+        throw new Error(`Failed to create project record: ${insertError?.message}`)
       }
+
+      const projectId = createdProject.id
 
       // =========================================================================
       // 8. CREATE AUDIT LOG
@@ -318,7 +309,7 @@ Deno.serve(async (req: Request): Promise<Response> => {
         p_action: 'create',
         p_actor_id: user.id,
         p_actor_email: user.email!,
-        p_organization_id: organization_id,
+        p_organization_id: actualOrgId,
         p_metadata: {
           project_name,
           region,
@@ -340,17 +331,7 @@ Deno.serve(async (req: Request): Promise<Response> => {
 
       return jsonResponse(response, 201)
     } catch (error) {
-      // If Management API call fails, update project status to 'failed'
-      await supabaseWithAuth
-        .from('projects')
-        .update({
-          status: 'failed',
-          management_api_response: {
-            error: error instanceof Error ? error.message : String(error),
-          },
-        })
-        .eq('id', projectId)
-
+      // If project creation fails, log the error and return failure response
       console.error('Error creating project:', error)
 
       return jsonError(
