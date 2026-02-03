@@ -1,13 +1,5 @@
 import { zodResolver } from '@hookform/resolvers/zod'
 import { PermissionAction } from '@supabase/shared-types/out/constants'
-import { indexOf } from 'lodash'
-import { Lock } from 'lucide-react'
-import Link from 'next/link'
-import { useCallback, useEffect, useMemo, useState } from 'react'
-import { useForm } from 'react-hook-form'
-import { toast } from 'sonner'
-import { z } from 'zod'
-
 import { useParams } from 'common'
 import { FormActions } from 'components/ui/Forms/FormActions'
 import { useProjectPostgrestConfigQuery } from 'data/config/project-postgrest-config-query'
@@ -16,6 +8,12 @@ import { useDatabaseExtensionsQuery } from 'data/database-extensions/database-ex
 import { useSchemasQuery } from 'data/database/schemas-query'
 import { useAsyncCheckPermissions } from 'hooks/misc/useCheckPermissions'
 import { useSelectedProjectQuery } from 'hooks/misc/useSelectedProject'
+import { indexOf } from 'lodash'
+import { Lock } from 'lucide-react'
+import Link from 'next/link'
+import { useCallback, useEffect, useMemo, useState } from 'react'
+import { useForm } from 'react-hook-form'
+import { toast } from 'sonner'
 import {
   Button,
   Card,
@@ -39,6 +37,8 @@ import {
   MultiSelectorList,
   MultiSelectorTrigger,
 } from 'ui-patterns/multi-select'
+import { z } from 'zod'
+
 import { HardenAPIModal } from './HardenAPIModal'
 
 const formSchema = z.object({
