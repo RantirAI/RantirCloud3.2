@@ -109,6 +109,12 @@ export const GLOBAL_MENU_ITEMS: GlobalMenuItems = [
         [
           { label: 'Modules' },
           {
+            label: 'Data API (REST)',
+            icon: 'rest',
+            href: '/guides/api' as `/${string}`,
+            level: 'api',
+          },
+          {
             label: 'AI & Vectors',
             icon: 'ai',
             href: '/guides/ai' as `/${string}`,
@@ -125,12 +131,6 @@ export const GLOBAL_MENU_ITEMS: GlobalMenuItems = [
             icon: 'queues',
             href: '/guides/queues' as `/${string}`,
             level: 'queues',
-          },
-          {
-            label: 'Data API (REST)',
-            icon: 'rest',
-            href: '/guides/api' as `/${string}`,
-            level: 'api',
           },
           {
             label: 'GraphQL API',
