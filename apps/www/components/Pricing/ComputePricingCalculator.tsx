@@ -17,13 +17,13 @@ const parsePrice = (price: string) => parseInt(price?.toString().replace('$', ''
 
 interface ComputePricingCalculatorProps {
   disableInteractivity?: boolean
-  activePlan: {
+  activePlan?: {
     name: string
     price: number
   }
 }
 
-const ComputePricingCalculator = ({ disableInteractivity, activePlan }: ComputePricingCalculatorProps) => {
+const ComputePricingCalculator = ({ disableInteractivity, activePlan = { name: 'Pro', price: 25 } }: ComputePricingCalculatorProps) => {
   // Filter out rows with no specific pricing
   const computeInstances = pricingAddOn.database.rows.filter((row) =>
     row.columns.some((it) => it.key === 'pricing' && it.value !== 'Contact Us')
