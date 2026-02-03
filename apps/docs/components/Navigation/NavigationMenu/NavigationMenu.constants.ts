@@ -107,7 +107,7 @@ export const GLOBAL_MENU_ITEMS: GlobalMenuItems = [
           },
         ],
         [
-          { label: 'Postgres Modules' },
+          { label: 'Modules' },
           {
             label: 'AI & Vectors',
             icon: 'ai',
@@ -125,6 +125,18 @@ export const GLOBAL_MENU_ITEMS: GlobalMenuItems = [
             icon: 'queues',
             href: '/guides/queues' as `/${string}`,
             level: 'queues',
+          },
+          {
+            label: 'Data API (REST)',
+            icon: 'rest',
+            href: '/guides/api' as `/${string}`,
+            level: 'api',
+          },
+          {
+            label: 'GraphQL API',
+            icon: 'graphql',
+            href: '/guides/graphql' as `/${string}`,
+            level: 'graphql',
           },
         ],
       ],
@@ -269,21 +281,6 @@ export const GLOBAL_MENU_ITEMS: GlobalMenuItems = [
             icon: 'ui',
             href: 'https://supabase.com/ui' as `/${string}`,
             level: 'ui',
-          },
-        ],
-        [
-          { label: 'Data API' },
-          {
-            label: 'REST',
-            icon: 'rest',
-            href: '/guides/api' as `/${string}`,
-            level: 'api',
-          },
-          {
-            label: 'GraphQL',
-            icon: 'graphql',
-            href: '/guides/graphql' as `/${string}`,
-            level: 'graphql',
           },
         ],
       ],
