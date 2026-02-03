@@ -1,17 +1,6 @@
-import { useParams } from 'common'
-import AlertError from 'components/ui/AlertError'
-import { ResourceList } from 'components/ui/Resource/ResourceList'
-import { HorizontalShimmerWithIcon } from 'components/ui/Shimmers'
-import { useAuthConfigQuery } from 'data/auth/auth-config-query'
-import { ExternalLink } from 'lucide-react'
-import Link from 'next/link'
-import {
-  AlertDescription_Shadcn_,
-  AlertTitle_Shadcn_,
-  Alert_Shadcn_,
-  Button,
-  WarningIcon,
-} from 'ui'
+import { UpgradeToPro } from 'components/ui/UpgradeToPro'
+import { useSelectedOrganizationQuery } from 'hooks/misc/useSelectedOrganization'
+import { IS_PLATFORM } from 'lib/constants'
 import {
   PageSection,
   PageSectionContent,
@@ -21,18 +10,12 @@ import {
   PageSectionTitle,
 } from 'ui-patterns/PageSection'
 
-import { PROVIDERS_SCHEMAS, getPhoneProviderValidationSchema } from '../AuthProvidersFormValidation'
 import { CustomAuthProvidersList } from './CustomAuthProvidersList'
 
 const CustomAuthProviders = () => {
-  const { ref: projectRef } = useParams()
-  const {
-    data: authConfig,
-    error: authConfigError,
-    isPending: isLoading,
-    isError,
-    isSuccess,
-  } = useAuthConfigQuery({ projectRef })
+  const { data: organization } = useSelectedOrganizationQuery()
+  const isProPlanAndUp = organization?.plan?.id !== 'free'
+  const promptProPlanUpgrade = IS_PLATFORM && !isProPlanAndUp
 
   return (
     <PageSection>
@@ -45,10 +28,12 @@ const CustomAuthProviders = () => {
         </PageSectionSummary>
       </PageSectionMeta>
       <PageSectionContent>
-        {isError ? (
-          <AlertError
-            error={authConfigError}
-            subject="Failed to retrieve auth configuration for hooks"
+        {promptProPlanUpgrade ? (
+          <UpgradeToPro
+            source="customAuthProviders"
+            featureProposition="configure customer auth providers"
+            primaryText="Custom Auth Providers are only available on the Pro Plan and above"
+            secondaryText="Upgrade to Pro Plan to start using Custom Auth Providers."
           />
         ) : (
           <div className="-space-y-px">

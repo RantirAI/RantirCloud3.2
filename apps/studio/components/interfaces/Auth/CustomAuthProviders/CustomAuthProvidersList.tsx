@@ -182,7 +182,7 @@ export const CustomAuthProvidersList = () => {
   }
 
   if (isError) {
-    return <AlertError error={error} subject="Failed to retrieve OAuth Server apps" />
+    return <AlertError error={error} subject="Failed to retrieve Custom Auth Providers" />
   }
 
   return (
@@ -320,7 +320,7 @@ export const CustomAuthProvidersList = () => {
                         {provider.provider_type}
                       </TableCell>
                       <TableCell className="text-xs text-foreground-light max-w-28">
-                        <Badge variant={provider.enabled ? 'success' : 'secondary'}>
+                        <Badge variant={provider.enabled ? 'success' : 'default'}>
                           {provider.enabled ? 'Enabled' : 'Disabled'}
                         </Badge>
                       </TableCell>
