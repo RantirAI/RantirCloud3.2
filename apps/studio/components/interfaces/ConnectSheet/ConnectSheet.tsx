@@ -1,14 +1,22 @@
+import { parseAsBoolean, parseAsString, useQueryState } from 'nuqs'
 import { Sheet, SheetContent, SheetDescription, SheetHeader, SheetTitle, cn } from 'ui'
 
-interface ConnectSheetProps {
-  open: boolean
-  onOpenChange: (open: boolean) => void
-  connectTab?: string | null
-}
+export const ConnectSheet = () => {
+  const [showConnect, setShowConnect] = useQueryState(
+    'showConnect',
+    parseAsBoolean.withDefault(false)
+  )
+  const [connectTab, setConnectTab] = useQueryState('connectTab', parseAsString)
 
-export const ConnectSheet = ({ open, onOpenChange, connectTab }: ConnectSheetProps) => {
+  const handleOpenChange = (sheetOpen: boolean) => {
+    if (!sheetOpen) {
+      setConnectTab(null)
+    }
+    setShowConnect(sheetOpen)
+  }
+
   return (
-    <Sheet open={open} onOpenChange={onOpenChange}>
+    <Sheet open={showConnect} onOpenChange={handleOpenChange}>
       <SheetContent size="lg" className="flex flex-col gap-0 p-0 space-y-0" tabIndex={undefined}>
         <SheetHeader className={cn('text-left border-b shrink-0 py-6 px-8')}>
           <div className="flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">

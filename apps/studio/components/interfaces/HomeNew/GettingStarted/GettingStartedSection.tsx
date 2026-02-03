@@ -1,16 +1,15 @@
-import { Code, Table2 } from 'lucide-react'
-import { useCallback, useMemo, useState } from 'react'
-
-import { ConnectButton } from '@/components/interfaces/ConnectButton/ConnectButton'
 import { useParams } from 'common'
 import { SIDEBAR_KEYS } from 'components/layouts/ProjectLayout/LayoutSidebar/LayoutSidebarProvider'
 import { useSendEventMutation } from 'data/telemetry/send-event-mutation'
 import { useSelectedOrganizationQuery } from 'hooks/misc/useSelectedOrganization'
 import { useSelectedProjectQuery } from 'hooks/misc/useSelectedProject'
 import { BASE_PATH } from 'lib/constants'
+import { Code, Table2 } from 'lucide-react'
+import { useCallback, useMemo, useState } from 'react'
 import { useAiAssistantStateSnapshot } from 'state/ai-assistant-state'
 import { useSidebarManagerSnapshot } from 'state/sidebar-manager-state'
 import { Button, Card, CardContent, ToggleGroup, ToggleGroupItem } from 'ui'
+
 import { GettingStarted } from './GettingStarted'
 import {
   GettingStartedAction,
@@ -19,6 +18,7 @@ import {
 } from './GettingStarted.types'
 import { getCodeWorkflowSteps, getNoCodeWorkflowSteps } from './GettingStarted.utils'
 import { useGettingStartedProgress } from './useGettingStartedProgress'
+import { ConnectButton } from '@/components/interfaces/ConnectButton/ConnectButton'
 
 interface GettingStartedSectionProps {
   value: GettingStartedState
@@ -50,7 +50,7 @@ export function GettingStartedSection({ value, onChange }: GettingStartedSection
     return [
       {
         label: 'Connect',
-        component: <ConnectButton buttonType="primary" renderDialog={false} />,
+        component: <ConnectButton buttonType="primary" />,
       },
     ]
   }, [])
