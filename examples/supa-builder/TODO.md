@@ -8,7 +8,7 @@
   - Include screenshots/GIFs
   - Document organization slug setup more clearly
 
-- [ ] Squash migrations
+- [] Squash migrations
   - Combine all 6 migration files into a single initial migration
   - Test against fresh database
   - Update migration numbering

@@ -3,8 +3,8 @@ import { createClient } from '@/lib/supabase/server'
 
 async function forwardToSupabaseAPI(request: Request, method: string, params: { path: string[] }) {
   // eslint-disable-next-line turbo/no-undeclared-env-vars
-  if (!process.env.SUPABASE_MANAGEMENT_API_TOKEN) {
-    console.error('Supabase Management API token is not configured.')
+  if (!process.env.MANAGEMENT_API_TOKEN) {
+    console.error('Management API token is not configured.')
     return NextResponse.json({ message: 'Server configuration error.' }, { status: 500 })
   }
 
@@ -48,7 +48,7 @@ async function forwardToSupabaseAPI(request: Request, method: string, params: { 
   try {
     const forwardHeaders: HeadersInit = {
       // eslint-disable-next-line turbo/no-undeclared-env-vars
-      Authorization: `Bearer ${process.env.SUPABASE_MANAGEMENT_API_TOKEN}`,
+      Authorization: `Bearer ${process.env.MANAGEMENT_API_TOKEN}`,
     }
 
     // Copy relevant headers from the original request

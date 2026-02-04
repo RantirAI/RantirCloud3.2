@@ -21,13 +21,13 @@ function getOpenAIClient() {
 const client = createClient<paths>({
   baseUrl: 'https://api.supabase.com',
   headers: {
-    Authorization: `Bearer ${process.env.SUPABASE_MANAGEMENT_API_TOKEN}`,
+    Authorization: `Bearer ${process.env.MANAGEMENT_API_TOKEN}`,
   },
 })
 
 // Function to get database schema
 async function getDbSchema(projectRef: string) {
-  const token = process.env.SUPABASE_MANAGEMENT_API_TOKEN
+  const token = process.env.MANAGEMENT_API_TOKEN
   if (!token) {
     throw new Error('Supabase Management API token is not configured.')
   }

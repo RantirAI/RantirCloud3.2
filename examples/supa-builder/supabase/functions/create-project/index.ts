@@ -222,20 +222,38 @@ Deno.serve(async (req: Request): Promise<Response> => {
       // Wait for project to be ready and fetch API keys
       // The project needs time to provision before keys are available
       console.log('Waiting for project to provision...')
-      await new Promise(resolve => setTimeout(resolve, 5000)) // Wait 5 seconds
 
-      // Fetch project API keys
-      const keysResponse = await fetch(
-        `https://api.supabase.com/v1/projects/${projectRef}/api-keys`,
-        {
-          headers: {
-            'Authorization': `Bearer ${managementAccessToken}`,
-          },
+      // Poll for project status with exponential backoff (max 2 minutes)
+      let keysResponse: Response | null = null
+      const maxAttempts = 12 // 12 attempts over ~2 minutes
+      let attempt = 0
+
+      while (attempt < maxAttempts) {
+        attempt++
+        const waitTime = Math.min(5000 + (attempt * 2000), 15000) // 5s, 7s, 9s, ... up to 15s
+        console.log(`Attempt ${attempt}/${maxAttempts}: Waiting ${waitTime}ms before checking project status...`)
+        await new Promise(resolve => setTimeout(resolve, waitTime))
+
+        // Check if project is ready by fetching API keys
+        keysResponse = await fetch(
+          `https://api.supabase.com/v1/projects/${projectRef}/api-keys`,
+          {
+            headers: {
+              'Authorization': `Bearer ${managementAccessToken}`,
+            },
+          }
+        )
+
+        if (keysResponse.ok) {
+          console.log('Project is ready!')
+          break
         }
-      )
 
-      if (!keysResponse.ok) {
-        throw new Error(`Failed to fetch API keys: ${keysResponse.status}`)
+        console.log(`Attempt ${attempt} failed with status ${keysResponse.status}, retrying...`)
+      }
+
+      if (!keysResponse || !keysResponse.ok) {
+        throw new Error(`Failed to fetch API keys after ${maxAttempts} attempts: ${keysResponse?.status || 'unknown'}`)
       }
 
       const keysData = await keysResponse.json()
