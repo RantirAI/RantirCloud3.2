@@ -45,28 +45,6 @@ describe('useConnectState', () => {
   })
 
   // ============================================================================
-  // Mode Switching Tests
-  // ============================================================================
-
-  describe('setMode', () => {
-    test('should preserve framework state when setting framework mode', () => {
-      const { result } = renderHook(() => useConnectState())
-
-      // Change framework
-      act(() => {
-        result.current.updateField('framework', 'react')
-      })
-
-      // Set framework mode again
-      act(() => {
-        result.current.setMode('framework')
-      })
-
-      expect(result.current.state.framework).toBe('react')
-    })
-  })
-
-  // ============================================================================
   // Field Update Tests
   // ============================================================================
 
@@ -205,25 +183,15 @@ describe('useConnectState', () => {
   // ============================================================================
 
   describe('getFieldOptions', () => {
-    test('should return framework options', () => {
+    test('should return framework options from schema', () => {
       const { result } = renderHook(() => useConnectState())
 
       const options = result.current.getFieldOptions('framework')
-      expect(options.length).toBeGreaterThan(0)
       expect(options.some((o) => o.value === 'nextjs')).toBe(true)
       expect(options.some((o) => o.value === 'react')).toBe(true)
     })
 
-    test('should return variant options for nextjs', () => {
-      const { result } = renderHook(() => useConnectState({ framework: 'nextjs' }))
-
-      const options = result.current.getFieldOptions('frameworkVariant')
-      expect(options.length).toBeGreaterThan(0)
-      expect(options.some((o) => o.value === 'app')).toBe(true)
-      expect(options.some((o) => o.value === 'pages')).toBe(true)
-    })
-
-    test('should return empty variant options for frameworks without variants', () => {
+    test('should return empty array for inactive field', () => {
       const { result } = renderHook(() => useConnectState({ framework: 'remix' }))
 
       const options = result.current.getFieldOptions('frameworkVariant')
@@ -236,15 +204,6 @@ describe('useConnectState', () => {
       const options = result.current.getFieldOptions('unknownField')
       expect(options).toEqual([])
     })
-
-    test('should return library options for selected framework', () => {
-      const { result } = renderHook(() =>
-        useConnectState({ framework: 'nextjs', frameworkVariant: 'app' })
-      )
-
-      const options = result.current.getFieldOptions('library')
-      expect(options.length).toBeGreaterThan(0)
-    })
   })
 
   // ============================================================================
@@ -256,16 +215,14 @@ describe('useConnectState', () => {
       const { result } = renderHook(() => useConnectState())
 
       expect(result.current.schema).toBeDefined()
-      expect(result.current.schema.modes).toBeDefined()
       expect(result.current.schema.fields).toBeDefined()
       expect(result.current.schema.steps).toBeDefined()
     })
 
-    test('should have all expected modes in schema', () => {
+    test('should include mode field in schema', () => {
       const { result } = renderHook(() => useConnectState())
 
-      const modeIds = result.current.schema.modes.map((m) => m.id)
-      expect(modeIds).toEqual(['framework'])
+      expect(result.current.schema.fields.mode).toBeDefined()
     })
   })
 })

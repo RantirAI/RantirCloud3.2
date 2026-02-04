@@ -1,4 +1,4 @@
-type ConnectionStrings = {
+type ConnectionStringPooler = {
   psql: string
   uri: string
   golang: string
@@ -10,7 +10,7 @@ type ConnectionStrings = {
   sqlalchemy: string
 }
 
-export const getConnectionStrings = ({
+export const getConnectionStringPooler = ({
   connectionInfo,
   poolingInfo,
   metadata,
@@ -33,8 +33,8 @@ export const getConnectionStrings = ({
     pgVersion?: string
   }
 }): {
-  direct: ConnectionStrings
-  pooler: ConnectionStrings
+  direct: ConnectionStringPooler
+  pooler: ConnectionStringPooler
 } => {
   const isMd5 = poolingInfo?.connectionString.includes('options=reference')
   const { projectRef } = metadata
@@ -65,14 +65,14 @@ export const getConnectionStrings = ({
 
   // User Id=${directUser};Password=${password};Server=${directHost};Port=${directPort};Database=${directName}`
   const directDotNetString = `{
-  "ConnectionStrings": {
+  "ConnectionStringPooler": {
     "DefaultConnection": "Host=${directHost};Database=${directName};Username=${directUser};Password=${password};SSL Mode=Require;Trust Server Certificate=true"
   }
 }`
 
   // `User Id=${poolerUser};Password=${password};Server=${poolerHost};Port=${poolerPort};Database=${poolerName}${isMd5 ? `;Options='reference=${projectRef}'` : ''}`
   const poolerDotNetString = `{
-  "ConnectionStrings": {
+  "ConnectionStringPooler": {
     "DefaultConnection": "User Id=${poolerUser};Password=${password};Server=${poolerHost};Port=${poolerPort};Database=${poolerName}${isMd5 ? `;Options='reference=${projectRef}'` : ''}"
   }
 }`

@@ -1,5 +1,3 @@
-import { BASE_PATH } from 'lib/constants'
-import { Box, Cable, Database, Sparkles } from 'lucide-react'
 import { useTheme } from 'next-themes'
 import {
   RadioGroupStacked,
@@ -10,9 +8,7 @@ import {
   SelectValue_Shadcn_,
   Select_Shadcn_,
   Switch,
-  cn,
 } from 'ui'
-import { ClientSelectDropdown, MCP_CLIENTS } from 'ui-patterns/McpUrlBuilder'
 import { FormLayout } from 'ui-patterns/form/Layout/FormLayout'
 import {
   MultiSelector,
@@ -22,18 +18,8 @@ import {
   MultiSelectorTrigger,
 } from 'ui-patterns/multi-select'
 
-import { FRAMEWORKS, MOBILES } from './Connect.constants'
-import type { ConnectMode, FieldOption, ResolvedField } from './Connect.types'
+import type { FieldOption, ResolvedField } from './Connect.types'
 import { ConnectionIcon } from './ConnectionIcon'
-import { FrameworkSelector } from './FrameworkSelector'
-
-// Icon mapping for modes
-const MODE_ICONS: Record<string, React.ReactNode> = {
-  framework: <Box size={16} strokeWidth={1.5} />,
-  direct: <Database size={16} strokeWidth={1.5} />,
-  orm: <Cable size={16} strokeWidth={1.5} />,
-  mcp: <Sparkles size={16} strokeWidth={1.5} />,
-}
 
 interface ConnectConfigSectionProps {
   activeFields: ResolvedField[]
@@ -54,9 +40,6 @@ export function ConnectConfigSection({
 
   if (activeFields.length === 0) return null
 
-  // Get all frameworks for the combobox
-  const allFrameworks = [...FRAMEWORKS, ...MOBILES]
-
   return (
     <div className="space-y-6">
       {activeFields.map((field) => {
@@ -72,28 +55,6 @@ export function ConnectConfigSection({
 
         switch (field.type) {
           case 'radio-grid':
-            // For framework field, use the combobox selector
-            if (field.id === 'framework') {
-              return (
-                <FormLayout
-                  key={field.id}
-                  layout="flex-row-reverse"
-                  label={field.label}
-                  description="What is your preferred coding agent"
-                  className={formLayoutClassName}
-                >
-                  <FrameworkSelector
-                    value={String(value ?? '')}
-                    onChange={(v) => onFieldChange(field.id, v)}
-                    items={allFrameworks}
-                    className="w-full"
-                    size="small"
-                  />
-                </FormLayout>
-              )
-            }
-
-            // Default radio-grid behavior for other fields
             return (
               <FormLayout
                 key={field.id}
@@ -162,30 +123,6 @@ export function ConnectConfigSection({
             )
 
           case 'select':
-            // Special case for MCP client - use the custom dropdown
-            if (field.id === 'mcpClient') {
-              const selectedClient = MCP_CLIENTS.find((c) => c.key === value) ?? MCP_CLIENTS[0]
-              return (
-                <FormLayout
-                  key={field.id}
-                  layout="flex-row-reverse"
-                  label={field.label}
-                  description={field.description}
-                  className={formLayoutClassName}
-                >
-                  <ClientSelectDropdown
-                    basePath={BASE_PATH}
-                    theme={(resolvedTheme ?? 'dark') as 'light' | 'dark'}
-                    label=""
-                    className="w-full"
-                    clients={MCP_CLIENTS}
-                    selectedClient={selectedClient}
-                    onClientChange={(v) => onFieldChange(field.id, v)}
-                  />
-                </FormLayout>
-              )
-            }
-
             return (
               <FormLayout
                 key={field.id}
@@ -272,42 +209,6 @@ export function ConnectConfigSection({
             return null
         }
       })}
-    </div>
-  )
-}
-
-// ============================================================================
-// Mode Selector
-// ============================================================================
-
-interface ModeSelectorProps {
-  modes: Array<{ id: ConnectMode; label: string; description: string }>
-  selected: ConnectMode
-  onChange: (mode: ConnectMode) => void
-}
-
-export function ModeSelector({ modes, selected, onChange }: ModeSelectorProps) {
-  return (
-    <div className="grid grid-cols-4 rounded-lg border">
-      {modes.map((mode) => (
-        <button
-          key={mode.id}
-          type="button"
-          onClick={() => onChange(mode.id)}
-          className={cn(
-            'flex flex-col items-center gap-2 p-4 transition-colors border-r last:border-r-0',
-            selected === mode.id
-              ? 'bg-surface-200'
-              : 'border-default hover:border-strong hover:bg-surface-100 '
-          )}
-        >
-          <span className="text-foreground-light">{MODE_ICONS[mode.id]}</span>
-          <div>
-            <p className="heading-default text-center">{mode.label}</p>
-            <p className="text-sm text-foreground-lighter text-center">{mode.description}</p>
-          </div>
-        </button>
-      ))}
     </div>
   )
 }

@@ -1,15 +1,63 @@
-import type { ConnectSchema, StepDefinition } from './Connect.types'
+import { FRAMEWORKS, MOBILES } from './Connect.constants'
+import type { ConnectSchema, ConnectState, FieldOption, StepDefinition } from './Connect.types'
 
-/**
- * Install commands for different packages
- */
-export const INSTALL_COMMANDS: Record<string, string> = {
-  supabasejs: 'npm install @supabase/supabase-js',
-  supabasepy: 'pip install supabase',
-  supabaseflutter: 'flutter pub add supabase_flutter',
-  supabaseswift:
-    'swift package add-dependency https://github.com/supabase-community/supabase-swift',
-  supabasekt: 'implementation("io.github.jan-tennert.supabase:supabase-kt:VERSION")',
+const frameworkOptions: FieldOption[] = [...FRAMEWORKS, ...MOBILES].map((framework) => ({
+  value: framework.key,
+  label: framework.label,
+  icon: framework.icon,
+}))
+
+const modeOptions: FieldOption[] = [
+  {
+    value: 'framework',
+    label: 'Framework',
+    description: 'Use a client library',
+  },
+]
+
+const getFrameworkVariantOptions = (state: ConnectState): FieldOption[] => {
+  const allFrameworks = [...FRAMEWORKS, ...MOBILES]
+  const selected = allFrameworks.find((framework) => framework.key === state.framework)
+  if (!selected?.children?.length) return []
+  if (selected.children.length <= 1) return []
+
+  return selected.children.map((variant) => ({
+    value: variant.key,
+    label: variant.label,
+    icon: variant.icon,
+  }))
+}
+
+const getLibraryOptions = (state: ConnectState): FieldOption[] => {
+  const allFrameworks = [...FRAMEWORKS, ...MOBILES]
+  const selectedFramework = allFrameworks.find((framework) => framework.key === state.framework)
+  if (!selectedFramework) return []
+
+  if (selectedFramework.children?.length > 1 && state.frameworkVariant) {
+    const variant = selectedFramework.children.find((child) => child.key === state.frameworkVariant)
+    if (variant?.children?.length) {
+      return variant.children.map((child) => ({
+        value: child.key,
+        label: child.label,
+        icon: child.icon,
+      }))
+    }
+  }
+
+  if (selectedFramework.children?.length === 1) {
+    const child = selectedFramework.children[0]
+    if (child.children?.length) {
+      return child.children.map((library) => ({
+        value: library.key,
+        label: library.label,
+        icon: library.icon,
+      }))
+    }
+
+    return [{ value: child.key, label: child.label, icon: child.icon }]
+  }
+
+  return []
 }
 
 // ============================================================================
@@ -74,43 +122,40 @@ const skillsInstallStep: StepDefinition = {
 
 export const connectSchema: ConnectSchema = {
   // -------------------------------------------------------------------------
-  // Mode Definitions
-  // -------------------------------------------------------------------------
-  modes: [
-    {
-      id: 'framework',
-      label: 'Framework',
-      description: 'Use a client library',
-      fields: ['framework', 'frameworkVariant', 'library', 'frameworkUi'],
-    },
-  ],
-
-  // -------------------------------------------------------------------------
   // Field Definitions
   // -------------------------------------------------------------------------
   fields: {
+    mode: {
+      id: 'mode',
+      type: 'radio-list',
+      label: 'Mode',
+      options: modeOptions,
+      defaultValue: 'framework',
+    },
     // Framework fields
     framework: {
       id: 'framework',
-      type: 'radio-grid',
+      type: 'select',
       label: 'Framework',
-      options: { source: 'frameworks' },
+      options: frameworkOptions,
       defaultValue: 'nextjs',
+      dependsOn: { mode: ['framework'] },
     },
     frameworkVariant: {
       id: 'frameworkVariant',
       type: 'select',
       label: 'Variant',
-      options: { source: 'frameworkVariants' },
+      options: getFrameworkVariantOptions,
       defaultValue: 'app',
-      dependsOn: { framework: ['nextjs', 'react'] }, // Only show for frameworks with multiple variants
+      dependsOn: { mode: ['framework'], framework: ['nextjs', 'react'] }, // Only show for frameworks with multiple variants
     },
     library: {
       id: 'library',
       type: 'select',
       label: 'Library',
-      options: { source: 'libraries' },
+      options: getLibraryOptions,
       defaultValue: 'supabasejs',
+      dependsOn: { mode: ['framework'] },
     },
     frameworkUi: {
       id: 'frameworkUi',
@@ -118,7 +163,7 @@ export const connectSchema: ConnectSchema = {
       label: 'Shadcn',
       description: 'Install components via the Supabase shadcn registry.',
       defaultValue: false,
-      dependsOn: { framework: ['nextjs', 'react'] },
+      dependsOn: { mode: ['framework'], framework: ['nextjs', 'react'] },
     },
   },
 

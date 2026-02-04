@@ -1,60 +1,22 @@
-import { describe, test, expect } from 'vitest'
-import { connectSchema, INSTALL_COMMANDS } from './connect.schema'
-import { resolveSteps } from './connect.resolver'
+import { describe, expect, test } from 'vitest'
+
+import { INSTALL_COMMANDS } from './Connect.constants'
 import type { ConnectState } from './Connect.types'
+import { resolveSteps } from './connect.resolver'
+import { connectSchema } from './connect.schema'
 
 // ============================================================================
 // Schema Structure Tests
 // ============================================================================
 
 describe('connect.schema:structure', () => {
-  test('should have all required modes', () => {
-    const modeIds = connectSchema.modes.map((m) => m.id)
-    expect(modeIds).toEqual(['framework'])
-  })
-
-  test('each mode should have required properties', () => {
-    connectSchema.modes.forEach((mode) => {
-      expect(mode.id).toBeDefined()
-      expect(mode.label).toBeDefined()
-      expect(mode.description).toBeDefined()
-      expect(mode.fields).toBeDefined()
-      expect(Array.isArray(mode.fields)).toBe(true)
-    })
-  })
-
-  test('framework mode should have correct fields', () => {
-    const frameworkMode = connectSchema.modes.find((m) => m.id === 'framework')
-    expect(frameworkMode?.fields).toContain('framework')
-    expect(frameworkMode?.fields).toContain('frameworkVariant')
-    expect(frameworkMode?.fields).toContain('library')
-    expect(frameworkMode?.fields).toContain('frameworkUi')
-  })
-
-  test('direct mode should be removed', () => {
-    const directMode = connectSchema.modes.find((m) => m.id === 'direct')
-    expect(directMode).toBeUndefined()
-  })
-
-  test('orm mode should be removed', () => {
-    const ormMode = connectSchema.modes.find((m) => m.id === 'orm')
-    expect(ormMode).toBeUndefined()
-  })
-
-  test('mcp mode should be removed', () => {
-    const mcpMode = connectSchema.modes.find((m) => m.id === 'mcp')
-    expect(mcpMode).toBeUndefined()
-  })
-
-  test('all mode fields should exist in fields definition', () => {
-    connectSchema.modes.forEach((mode) => {
-      mode.fields.forEach((fieldId) => {
-        expect(
-          connectSchema.fields[fieldId],
-          `Field "${fieldId}" in mode "${mode.id}" should exist in fields definition`
-        ).toBeDefined()
-      })
-    })
+  test('should define a mode field', () => {
+    const field = connectSchema.fields.mode
+    expect(field).toBeDefined()
+    expect(field.type).toBe('radio-list')
+    expect(field.defaultValue).toBe('framework')
+    const options = Array.isArray(field.options) ? field.options : []
+    expect(options.some((option) => option.value === 'framework')).toBe(true)
   })
 })
 
@@ -65,21 +27,25 @@ describe('connect.schema:structure', () => {
 describe('connect.schema:fields', () => {
   test('framework field should have correct type', () => {
     const field = connectSchema.fields.framework
-    expect(field.type).toBe('radio-grid')
-    expect(field.options).toEqual({ source: 'frameworks' })
+    expect(field.type).toBe('select')
+    expect(Array.isArray(field.options)).toBe(true)
+    const options = Array.isArray(field.options) ? field.options : []
+    expect(options.some((option) => option.value === 'nextjs')).toBe(true)
     expect(field.defaultValue).toBe('nextjs')
+    expect(field.dependsOn).toEqual({ mode: ['framework'] })
   })
 
   test('frameworkVariant field should depend on framework', () => {
     const field = connectSchema.fields.frameworkVariant
-    expect(field.dependsOn).toEqual({ framework: ['nextjs', 'react'] })
+    expect(field.dependsOn).toEqual({ mode: ['framework'], framework: ['nextjs', 'react'] })
+    expect(typeof field.options).toBe('function')
   })
 
   test('frameworkUi field should be a switch type', () => {
     const field = connectSchema.fields.frameworkUi
     expect(field.type).toBe('switch')
     expect(field.defaultValue).toBe(false)
-    expect(field.dependsOn).toEqual({ framework: ['nextjs', 'react'] })
+    expect(field.dependsOn).toEqual({ mode: ['framework'], framework: ['nextjs', 'react'] })
   })
 
   test('connectionMethod field should be removed', () => {
