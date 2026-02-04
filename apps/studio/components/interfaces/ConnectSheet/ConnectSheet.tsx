@@ -58,7 +58,7 @@ export const ConnectSheet = () => {
 
   // Project keys for step components
   const { ref: projectRef } = useParams()
-  const { data: settings } = useProjectSettingsV2Query({ projectRef }, { enabled: open })
+  const { data: settings } = useProjectSettingsV2Query({ projectRef }, { enabled: showConnect })
   const { can: canReadAPIKeys } = useAsyncCheckPermissions(
     PermissionAction.READ,
     'service_api_keys'

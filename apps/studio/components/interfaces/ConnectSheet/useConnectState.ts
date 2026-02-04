@@ -215,6 +215,7 @@ export function useConnectState(initialState?: Partial<ConnectState>): UseConnec
         }
 
         // Reset library
+        delete next.library
         const libraryKey = resolveFrameworkLibraryKey({
           framework: next.framework,
           frameworkVariant: next.frameworkVariant,
@@ -229,8 +230,9 @@ export function useConnectState(initialState?: Partial<ConnectState>): UseConnec
 
       // Handle cascading updates for variant selection
       if (fieldId === 'frameworkVariant') {
+        delete next.library
         const libraryKey = resolveFrameworkLibraryKey({
-          framework: prev.framework,
+          framework: next.framework,
           frameworkVariant: String(value),
           library: next.library,
         })
@@ -257,6 +259,7 @@ export function useConnectState(initialState?: Partial<ConnectState>): UseConnec
         if (firstFramework?.children?.length > 1) {
           next.frameworkVariant = firstFramework.children[0]?.key ?? ''
         }
+        delete next.library
         const libraryKey = resolveFrameworkLibraryKey({
           framework: next.framework,
           frameworkVariant: next.frameworkVariant,
