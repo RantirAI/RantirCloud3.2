@@ -62,7 +62,6 @@ export const plans: PricingInformation[] = [
       'Email support',
       'Daily backups stored for 7 days',
       '7-day log retention',
-
     ],
     preface: 'Everything in the Free Plan, plus:',
     cta: 'Get Started',
