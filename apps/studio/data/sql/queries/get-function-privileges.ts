@@ -23,7 +23,7 @@ select
           )
         )
       from
-        aclexplode(p.proacl) as acl (grantor, grantee, privilege_type, is_grantable)
+        aclexplode(coalesce(p.proacl, acldefault('f', p.proowner))) as acl (grantor, grantee, privilege_type, is_grantable)
     ),
     '[]'::jsonb
   ) as privileges
