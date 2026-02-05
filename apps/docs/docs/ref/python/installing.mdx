@@ -40,3 +40,26 @@ custom_edit_url: https://github.com/supabase/supabase/edit/master/apps/docs/spec
 
   </RefSubLayout.Examples>
 </RefSubLayout.EducationRow>
+
+### Enable Data API access
+
+<RefSubLayout.EducationRow>
+  <RefSubLayout.Details>
+
+    To access a table via the Data API, the `anon` and/or `authenticated` roles need the appropriate permissions.
+
+    When using the Table Editor in the Dashboard, ensure the **Enable Data API Access** toggle is on when creating or editing a table.
+
+    When using SQL, grant the required permissions:
+
+  </RefSubLayout.Details>
+
+  <RefSubLayout.Examples>
+
+    ```sql
+    -- Grant access to the anon and authenticated roles
+    grant all on public.your_table to anon, authenticated;
+    ```
+
+  </RefSubLayout.Examples>
+</RefSubLayout.EducationRow>
