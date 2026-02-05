@@ -1,14 +1,14 @@
 import { useMemo } from 'react'
 
-import type { ConnectionVars } from 'data/common.types'
-import { useIsSchemaExposed } from 'hooks/misc/useIsSchemaExposed'
-import type { Prettify } from 'lib/type-helpers'
-import type { UseCustomQueryOptions } from 'types'
 import {
   useFunctionPrivilegesQuery,
   type FunctionPrivilegesData,
   type FunctionPrivilegesError,
 } from './function-privileges-query'
+import type { ConnectionVars } from '@/data/common.types'
+import { useIsSchemaExposed } from '@/hooks/misc/useIsSchemaExposed'
+import type { Prettify } from '@/lib/type-helpers'
+import type { UseCustomQueryOptions } from '@/types'
 
 // The contents of this array are never used, so any will allow
 // it to be used anywhere an array of any type is required.
@@ -31,10 +31,7 @@ const getApiPrivilegesByRole = (
 
   privileges.forEach((privilege) => {
     const { grantee, privilege_type } = privilege
-    if (
-      (grantee === 'anon' || grantee === 'authenticated') &&
-      privilege_type === 'EXECUTE'
-    ) {
+    if ((grantee === 'anon' || grantee === 'authenticated') && privilege_type === 'EXECUTE') {
       privilegesByRole[grantee] = true
     }
   })
@@ -75,7 +72,10 @@ export type FunctionApiAccessData =
       privileges: FunctionApiPrivilegesByRole
     }
   | {
-      apiAccessType: 'none' | 'exposed-schema-no-grants'
+      apiAccessType: 'none'
+    }
+  | {
+      apiAccessType: 'exposed-schema-no-grants'
     }
 
 export type FunctionApiAccessMap = Prettify<Record<number, FunctionApiAccessData>>
@@ -119,9 +119,7 @@ export const useFunctionApiAccessQuery = (
   > = {}
 ): UseFunctionApiAccessQueryReturn => {
   const uniqueFunctionIds = useMemo(() => {
-    return new Set(
-      functionIds.filter((id) => typeof id === 'number' && id > 0)
-    )
+    return new Set(functionIds.filter((id) => typeof id === 'number' && id > 0))
   }, [functionIds])
   const hasFunctions = uniqueFunctionIds.size > 0
 

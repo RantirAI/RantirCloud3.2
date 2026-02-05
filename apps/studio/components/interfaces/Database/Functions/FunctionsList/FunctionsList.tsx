@@ -1,33 +1,10 @@
 import { PermissionAction } from '@supabase/shared-types/out/constants'
+import { useParams } from 'common'
 import { Search } from 'lucide-react'
 import { useRouter } from 'next/router'
 import { parseAsBoolean, parseAsJson, useQueryState } from 'nuqs'
 import { useMemo, useRef, useState } from 'react'
 import { toast } from 'sonner'
-
-import { useParams } from 'common'
-import {
-  ReportsSelectFilter,
-  selectFilterSchema,
-} from 'components/interfaces/Reports/v2/ReportsSelectFilter'
-import { SIDEBAR_KEYS } from 'components/layouts/ProjectLayout/LayoutSidebar/LayoutSidebarProvider'
-import ProductEmptyState from 'components/to-be-cleaned/ProductEmptyState'
-import AlertError from 'components/ui/AlertError'
-import { ButtonTooltip } from 'components/ui/ButtonTooltip'
-import SchemaSelector from 'components/ui/SchemaSelector'
-import { useDatabaseFunctionDeleteMutation } from 'data/database-functions/database-functions-delete-mutation'
-import type { DatabaseFunction } from 'data/database-functions/database-functions-query'
-import { useDatabaseFunctionsQuery } from 'data/database-functions/database-functions-query'
-import { useSchemasQuery } from 'data/database/schemas-query'
-import { useFunctionApiAccessQuery } from 'data/privileges/function-api-access-query'
-import { useFunctionApiAccessPrivilegesMutation } from 'data/privileges/function-api-access-mutation'
-import { useAsyncCheckPermissions } from 'hooks/misc/useCheckPermissions'
-import { handleErrorOnDelete, useQueryStateWithSelect } from 'hooks/misc/useQueryStateWithSelect'
-import { useQuerySchemaState } from 'hooks/misc/useSchemaQueryState'
-import { useSelectedProjectQuery } from 'hooks/misc/useSelectedProject'
-import { useIsProtectedSchema } from 'hooks/useProtectedSchemas'
-import { useAiAssistantStateSnapshot } from 'state/ai-assistant-state'
-import { useSidebarManagerSnapshot } from 'state/sidebar-manager-state'
 import {
   AiIconAnimation,
   Card,
@@ -39,14 +16,36 @@ import {
   TableRow,
 } from 'ui'
 import { GenericSkeletonLoader } from 'ui-patterns/ShimmeringLoader'
-import { ProtectedSchemaWarning } from '../../ProtectedSchemaWarning'
-import FunctionList from './FunctionList'
-import { ToggleFunctionApiAccessModal } from './ToggleFunctionApiAccessModal'
 
-import { useIsInlineEditorEnabled } from 'components/interfaces/Account/Preferences/InlineEditorSettings'
-import { CreateFunction } from 'components/interfaces/Database/Functions/CreateFunction'
-import { DeleteFunction } from 'components/interfaces/Database/Functions/DeleteFunction'
-import { useEditorPanelStateSnapshot } from 'state/editor-panel-state'
+import { ProtectedSchemaWarning } from '../../ProtectedSchemaWarning'
+import { FunctionList } from './FunctionList'
+import { ToggleFunctionApiAccessModal } from './ToggleFunctionApiAccessModal'
+import { useIsInlineEditorEnabled } from '@/components/interfaces/Account/Preferences/InlineEditorSettings'
+import { CreateFunction } from '@/components/interfaces/Database/Functions/CreateFunction'
+import { DeleteFunction } from '@/components/interfaces/Database/Functions/DeleteFunction'
+import {
+  ReportsSelectFilter,
+  selectFilterSchema,
+} from '@/components/interfaces/Reports/v2/ReportsSelectFilter'
+import { SIDEBAR_KEYS } from '@/components/layouts/ProjectLayout/LayoutSidebar/LayoutSidebarProvider'
+import ProductEmptyState from '@/components/to-be-cleaned/ProductEmptyState'
+import AlertError from '@/components/ui/AlertError'
+import { ButtonTooltip } from '@/components/ui/ButtonTooltip'
+import SchemaSelector from '@/components/ui/SchemaSelector'
+import { useDatabaseFunctionDeleteMutation } from '@/data/database-functions/database-functions-delete-mutation'
+import type { DatabaseFunction } from '@/data/database-functions/database-functions-query'
+import { useDatabaseFunctionsQuery } from '@/data/database-functions/database-functions-query'
+import { useSchemasQuery } from '@/data/database/schemas-query'
+import { useFunctionApiAccessPrivilegesMutation } from '@/data/privileges/function-api-access-mutation'
+import { useFunctionApiAccessQuery } from '@/data/privileges/function-api-access-query'
+import { useAsyncCheckPermissions } from '@/hooks/misc/useCheckPermissions'
+import { handleErrorOnDelete, useQueryStateWithSelect } from '@/hooks/misc/useQueryStateWithSelect'
+import { useQuerySchemaState } from '@/hooks/misc/useSchemaQueryState'
+import { useSelectedProjectQuery } from '@/hooks/misc/useSelectedProject'
+import { useIsProtectedSchema } from '@/hooks/useProtectedSchemas'
+import { useAiAssistantStateSnapshot } from '@/state/ai-assistant-state'
+import { useEditorPanelStateSnapshot } from '@/state/editor-panel-state'
+import { useSidebarManagerSnapshot } from '@/state/sidebar-manager-state'
 
 const createFunctionSnippet = `create function function_name()
 returns void
@@ -57,7 +56,7 @@ begin
 end;
 $$;`
 
-const FunctionsList = () => {
+export function FunctionsList() {
   const router = useRouter()
   const { search } = useParams()
   const { data: project } = useSelectedProjectQuery()
@@ -169,9 +168,7 @@ const FunctionsList = () => {
 
   // Get function IDs for the selected schema
   const schemaFunctionIds = useMemo(() => {
-    return (functions ?? [])
-      .filter((fn) => fn.schema === selectedSchema)
-      .map((fn) => fn.id)
+    return (functions ?? []).filter((fn) => fn.schema === selectedSchema).map((fn) => fn.id)
   }, [functions, selectedSchema])
 
   // Query function API access
@@ -453,5 +450,3 @@ const FunctionsList = () => {
     </>
   )
 }
-
-export default FunctionsList
