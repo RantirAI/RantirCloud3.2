@@ -34,4 +34,3 @@ where
   p.prokind = 'f'
   and n.nspname not in ('pg_catalog', 'information_schema')
 `
-

@@ -427,7 +427,9 @@ export function FunctionsList() {
 
       <ToggleFunctionApiAccessModal
         func={apiAccessConfigFunc}
-        apiAccessData={apiAccessConfigFunc ? functionApiAccessMap?.[apiAccessConfigFunc.id] : undefined}
+        apiAccessData={
+          apiAccessConfigFunc ? functionApiAccessMap?.[apiAccessConfigFunc.id] : undefined
+        }
         projectRef={project?.ref}
         isLoading={isUpdatingApiAccess}
         onConfirm={(roles) => {
