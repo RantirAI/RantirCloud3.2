@@ -9,12 +9,14 @@ import { getTableOfContents } from '@/lib/toc'
 import { getCurrentChapter } from '@/lib/get-current-chapter'
 import { getNextPage } from '@/lib/get-next-page'
 import { absoluteUrl, cn } from '@/lib/utils'
+import { courses } from '@/config/docs'
+import type { SidebarNavItem } from '@/types/nav'
 import '@/styles/code-block-variables.css'
 import '@/styles/mdx.css'
 import { allDocs } from 'contentlayer/generated'
-import { ChevronRight } from 'lucide-react'
 import type { Metadata } from 'next'
 import { notFound } from 'next/navigation'
+import Link from 'next/link'
 import Balancer from 'react-wrap-balancer'
 import { ScrollArea } from 'ui'
 
@@ -87,6 +89,34 @@ export default async function DocPage(props: DocPageProps) {
     }
   ).explore
 
+  // Build breadcrumb hierarchy
+  const breadcrumb: { label: string; href?: string }[] = [{ label: 'Learn', href: '/' }]
+
+  // Find course, module, and chapter
+  const course = courses.items[0] // Foundations - only one course for now
+  if (course) {
+    // Link to course introduction or first page
+    breadcrumb.push({ label: course.title, href: '/foundations/introduction' })
+
+    // Check if this is a standalone item or part of a module
+    let foundModule: SidebarNavItem | null = null
+    course.items?.forEach((item: SidebarNavItem) => {
+      if (item.items && item.items.length > 0) {
+        // It's a module
+        const foundLesson = item.items.find((lesson) => lesson.href === doc.slug)
+        if (foundLesson) {
+          // Link to first lesson in module
+          const firstLessonHref = item.items[0]?.href
+          breadcrumb.push({ label: item.title, href: firstLessonHref })
+          foundModule = item
+        }
+      }
+    })
+
+    // Add the current page title (no link since we're on this page)
+    breadcrumb.push({ label: doc.title })
+  }
+
   return (
     <div className={cn('relative')}>
       {isIntroductionPage && doc.courseHero && (
@@ -105,10 +135,22 @@ export default async function DocPage(props: DocPageProps) {
         )}
       >
         <div className="mx-auto w-full min-w-0 max-w-4xl">
-          <div className="mb-4 flex items-center space-x-1 text-sm text-foreground-muted">
-            <div className="overflow-hidden text-ellipsis whitespace-nowrap">Learn</div>
-            <ChevronRight className="h-4 w-4 text-foreground-muted" />
-            <div className="text-foreground-lighter">{doc.title}</div>
+          <div className="mb-4 flex items-center gap-3 text-sm text-foreground-muted">
+            {breadcrumb.map((crumb, index) => (
+              <span key={index} className="flex items-center gap-3">
+                {crumb.href ? (
+                  <Link
+                    href={crumb.href}
+                    className="hover:text-foreground transition-colors"
+                  >
+                    {crumb.label}
+                  </Link>
+                ) : (
+                  <span className="text-foreground-light">{crumb.label}</span>
+                )}
+                {index < breadcrumb.length - 1 && <span>/</span>}
+              </span>
+            ))}
           </div>
           <div className="flex flex-col lg:flex-row lg:items-end justify-between mb-5">
             <div className="space-y-2">

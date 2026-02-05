@@ -43,13 +43,20 @@ const NavigationItem: React.FC<NavigationItemProps> = ({
   // Check if internal content exists for this item and user is logged in
   const hasInternal = item.href && internalPaths?.includes(item.href) && isLoggedIn
 
-  // Auto-expand if any child is active
+  // Auto-expand if any child or nested child is active
   useEffect(() => {
     if (hasChildren) {
-      const hasActiveChild = item.items?.some((child) => {
-        return pathname === child.href
-      })
-      if (hasActiveChild) {
+      const hasActiveChild = (items: typeof item.items): boolean => {
+        return items?.some((child) => {
+          if (pathname === child.href) return true
+          if (child.items && child.items.length > 0) {
+            return hasActiveChild(child.items)
+          }
+          return false
+        }) ?? false
+      }
+
+      if (hasActiveChild(item.items)) {
         setIsOpen(true)
       }
     }
@@ -81,7 +88,12 @@ const NavigationItem: React.FC<NavigationItemProps> = ({
 
   const itemClasses = cn(
     'flex text-sm rounded-md transition-colors',
-    level === 0 ? 'px-3 py-2' : 'px-3 py-1.5',
+    // Course level (0)
+    level === 0 && 'px-3 py-2 font-semibold',
+    // Module level (1)
+    level === 1 && 'px-3 py-2 font-medium text-xs text-foreground-muted',
+    // Chapter level (2+)
+    level >= 2 && 'px-3 py-1.5 text-sm',
     isActive
       ? 'bg-surface-200 text-foreground'
       : hasChildren && isOpen

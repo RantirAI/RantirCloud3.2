@@ -57,7 +57,7 @@ function SideNavigation({ internalPaths }: SideNavigationProps) {
   ]
 
   return (
-    <nav className="flex flex-col h-full min-w-[220px]">
+    <nav className="flex flex-col h-full min-w-[320px]">
       <div className="flex-1 flex flex-col overflow-hidden">
         <div className="p-6 flex-shrink-0">
           <div className="flex items-start justify-between mb-4">
