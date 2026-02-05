@@ -1,22 +1,22 @@
 import { useQuery } from '@tanstack/react-query'
 import { useMemo } from 'react'
 
-import type { ConnectionVars } from '@/data/common.types'
-import { useIsSchemaExposed } from '@/hooks/misc/useIsSchemaExposed'
-import type { ApiAccessRole } from '@/lib/data-api-types'
-import type { Prettify } from '@/lib/type-helpers'
-import type { UseCustomQueryOptions } from '@/types'
 import {
   functionPrivilegesQueryOptions,
   type FunctionPrivilegesData,
   type FunctionPrivilegesError,
 } from './function-privileges-query'
+import type { ConnectionVars } from '@/data/common.types'
+import { useIsSchemaExposed } from '@/hooks/misc/useIsSchemaExposed'
+import type { ApiAccessRole } from '@/lib/data-api-types'
+import type { Prettify } from '@/lib/type-helpers'
+import type { UseCustomQueryOptions } from '@/types'
 
 // The contents of this array are never used, so any will allow
 // it to be used anywhere an array of any type is required.
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 const STABLE_EMPTY_ARRAY: any[] = []
-const STABLE_EMPTY_OBJECT = {}
+const STABLE_EMPTY_OBJECT = Object.freeze({})
 
 export type FunctionApiPrivilegesByRole = Record<ApiAccessRole, boolean>
 
@@ -30,7 +30,15 @@ const getApiPrivilegesByRole = (
 
   privileges.forEach((privilege) => {
     const { grantee, privilege_type } = privilege
-    if ((grantee === 'anon' || grantee === 'authenticated') && privilege_type === 'EXECUTE') {
+    if (privilege_type !== 'EXECUTE') return
+
+    if (grantee === 'public') {
+      Object.keys(privilegesByRole).forEach((role) => {
+        privilegesByRole[role as keyof typeof privilegesByRole] = true
+      })
+    }
+
+    if (grantee === 'anon' || grantee === 'authenticated') {
       privilegesByRole[grantee] = true
     }
   })
@@ -39,15 +47,15 @@ const getApiPrivilegesByRole = (
 }
 
 const mapPrivilegesByFunctionId = (
-  privileges: FunctionPrivilegesData | undefined,
+  data: FunctionPrivilegesData | undefined,
   schemaName: string,
   functionIds: Set<number>
 ): Record<number, FunctionApiPrivilegesByRole> => {
-  if (!privileges) return {}
+  if (!data) return {}
 
   const result: Record<number, FunctionApiPrivilegesByRole> = {}
 
-  privileges.forEach((entry) => {
+  data.forEach((entry) => {
     if (entry.schema !== schemaName) return
     if (!functionIds.has(entry.function_id)) return
     result[entry.function_id] = getApiPrivilegesByRole(entry.privileges)
@@ -62,8 +70,6 @@ export type UseFunctionApiAccessQueryParams = Prettify<
     functionIds: number[]
   }
 >
-
-export type DataApiAccessType = 'none' | 'exposed-schema-no-grants' | 'access'
 
 export type FunctionApiAccessData =
   | {
@@ -126,7 +132,10 @@ export const useFunctionApiAccessQuery = (
 
   const enablePrivilegesQuery = enabled && hasFunctions
   const privilegeStatus = useQuery({
-    ...functionPrivilegesQueryOptions({ projectRef, connectionString }, { enabled: enablePrivilegesQuery }),
+    ...functionPrivilegesQueryOptions(
+      { projectRef, connectionString },
+      { enabled: enablePrivilegesQuery }
+    ),
     ...options,
   })
 
