@@ -121,7 +121,39 @@ export default defineConfig({
       name: 'Features',
       testDir: './features',
       testMatch: /.*\.spec\.ts/,
+      testIgnore: [
+        /table-editor\.spec\.ts/,
+        /queue-table-operations\.spec\.ts/,
+        /rls-policies\.spec\.ts/,
+        /database\.spec\.ts/,
+        /index-advisor\.spec\.ts/,
+        /cron-jobs\.spec\.ts/,
+        /api-access-toggle\.spec\.ts/,
+      ],
       dependencies: ['setup'],
+      use: {
+        browserName: 'chromium',
+        screenshot: 'off',
+
+        // Only use storage state if authentication is enabled. When AUTHENTICATION=false
+        // we should not require a pre-generated storage state file.
+        storageState: env.AUTHENTICATION ? STORAGE_STATE_PATH : undefined,
+      },
+    },
+    {
+      name: 'Database Features',
+      testDir: './features',
+      testMatch: [
+        /table-editor\.spec\.ts/,
+        /queue-table-operations\.spec\.ts/,
+        /rls-policies\.spec\.ts/,
+        /database\.spec\.ts/,
+        /index-advisor\.spec\.ts/,
+        /cron-jobs\.spec\.ts/,
+        /api-access-toggle\.spec\.ts/,
+      ],
+      fullyParallel: false,
+      dependencies: ['Features'],
       use: {
         browserName: 'chromium',
         screenshot: 'off',
