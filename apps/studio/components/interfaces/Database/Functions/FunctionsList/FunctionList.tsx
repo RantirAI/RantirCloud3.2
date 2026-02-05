@@ -1,6 +1,6 @@
 import { PermissionAction } from '@supabase/shared-types/out/constants'
 import { includes, noop, sortBy } from 'lodash'
-import { Copy, Edit, Edit2, FileText, MoreVertical, Trash } from 'lucide-react'
+import { Check, Copy, Edit, Edit2, FileText, Globe, MoreVertical, Trash, X } from 'lucide-react'
 import Link from 'next/link'
 import { useRouter } from 'next/router'
 
@@ -11,6 +11,7 @@ import { useSelectedProjectQuery } from 'hooks/misc/useSelectedProject'
 import { useAiAssistantStateSnapshot } from 'state/ai-assistant-state'
 import { useSidebarManagerSnapshot } from 'state/sidebar-manager-state'
 import {
+  Badge,
   Button,
   DropdownMenu,
   DropdownMenuContent,
@@ -19,8 +20,12 @@ import {
   DropdownMenuTrigger,
   TableCell,
   TableRow,
+  Tooltip,
+  TooltipContent,
+  TooltipTrigger,
 } from 'ui'
 import type { DatabaseFunction } from 'data/database-functions/database-functions-query'
+import type { FunctionApiAccessMap } from 'data/privileges/function-api-access-query'
 
 interface FunctionListProps {
   schema: string
@@ -32,6 +37,8 @@ interface FunctionListProps {
   editFunction: (fn: any) => void
   deleteFunction: (fn: any) => void
   functions: DatabaseFunction[]
+  functionApiAccessMap?: FunctionApiAccessMap
+  onToggleApiAccess?: (fn: DatabaseFunction, enable: boolean) => void
 }
 
 const FunctionList = ({
@@ -44,6 +51,8 @@ const FunctionList = ({
   editFunction = noop,
   deleteFunction = noop,
   functions,
+  functionApiAccessMap,
+  onToggleApiAccess = noop,
 }: FunctionListProps) => {
   const router = useRouter()
   const { data: selectedProject } = useSelectedProjectQuery()
@@ -73,7 +82,7 @@ const FunctionList = ({
   if (_functions.length === 0 && filterString.length === 0) {
     return (
       <TableRow key={schema}>
-        <TableCell colSpan={5}>
+        <TableCell colSpan={6}>
           <p className="text-sm text-foreground">No functions created yet</p>
           <p className="text-sm text-foreground-light">
             There are no functions found in the schema "{schema}"
@@ -86,7 +95,7 @@ const FunctionList = ({
   if (_functions.length === 0 && filterString.length > 0) {
     return (
       <TableRow key={schema}>
-        <TableCell colSpan={5}>
+        <TableCell colSpan={6}>
           <p className="text-sm text-foreground">No results found</p>
           <p className="text-sm text-foreground-light">
             Your search for "{filterString}" did not return any results
@@ -142,6 +151,11 @@ const FunctionList = ({
                 {x.security_definer ? 'Definer' : 'Invoker'}
               </p>
             </TableCell>
+            <TableCell className="table-cell">
+              <ApiAccessCell
+                apiAccessData={functionApiAccessMap?.[x.id]}
+              />
+            </TableCell>
             <TableCell className="text-right">
               {!isLocked && (
                 <div className="flex items-center justify-end">
@@ -165,6 +179,10 @@ const FunctionList = ({
                             <p>Client API docs</p>
                           </DropdownMenuItem>
                         )}
+                        <ApiAccessMenuItem
+                          apiAccessData={functionApiAccessMap?.[x.id]}
+                          onToggle={(enable) => onToggleApiAccess(x, enable)}
+                        />
                         <DropdownMenuSeparator />
                         <DropdownMenuItem className="space-x-2" onClick={() => editFunction(x)}>
                           <Edit2 size={14} />
@@ -238,6 +256,98 @@ const FunctionList = ({
         )
       })}
     </>
+  )
+}
+
+const ApiAccessCell = ({
+  apiAccessData,
+}: {
+  apiAccessData?: FunctionApiAccessMap[number]
+}) => {
+  if (!apiAccessData) {
+    return (
+      <p className="truncate text-foreground-muted">–</p>
+    )
+  }
+
+  if (apiAccessData.apiAccessType === 'none') {
+    return (
+      <Tooltip>
+        <TooltipTrigger>
+          <Badge variant="default">
+            <X size={12} className="mr-1" />
+            No
+          </Badge>
+        </TooltipTrigger>
+        <TooltipContent side="top" className="max-w-xs">
+          Schema is not exposed via the Data API. Enable the schema in API settings to allow API access.
+        </TooltipContent>
+      </Tooltip>
+    )
+  }
+
+  if (apiAccessData.apiAccessType === 'exposed-schema-no-grants') {
+    return (
+      <Tooltip>
+        <TooltipTrigger>
+          <Badge variant="default">
+            <X size={12} className="mr-1" />
+            No
+          </Badge>
+        </TooltipTrigger>
+        <TooltipContent side="top" className="max-w-xs">
+          Function is not accessible via the Data API. Grant EXECUTE privileges to anon or authenticated roles to enable access.
+        </TooltipContent>
+      </Tooltip>
+    )
+  }
+
+  // apiAccessType === 'access'
+  const roles = []
+  if (apiAccessData.privileges.anon) roles.push('anon')
+  if (apiAccessData.privileges.authenticated) roles.push('authenticated')
+
+  return (
+    <Tooltip>
+      <TooltipTrigger>
+        <Badge variant="brand">
+          <Check size={12} className="mr-1" />
+          Yes
+        </Badge>
+      </TooltipTrigger>
+      <TooltipContent side="top" className="max-w-xs">
+        Function is accessible via the Data API for roles: {roles.join(', ')}
+      </TooltipContent>
+    </Tooltip>
+  )
+}
+
+const ApiAccessMenuItem = ({
+  apiAccessData,
+  onToggle,
+}: {
+  apiAccessData?: FunctionApiAccessMap[number]
+  onToggle: (enable: boolean) => void
+}) => {
+  if (!apiAccessData) {
+    return null
+  }
+
+  // If schema is not exposed, don't show the toggle option
+  if (apiAccessData.apiAccessType === 'none') {
+    return null
+  }
+
+  const hasAccess = apiAccessData.apiAccessType === 'access'
+
+  return (
+    <DropdownMenuItem
+      className="space-x-2"
+      onClick={() => onToggle(!hasAccess)}
+    >
+      <Globe size={14} />
+      <p>{hasAccess ? 'Disable API access' : 'Enable API access'}</p>
+    </DropdownMenuItem>
   )
 }
 

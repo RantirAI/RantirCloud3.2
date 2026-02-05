@@ -2,7 +2,7 @@ import { PermissionAction } from '@supabase/shared-types/out/constants'
 import { Search } from 'lucide-react'
 import { useRouter } from 'next/router'
 import { parseAsBoolean, parseAsJson, useQueryState } from 'nuqs'
-import { useRef } from 'react'
+import { useMemo, useRef, useState } from 'react'
 import { toast } from 'sonner'
 
 import { useParams } from 'common'
@@ -19,6 +19,8 @@ import { useDatabaseFunctionDeleteMutation } from 'data/database-functions/datab
 import type { DatabaseFunction } from 'data/database-functions/database-functions-query'
 import { useDatabaseFunctionsQuery } from 'data/database-functions/database-functions-query'
 import { useSchemasQuery } from 'data/database/schemas-query'
+import { useFunctionApiAccessQuery } from 'data/privileges/function-api-access-query'
+import { useFunctionApiAccessPrivilegesMutation } from 'data/privileges/function-api-access-mutation'
 import { useAsyncCheckPermissions } from 'hooks/misc/useCheckPermissions'
 import { handleErrorOnDelete, useQueryStateWithSelect } from 'hooks/misc/useQueryStateWithSelect'
 import { useQuerySchemaState } from 'hooks/misc/useSchemaQueryState'
@@ -39,6 +41,7 @@ import {
 import { GenericSkeletonLoader } from 'ui-patterns/ShimmeringLoader'
 import { ProtectedSchemaWarning } from '../../ProtectedSchemaWarning'
 import FunctionList from './FunctionList'
+import { ToggleFunctionApiAccessModal } from './ToggleFunctionApiAccessModal'
 
 import { useIsInlineEditorEnabled } from 'components/interfaces/Account/Preferences/InlineEditorSettings'
 import { CreateFunction } from 'components/interfaces/Database/Functions/CreateFunction'
@@ -70,6 +73,12 @@ const FunctionsList = () => {
 
   // Track the ID being deleted to exclude it from error checking
   const deletingFunctionIdRef = useRef<string | null>(null)
+
+  // State for API access toggle modal
+  const [apiAccessToggleState, setApiAccessToggleState] = useState<{
+    func: DatabaseFunction
+    enable: boolean
+  } | null>(null)
 
   const createFunction = () => {
     setSelectedFunctionIdToDuplicate(null)
@@ -157,6 +166,34 @@ const FunctionsList = () => {
     projectRef: project?.ref,
     connectionString: project?.connectionString,
   })
+
+  // Get function IDs for the selected schema
+  const schemaFunctionIds = useMemo(() => {
+    return (functions ?? [])
+      .filter((fn) => fn.schema === selectedSchema)
+      .map((fn) => fn.id)
+  }, [functions, selectedSchema])
+
+  // Query function API access
+  const { data: functionApiAccessMap } = useFunctionApiAccessQuery(
+    {
+      projectRef: project?.ref,
+      connectionString: project?.connectionString ?? undefined,
+      schemaName: selectedSchema,
+      functionIds: schemaFunctionIds,
+    },
+    { enabled: Boolean(selectedSchema && schemaFunctionIds.length > 0) }
+  )
+
+  // Mutation for toggling API access
+  const { mutate: updateApiAccess, isPending: isUpdatingApiAccess } =
+    useFunctionApiAccessPrivilegesMutation({
+      onSuccess: (_, variables) => {
+        const action = variables.enable ? 'enabled' : 'disabled'
+        toast.success(`API access ${action} for function ${variables.functionName}`)
+        setApiAccessToggleState(null)
+      },
+    })
 
   // Get unique return types from functions in the selected schema
   const schemaFunctions = (functions ?? []).filter((fn) => fn.schema === selectedSchema)
@@ -339,6 +376,9 @@ const FunctionsList = () => {
                   <TableHead key="security" className="table-cell w-[100px]">
                     Security
                   </TableHead>
+                  <TableHead key="api_access" className="table-cell w-[100px]">
+                    API Access
+                  </TableHead>
                   <TableHead key="buttons" className="w-1/6"></TableHead>
                 </TableRow>
               </TableHeader>
@@ -353,6 +393,8 @@ const FunctionsList = () => {
                   editFunction={editFunction}
                   deleteFunction={deleteFunction}
                   functions={functions ?? []}
+                  functionApiAccessMap={functionApiAccessMap}
+                  onToggleApiAccess={(func, enable) => setApiAccessToggleState({ func, enable })}
                 />
               </TableBody>
             </Table>
@@ -388,6 +430,25 @@ const FunctionsList = () => {
           deleteDatabaseFunction(params)
         }}
         isLoading={isDeletingFunction}
+      />
+
+      <ToggleFunctionApiAccessModal
+        visible={!!apiAccessToggleState}
+        func={apiAccessToggleState?.func}
+        enable={apiAccessToggleState?.enable ?? false}
+        isLoading={isUpdatingApiAccess}
+        onConfirm={() => {
+          if (!apiAccessToggleState || !project) return
+          updateApiAccess({
+            projectRef: project.ref,
+            connectionString: project.connectionString,
+            functionSchema: apiAccessToggleState.func.schema,
+            functionName: apiAccessToggleState.func.name,
+            functionArgs: apiAccessToggleState.func.identity_argument_types,
+            enable: apiAccessToggleState.enable,
+          })
+        }}
+        onCancel={() => setApiAccessToggleState(null)}
       />
     </>
   )
