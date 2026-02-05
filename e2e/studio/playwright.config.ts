@@ -6,6 +6,16 @@ const IS_CI = !!process.env.CI
 const WEB_SERVER_TIMEOUT = Number(process.env.WEB_SERVER_TIMEOUT) || 10 * 60 * 1000
 const WEB_SERVER_PORT = Number(process.env.WEB_SERVER_PORT) || 8082
 
+const DATABASE_FEATURES_TEST_MATCH = [
+  /table-editor\.spec\.ts/,
+  /queue-table-operations\.spec\.ts/,
+  /rls-policies\.spec\.ts/,
+  /database\.spec\.ts/,
+  /index-advisor\.spec\.ts/,
+  /cron-jobs\.spec\.ts/,
+  /api-access-toggle\.spec\.ts/,
+]
+
 // 15 minutes for platform, 2 minutes for self-hosted. Takes longer to setup a full project on platform.
 const setupTimeout = env.IS_PLATFORM ? 15 * 60 * 1000 : 120 * 1000
 
@@ -121,15 +131,7 @@ export default defineConfig({
       name: 'Features',
       testDir: './features',
       testMatch: /.*\.spec\.ts/,
-      testIgnore: [
-        /table-editor\.spec\.ts/,
-        /queue-table-operations\.spec\.ts/,
-        /rls-policies\.spec\.ts/,
-        /database\.spec\.ts/,
-        /index-advisor\.spec\.ts/,
-        /cron-jobs\.spec\.ts/,
-        /api-access-toggle\.spec\.ts/,
-      ],
+      testIgnore: DATABASE_FEATURES_TEST_MATCH,
       dependencies: ['setup'],
       use: {
         browserName: 'chromium',
@@ -143,15 +145,7 @@ export default defineConfig({
     {
       name: 'Database Features',
       testDir: './features',
-      testMatch: [
-        /table-editor\.spec\.ts/,
-        /queue-table-operations\.spec\.ts/,
-        /rls-policies\.spec\.ts/,
-        /database\.spec\.ts/,
-        /index-advisor\.spec\.ts/,
-        /cron-jobs\.spec\.ts/,
-        /api-access-toggle\.spec\.ts/,
-      ],
+      testMatch: DATABASE_FEATURES_TEST_MATCH,
       fullyParallel: false,
       dependencies: ['Features'],
       use: {
