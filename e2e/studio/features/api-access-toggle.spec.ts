@@ -467,6 +467,12 @@ test.describe('API Access Toggle', () => {
   }) => {
     const tableName = `${TABLE_NAME_PREFIX}_preserve_grants`
 
+    await runSQL(page, ref, `DROP TABLE IF EXISTS ${tableName} CASCADE;`)
+
+    let loadPromise = waitForTableToLoad(page, ref)
+    await page.goto(toUrl(`/project/${ref}/editor?schema=public`))
+    await loadPromise
+
     // Step 1: Create a table with partial privileges (only SELECT and INSERT for anon)
     await page.getByRole('button', { name: 'New table', exact: true }).click()
     await expect(page.getByTestId('table-editor-side-panel')).toBeVisible()
@@ -514,7 +520,7 @@ test.describe('API Access Toggle', () => {
     })
 
     // Navigate back to table editor
-    let loadPromise = waitForTableToLoad(page, ref)
+    loadPromise = waitForTableToLoad(page, ref)
     await page.goto(toUrl(`/project/${ref}/editor?schema=public`))
     await loadPromise
 

@@ -311,6 +311,7 @@ test.describe('Queue Table Operations', () => {
     await expect(page.getByRole('dialog').getByText('Pending changes')).toBeVisible()
 
     await page.keyboard.press('ControlOrMeta+.')
+    await expect(page.getByRole('dialog').getByText('Pending changes')).not.toBeVisible()
     await expect(page.getByRole('button', { name: 'View Details' })).toBeVisible()
 
     await page.keyboard.press('ControlOrMeta+s')

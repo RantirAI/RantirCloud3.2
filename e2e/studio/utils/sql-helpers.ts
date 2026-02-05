@@ -13,11 +13,11 @@ export const runSQL = async (page: Page, ref: string, sql: string) => {
   await page.getByTestId('sql-run-button').click()
 
   const confirmButton = page.getByRole('button', { name: 'Run this query' })
-  if (await confirmButton.isVisible({ timeout: 1000 }).catch(() => false)) {
+  if (await confirmButton.isVisible({ timeout: 3000 }).catch(() => false)) {
     await confirmButton.click()
   }
 
   await expect(
     page.getByText('Success. No rows returned').or(page.getByText(/^\d+ rows?$/)).first()
-  ).toBeVisible()
+  ).toBeVisible({ timeout: 30000 })
 }
