@@ -1,18 +1,19 @@
-import { useRouter } from 'next/router'
-import { PropsWithChildren } from 'react'
-
 import { LOCAL_STORAGE_KEYS, useParams } from 'common'
 import { AppBannerWrapper } from 'components/interfaces/App/AppBannerWrapper'
 import { Sidebar } from 'components/interfaces/Sidebar'
 import { useLocalStorageQuery } from 'hooks/misc/useLocalStorage'
 import { useCheckLatestDeploy } from 'hooks/use-check-latest-deploy'
+import { useRouter } from 'next/router'
+import { PropsWithChildren } from 'react'
 import { useAppStateSnapshot } from 'state/app-state'
 import { ResizablePanel, ResizablePanelGroup, SidebarProvider } from 'ui'
+
 import { LayoutHeader } from './ProjectLayout/LayoutHeader/LayoutHeader'
 import { LayoutSidebar } from './ProjectLayout/LayoutSidebar'
 import { LayoutSidebarProvider } from './ProjectLayout/LayoutSidebar/LayoutSidebarProvider'
 import MobileNavigationBar from './ProjectLayout/NavigationBar/MobileNavigationBar'
 import { ProjectContextProvider } from './ProjectLayout/ProjectContext'
+import { SidebarToolbar } from './ProjectLayout/SidebarToolbar'
 
 export interface DefaultLayoutProps {
   headerTitle?: string
@@ -100,6 +101,8 @@ export const DefaultLayout = ({
                   defaultSize={100 - contentMaxSizePercentage}
                 />
               </ResizablePanelGroup>
+              {/* Sidebar Toolbar - flush to the right */}
+              <SidebarToolbar />
             </div>
           </div>
         </ProjectContextProvider>
