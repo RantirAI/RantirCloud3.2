@@ -90,7 +90,7 @@ export default async function DocPage(props: DocPageProps) {
     <div className="relative xl:grid xl:grid-cols-[1fr_160px] gap-4 px-6 py-6 lg:py-8">
       <div className="mx-auto w-full min-w-0 max-w-4xl flex-1">
         <nav
-          className="mb-4 flex items-center space-x-1 text-sm text-foreground-muted"
+          className="mb-4 flex items-center space-x-1 text-sm text-foreground-lighter"
           aria-label="Breadcrumb"
         >
           {breadcrumbSegments.map((segment, index) => (
@@ -99,7 +99,7 @@ export default async function DocPage(props: DocPageProps) {
               {segment.href ? (
                 <Link
                   href={segment.href}
-                  className="overflow-hidden text-ellipsis whitespace-nowrap hover:text-foreground-lighter"
+                  className="overflow-hidden text-ellipsis whitespace-nowrap hover:text-foreground transition-colors"
                 >
                   {segment.title}
                 </Link>
@@ -110,6 +110,12 @@ export default async function DocPage(props: DocPageProps) {
               )}
             </span>
           ))}
+          {breadcrumbSegments.length > 0 && (
+            <ChevronRight className="h-4 w-4 shrink-0 text-foreground-muted/50" />
+          )}
+          <span className="overflow-hidden text-ellipsis whitespace-nowrap text-foreground-muted">
+            {doc.title}
+          </span>
         </nav>
         <div className="space-y-2 mb-5">
           <h1 className="scroll-m-20 text-4xl tracking-tight">{doc.title}</h1>
