@@ -167,7 +167,7 @@ export const HelpContent = ({ onClose }: { onClose: () => void }) => {
           </ButtonGroup>
         </div>
       </div>
-      <Separator className={__styles.separator} />
+      <Separator className={cn(__styles.separator, 'my-4')} />
       <div className="flex flex-col gap-4">
         <div className="px-4 flex flex-col gap-1">
           <h5 className="text-foreground">Community support</h5>

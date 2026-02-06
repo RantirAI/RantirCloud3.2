@@ -1,4 +1,4 @@
-import { LOCAL_STORAGE_KEYS, useParams } from 'common'
+import { LOCAL_STORAGE_KEYS, useFlag, useParams } from 'common'
 import { AppBannerWrapper } from 'components/interfaces/App/AppBannerWrapper'
 import { Sidebar } from 'components/interfaces/Sidebar'
 import { useLocalStorageQuery } from 'hooks/misc/useLocalStorage'
@@ -39,6 +39,7 @@ export const DefaultLayout = ({
   const router = useRouter()
   const appSnap = useAppStateSnapshot()
   const showProductMenu = !!ref && router.pathname !== '/project/[ref]'
+  const showSidebarToolbar = useFlag('enableSidebarToolbar')
 
   const [lastVisitedOrganization] = useLocalStorageQuery(
     LOCAL_STORAGE_KEYS.LAST_VISITED_ORGANIZATION,
@@ -101,8 +102,7 @@ export const DefaultLayout = ({
                   defaultSize={100 - contentMaxSizePercentage}
                 />
               </ResizablePanelGroup>
-              {/* Sidebar Toolbar - flush to the right */}
-              <SidebarToolbar />
+              {showSidebarToolbar && <SidebarToolbar />}
             </div>
           </div>
         </ProjectContextProvider>

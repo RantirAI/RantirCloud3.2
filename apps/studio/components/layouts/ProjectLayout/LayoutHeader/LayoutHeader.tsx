@@ -1,4 +1,4 @@
-import { LOCAL_STORAGE_KEYS, useParams } from 'common'
+import { LOCAL_STORAGE_KEYS, useFlag, useParams } from 'common'
 import { useIsBranching2Enabled } from 'components/interfaces/App/FeaturePreview/FeaturePreviewContext'
 import { LocalDropdown } from 'components/interfaces/LocalDropdown'
 import { UserDropdown } from 'components/interfaces/UserDropdown'
@@ -74,6 +74,7 @@ export const LayoutHeader = ({
   const { setMobileMenuOpen } = useAppStateSnapshot()
   const gitlessBranching = useIsBranching2Enabled()
 
+  const showSidebarToolbar = useFlag('enableSidebarToolbar')
   const connectSheetFlag = usePHFlag<string | boolean>('connectSheet')
   const isFlagResolved = connectSheetFlag !== undefined
   const isConnectSheetEnabled = connectSheetFlag === true || connectSheetFlag === 'variation'
@@ -128,7 +129,8 @@ export const LayoutHeader = ({
         )}
         <div
           className={cn(
-            'flex items-center justify-between h-full pr-3 flex-1 overflow-x-auto gap-x-8 pl-4'
+            'flex items-center justify-between h-full pr-3 flex-1 overflow-x-auto gap-x-8 pl-4',
+            showSidebarToolbar && 'pr-1.5'
           )}
         >
           <div className="flex items-center text-sm">
@@ -229,16 +231,20 @@ export const LayoutHeader = ({
                       '[&_.command-shortcut>div]:text-foreground-lighter'
                     )}
                   />
-                  <HelpPopover />
-                  <AdvisorButton projectRef={projectRef} />
-                  <AnimatePresence initial={false}>
-                    {!!projectRef && (
-                      <>
-                        <InlineEditorButton />
-                        <AssistantButton />
-                      </>
-                    )}
-                  </AnimatePresence>
+                  {!showSidebarToolbar && (
+                    <>
+                      <HelpPopover />
+                      <AdvisorButton projectRef={projectRef} />
+                      <AnimatePresence initial={false}>
+                        {!!projectRef && (
+                          <>
+                            <InlineEditorButton />
+                            <AssistantButton />
+                          </>
+                        )}
+                      </AnimatePresence>
+                    </>
+                  )}
                 </div>
                 <UserDropdown />
               </>
@@ -255,16 +261,20 @@ export const LayoutHeader = ({
                         [&_.command-shortcut>div]:text-foreground-lighter
                       "
                   />
-                  <HelpPopover />
-                  <AdvisorButton projectRef={projectRef} />
-                  <AnimatePresence initial={false}>
-                    {!!projectRef && (
-                      <>
-                        <InlineEditorButton />
-                        <AssistantButton />
-                      </>
-                    )}
-                  </AnimatePresence>
+                  {!showSidebarToolbar && (
+                    <>
+                      <HelpPopover />
+                      <AdvisorButton projectRef={projectRef} />
+                      <AnimatePresence initial={false}>
+                        {!!projectRef && (
+                          <>
+                            <InlineEditorButton />
+                            <AssistantButton />
+                          </>
+                        )}
+                      </AnimatePresence>
+                    </>
+                  )}
                 </div>
                 <LocalDropdown />
               </>
