@@ -22,7 +22,7 @@ This creates a corresponding route `todos` which can accept `GET`, `POST`, `PATC
 
 1. Go to the [Table editor](/dashboard/project/_/editor) page in the Dashboard.
 1. Click **New Table** and create a table with the name `todos`.
-1. Ensure the **Enable Data API Access** toggle is turned on. This grants permissions to the `anon` and `authenticated` roles.
+1. Ensure the **Enable Data API Access** toggle is turned on. This grants permissions to the `anon`, `authenticated`, and `service_role` roles.
 1. Click **Save**.
 1. Click **New Column** and create a column with the name `task` and type `text`.
 1. Click **Save**.
@@ -38,8 +38,8 @@ create table
     task text check (char_length(task) > 3)
   );
 
--- Enable Data API access for anon and authenticated roles
-grant all on public.todos to anon, authenticated;
+-- Enable Data API access for anon, authenticated, and service_role roles
+grant all on public.todos to anon, authenticated, service_role;
 ```
 
 </TabPanel>
@@ -47,7 +47,7 @@ grant all on public.todos to anon, authenticated;
 
 <Admonition type="note" title="Data API access">
 
-To access a table via the Data API, the `anon` and/or `authenticated` roles need the appropriate permissions. When using the Table Editor, ensure the **Enable Data API Access** toggle is on. When using SQL, run a grant statement like:
+To access a table via the Data API, the `anon`, `authenticated`, and/or `service_role` roles need the appropriate permissions. When using the Table Editor, ensure the **Enable Data API Access** toggle is on. When using SQL, run a grant statement like:
 
 ```sql
 grant all on public.your_table to anon, authenticated, service_role;

@@ -40,7 +40,7 @@ We'll create a database table called `todos` for storing tasks. This creates a c
       );
 
       -- Enable Data API access
-      grant all on public.todos to anon, authenticated;
+      grant all on public.todos to anon, authenticated, service_role;
       ```
 
       </TabPanel>
