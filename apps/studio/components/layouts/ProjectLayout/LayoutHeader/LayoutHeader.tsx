@@ -1,5 +1,8 @@
-import { LOCAL_STORAGE_KEYS, useFlag, useParams } from 'common'
-import { useIsBranching2Enabled } from 'components/interfaces/App/FeaturePreview/FeaturePreviewContext'
+import { LOCAL_STORAGE_KEYS, useParams } from 'common'
+import {
+  useIsBranching2Enabled,
+  useIsSidebarToolbarEnabled,
+} from 'components/interfaces/App/FeaturePreview/FeaturePreviewContext'
 import { LocalDropdown } from 'components/interfaces/LocalDropdown'
 import { UserDropdown } from 'components/interfaces/UserDropdown'
 import { AdvisorButton } from 'components/layouts/AppLayout/AdvisorButton'
@@ -74,7 +77,7 @@ export const LayoutHeader = ({
   const { setMobileMenuOpen } = useAppStateSnapshot()
   const gitlessBranching = useIsBranching2Enabled()
 
-  const showSidebarToolbar = useFlag('enableSidebarToolbar')
+  const showSidebarToolbar = useIsSidebarToolbarEnabled()
   const connectSheetFlag = usePHFlag<string | boolean>('connectSheet')
   const isFlagResolved = connectSheetFlag !== undefined
   const isConnectSheetEnabled = connectSheetFlag === true || connectSheetFlag === 'variation'

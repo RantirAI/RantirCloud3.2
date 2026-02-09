@@ -1,4 +1,3 @@
-import { useFlag } from 'common'
 import { ProfileImage } from 'components/ui/ProfileImage'
 import { useIsFeatureEnabled } from 'hooks/misc/useIsFeatureEnabled'
 import { IS_PLATFORM } from 'lib/constants'
@@ -25,7 +24,10 @@ import {
 } from 'ui'
 import { useCommandMenuOpenedTelemetry, useSetCommandMenuOpen } from 'ui-patterns/CommandMenu'
 
-import { useFeaturePreviewModal } from './App/FeaturePreview/FeaturePreviewContext'
+import {
+  useFeaturePreviewModal,
+  useIsSidebarToolbarEnabled,
+} from './App/FeaturePreview/FeaturePreviewContext'
 
 export function UserDropdown() {
   const router = useRouter()
@@ -34,7 +36,7 @@ export function UserDropdown() {
   const profileShowEmailEnabled = useIsFeatureEnabled('profile:show_email')
   const { username, avatarUrl, primaryEmail, isLoading } = useProfileNameAndPicture()
 
-  const showSidebarToolbar = useFlag('enableSidebarToolbar')
+  const showSidebarToolbar = useIsSidebarToolbarEnabled()
   const setCommandMenuOpen = useSetCommandMenuOpen()
   const sendTelemetry = useCommandMenuOpenedTelemetry()
   const { openFeaturePreviewModal } = useFeaturePreviewModal()
