@@ -21,6 +21,7 @@ import {
   default as python,
 } from 'react-syntax-highlighter/dist/cjs/languages/hljs/python'
 import sql from 'react-syntax-highlighter/dist/cjs/languages/hljs/sql'
+import swift from 'react-syntax-highlighter/dist/cjs/languages/hljs/swift'
 import ts from 'react-syntax-highlighter/dist/cjs/languages/hljs/typescript'
 import yaml from 'react-syntax-highlighter/dist/cjs/languages/hljs/yaml'
 
@@ -46,7 +47,10 @@ export type CodeBlockLang =
   | 'python'
   | 'go'
   | 'pgsql'
+  | 'swift'
   | 'yaml'
+  | 'toml'
+  | 'html'
 
 export interface CodeBlockProps {
   title?: ReactNode
@@ -159,6 +163,7 @@ export const CodeBlock = ({
   SyntaxHighlighter.registerLanguage('python', python)
   SyntaxHighlighter.registerLanguage('go', go)
   SyntaxHighlighter.registerLanguage('pgsql', pgsql)
+  SyntaxHighlighter.registerLanguage('swift', swift)
   SyntaxHighlighter.registerLanguage('yaml', yaml)
 
   const large = false
