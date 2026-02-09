@@ -6,7 +6,7 @@ import { useCheckLatestDeploy } from 'hooks/use-check-latest-deploy'
 import { useRouter } from 'next/router'
 import { PropsWithChildren } from 'react'
 import { useAppStateSnapshot } from 'state/app-state'
-import { ResizablePanel, ResizablePanelGroup, SidebarProvider } from 'ui'
+import { cn, ResizablePanel, ResizablePanelGroup, SidebarProvider } from 'ui'
 
 import { useIsSidebarToolbarEnabled } from '../interfaces/App/FeaturePreview/FeaturePreviewContext'
 import { LayoutHeader } from './ProjectLayout/LayoutHeader/LayoutHeader'
@@ -77,7 +77,12 @@ export const DefaultLayout = ({
               />
             </div>
             {/* Main Content Area */}
-            <div className="flex flex-1 w-full overflow-y-hidden">
+            <div
+              className={cn(
+                'flex flex-1 w-full overflow-y-hidden',
+                showSidebarToolbar && 'flex-col md:flex-row'
+              )}
+            >
               {/* Sidebar - Only show for project pages, not account pages */}
               {!router.pathname.startsWith('/account') && <Sidebar />}
               {/* Main Content with Layout Sidebar */}
