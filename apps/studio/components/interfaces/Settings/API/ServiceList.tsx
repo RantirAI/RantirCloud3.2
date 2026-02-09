@@ -1,12 +1,5 @@
 import { zodResolver } from '@hookform/resolvers/zod'
 import { PermissionAction } from '@supabase/shared-types/out/constants'
-import { AlertCircle } from 'lucide-react'
-import { parseAsString, useQueryState } from 'nuqs'
-import { useEffect } from 'react'
-import { useForm } from 'react-hook-form'
-import { toast } from 'sonner'
-import { z } from 'zod'
-
 import { useParams } from 'common'
 import { ScaffoldSection } from 'components/layouts/Scaffold'
 import { DatabaseSelector } from 'components/ui/DatabaseSelector'
@@ -19,18 +12,23 @@ import { useReadReplicasQuery } from 'data/read-replicas/replicas-query'
 import { useAsyncCheckPermissions } from 'hooks/misc/useCheckPermissions'
 import { useSelectedProjectQuery } from 'hooks/misc/useSelectedProject'
 import { PROJECT_STATUS } from 'lib/constants'
+import { AlertCircle } from 'lucide-react'
+import { parseAsString, useQueryState } from 'nuqs'
+import { useEffect } from 'react'
+import { useForm } from 'react-hook-form'
+import { toast } from 'sonner'
 import { useDatabaseSelectorStateSnapshot } from 'state/database-selector'
 import {
+  Alert_Shadcn_,
   AlertDescription_Shadcn_,
   AlertTitle_Shadcn_,
-  Alert_Shadcn_,
   Card,
   CardContent,
   CardFooter,
+  Form_Shadcn_,
   FormControl_Shadcn_,
   FormField_Shadcn_,
   FormItem_Shadcn_,
-  Form_Shadcn_,
   Switch,
   WarningIcon,
 } from 'ui'
@@ -46,6 +44,8 @@ import {
 import { Input } from 'ui-patterns/DataInputs/Input'
 import { FormItemLayout } from 'ui-patterns/form/FormItemLayout/FormItemLayout'
 import { ShimmeringLoader } from 'ui-patterns/ShimmeringLoader'
+import { z } from 'zod'
+
 import { PostgrestConfig } from './PostgrestConfig'
 
 const getDefaultSchemas = (dbSchema: string | null | undefined) => {
@@ -62,7 +62,11 @@ const dataApiFormSchema = z.object({
   enableDataApi: z.boolean(),
 })
 
-export const DataApiEnableSwitch = () => {
+type DataApiEnableSwitchProps = {
+  onEnableStateChange?: (state: { enabled: boolean; isDirty: boolean }) => void
+}
+
+export const DataApiEnableSwitch = ({ onEnableStateChange }: DataApiEnableSwitchProps = {}) => {
   const { ref: projectRef } = useParams()
   const { can: canUpdatePostgrestConfig, isSuccess: isPermissionsLoaded } =
     useAsyncCheckPermissions(PermissionAction.UPDATE, 'custom_config_postgrest')
@@ -118,6 +122,11 @@ export const DataApiEnableSwitch = () => {
   }
 
   const watchedEnabled = form.watch('enableDataApi')
+
+  useEffect(() => {
+    if (isLoading || isError || !config) return
+    onEnableStateChange?.({ enabled: watchedEnabled, isDirty: form.formState.isDirty })
+  }, [config, form.formState.isDirty, isError, isLoading, onEnableStateChange, watchedEnabled])
 
   return (
     <Card>
@@ -200,7 +209,11 @@ export const DataApiEnableSwitch = () => {
   )
 }
 
-export const DataApiProjectUrlCard = () => {
+type DataApiProjectUrlCardProps = {
+  embedded?: boolean
+}
+
+export const DataApiProjectUrlCard = ({ embedded = false }: DataApiProjectUrlCardProps) => {
   const { isPending: isLoading } = useSelectedProjectQuery()
   const { ref: projectRef } = useParams()
   const state = useDatabaseSelectorStateSnapshot()
@@ -226,6 +239,11 @@ export const DataApiProjectUrlCard = () => {
   const selectedDatabase = databases?.find((db) => db.identifier === state.selectedDatabaseId)
   const loadBalancerSelected = state.selectedDatabaseId === 'load-balancer'
   const replicaSelected = selectedDatabase?.identifier !== projectRef
+  const description = loadBalancerSelected
+    ? 'RESTful endpoint for querying and managing your databases through your load balancer'
+    : replicaSelected
+      ? 'RESTful endpoint for querying your read replica'
+      : 'RESTful endpoint for querying and managing your database'
 
   const endpoint =
     isCustomDomainActive && state.selectedDatabaseId === projectRef
@@ -234,18 +252,58 @@ export const DataApiProjectUrlCard = () => {
         ? loadBalancers?.[0].endpoint ?? ''
         : selectedDatabase?.restUrl
 
+  const content =
+    isLoading || isLoadingDatabases ? (
+      <div className="space-y-2">
+        <ShimmeringLoader className="py-3.5" />
+        <ShimmeringLoader className="py-3.5 w-3/4" delayIndex={1} />
+      </div>
+    ) : isError ? (
+      <Alert_Shadcn_ variant="destructive">
+        <AlertCircle size={16} />
+        <AlertTitle_Shadcn_>Failed to retrieve project URL</AlertTitle_Shadcn_>
+      </Alert_Shadcn_>
+    ) : (
+      <Input copy readOnly className="font-mono" value={endpoint} />
+    )
+
+  if (embedded) {
+    return (
+      <Card>
+        <CardContent>
+          <FormItemLayout
+            isReactForm={false}
+            layout="flex-row-reverse"
+            label="API URL"
+            description={description}
+          >
+            <div className="space-y-2 w-full">
+              <div className="flex justify-end">
+                <DatabaseSelector
+                  additionalOptions={
+                    (loadBalancers ?? []).length > 0
+                      ? [{ id: 'load-balancer', name: 'API Load Balancer' }]
+                      : []
+                  }
+                  onSelectId={() => {
+                    setQuerySource(null)
+                  }}
+                />
+              </div>
+              {content}
+            </div>
+          </FormItemLayout>
+        </CardContent>
+      </Card>
+    )
+  }
+
   return (
     <PageSection className="first:pt-0">
       <PageSectionMeta>
         <PageSectionSummary>
           <PageSectionTitle>API URL</PageSectionTitle>
-          <PageSectionDescription>
-            {loadBalancerSelected
-              ? 'RESTful endpoint for querying and managing your databases through your load balancer'
-              : replicaSelected
-                ? 'RESTful endpoint for querying your read replica'
-                : 'RESTful endpoint for querying and managing your database'}
-          </PageSectionDescription>
+          <PageSectionDescription>{description}</PageSectionDescription>
         </PageSectionSummary>
         <PageSectionAside>
           <DatabaseSelector
@@ -260,21 +318,7 @@ export const DataApiProjectUrlCard = () => {
           />
         </PageSectionAside>
       </PageSectionMeta>
-      <PageSectionContent>
-        {isLoading || isLoadingDatabases ? (
-          <div className="space-y-2">
-            <ShimmeringLoader className="py-3.5" />
-            <ShimmeringLoader className="py-3.5 w-3/4" delayIndex={1} />
-          </div>
-        ) : isError ? (
-          <Alert_Shadcn_ variant="destructive">
-            <AlertCircle size={16} />
-            <AlertTitle_Shadcn_>Failed to retrieve project URL</AlertTitle_Shadcn_>
-          </Alert_Shadcn_>
-        ) : (
-          <Input copy readOnly className="font-mono" value={endpoint} />
-        )}
-      </PageSectionContent>
+      <PageSectionContent>{content}</PageSectionContent>
     </PageSection>
   )
 }

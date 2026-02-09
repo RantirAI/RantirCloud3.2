@@ -1,11 +1,11 @@
+import { BASE_PATH, DOCS_URL } from 'lib/constants'
 import { Clock5, Code2, Layers, Timer, Vault, Webhook } from 'lucide-react'
 import dynamic from 'next/dynamic'
 import Image from 'next/image'
 import { ComponentType, ReactNode } from 'react'
-
-import { BASE_PATH, DOCS_URL } from 'lib/constants'
 import { cn } from 'ui'
 import { GenericSkeletonLoader } from 'ui-patterns/ShimmeringLoader'
+
 import { UpgradeDatabaseAlert } from '../Queues/UpgradeDatabaseAlert'
 import { WRAPPERS } from '../Wrappers/Wrappers.constants'
 import { WrapperMeta } from '../Wrappers/Wrappers.types'
@@ -277,10 +277,6 @@ const SUPABASE_INTEGRATIONS: IntegrationDefinition[] = [
         label: 'Overview',
       },
       {
-        route: 'settings',
-        label: 'Settings',
-      },
-      {
         route: 'docs',
         label: 'Docs',
       },
@@ -288,20 +284,11 @@ const SUPABASE_INTEGRATIONS: IntegrationDefinition[] = [
     navigate: (_id: string, pageId: string = 'overview', _childId: string | undefined) => {
       switch (pageId) {
         case 'overview':
+        case 'settings':
           return dynamic(
             () =>
               import('components/interfaces/Integrations/DataApi/OverviewTab').then(
                 (mod) => mod.DataApiOverviewTab
-              ),
-            {
-              loading: Loading,
-            }
-          )
-        case 'settings':
-          return dynamic(
-            () =>
-              import('components/interfaces/Integrations/DataApi/SettingsTab').then(
-                (mod) => mod.DataApiSettingsTab
               ),
             {
               loading: Loading,
