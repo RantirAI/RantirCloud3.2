@@ -1,183 +1,406 @@
-import { PageLayout } from 'components/layouts/PageLayout/PageLayout'
-import { ScaffoldContainer, ScaffoldSection } from 'components/layouts/Scaffold'
-import { Check } from 'lucide-react'
-import { useEffect, useRef, useState } from 'react'
-import type { CookbookRecipe, RecipeContext } from 'types/cookbook'
-import { cn } from 'ui'
-import { EdgeFunctionStep } from './steps/EdgeFunctionStep'
-import { EnvStep } from './steps/EnvStep'
-import { InputStep } from './steps/InputStep'
-import { SqlStep } from './steps/SqlStep'
+import { zodResolver } from '@hookform/resolvers/zod'
+import { useTemplateComponentSourcesQuery } from 'data/templates/template-component-sources-query'
+import { useTemplateInstallMutation } from 'data/templates/template-install-mutation'
+import { parseTemplateStructure, parseTemplateVariables } from 'lib/cookbook/template-parser'
+import { Eye, EyeOff, Loader2 } from 'lucide-react'
+import { useEffect, useMemo, useState } from 'react'
+import { useForm } from 'react-hook-form'
+import { toast } from 'sonner'
+import type { TemplateRegistryInput, TemplateRegistryItem } from 'types/cookbook'
+import {
+  Button,
+  cn,
+  CodeBlock,
+  Form_Shadcn_,
+  FormControl_Shadcn_,
+  FormField_Shadcn_,
+  FormMessage_Shadcn_,
+  Input_Shadcn_,
+  Select_Shadcn_,
+  SelectContent_Shadcn_,
+  SelectItem_Shadcn_,
+  SelectTrigger_Shadcn_,
+  SelectValue_Shadcn_,
+} from 'ui'
+import { FormItemLayout } from 'ui-patterns/form/FormItemLayout/FormItemLayout'
+import { PageContainer } from 'ui-patterns/PageContainer'
+import {
+  PageHeader,
+  PageHeaderDescription,
+  PageHeaderMeta,
+  PageHeaderSummary,
+  PageHeaderTitle,
+} from 'ui-patterns/PageHeader'
+import {
+  PageSection,
+  PageSectionContent,
+  PageSectionDescription,
+  PageSectionMeta,
+  PageSectionSummary,
+  PageSectionTitle,
+} from 'ui-patterns/PageSection'
+import * as z from 'zod'
 
 interface TemplateInstallProps {
-  recipe: CookbookRecipe
+  template: TemplateRegistryItem
+  templateUrl: string
   projectRef: string
-  connectionString?: string | null
 }
 
-export function TemplateInstall({
-  recipe,
-  projectRef,
-  connectionString,
-}: TemplateInstallProps) {
+type TemplateInputValues = Record<string, string>
+
+export function TemplateInstall({ template, templateUrl, projectRef }: TemplateInstallProps) {
   const [currentStepIndex, setCurrentStepIndex] = useState(0)
-  const [context, setContext] = useState<RecipeContext>({})
-  const [completedSteps, setCompletedSteps] = useState<Set<number>>(new Set())
-  const stepRefs = useRef<(HTMLDivElement | null)[]>([])
+  const [inputValues, setInputValues] = useState<TemplateInputValues>({})
+  const [showValues, setShowValues] = useState<Record<string, boolean>>({})
 
-  const handleStepComplete = (stepIndex: number, outputs?: Record<string, any>) => {
-    // Add outputs to context
-    if (outputs) {
-      setContext((prev) => ({ ...prev, ...outputs }))
-    }
+  const inputEntries = useMemo(() => Object.entries(template.inputs ?? {}), [template.inputs])
 
-    // Mark step as completed
-    setCompletedSteps((prev) => new Set(prev).add(stepIndex))
+  const formSchema = useMemo(() => {
+    const shape: Record<string, z.ZodTypeAny> = {}
 
-    // Move to next step and scroll to it
-    const nextStepIndex = stepIndex + 1
-    if (nextStepIndex < recipe.steps.length) {
-      setCurrentStepIndex(nextStepIndex)
-    }
-  }
+    inputEntries.forEach(([fieldName, field]) => {
+      if (field.type === 'number') {
+        const numericError = `${field.label} must be a number`
+        if (field.required) {
+          shape[fieldName] = z
+            .string()
+            .trim()
+            .min(1, `${field.label} is required`)
+            .refine((value) => !Number.isNaN(Number(value)), numericError)
+        } else {
+          shape[fieldName] = z
+            .string()
+            .optional()
+            .refine(
+              (value) =>
+                value === undefined || value.trim().length === 0 || !Number.isNaN(Number(value)),
+              numericError
+            )
+        }
+      } else if (field.required) {
+        shape[fieldName] = z.string().trim().min(1, `${field.label} is required`)
+      } else {
+        shape[fieldName] = z.string().optional()
+      }
+    })
 
-  // Scroll to current step when it changes
+    return z.object(shape)
+  }, [inputEntries])
+
+  const defaultValues = useMemo(() => {
+    const defaults: TemplateInputValues = {}
+
+    inputEntries.forEach(([fieldName, field]) => {
+      defaults[fieldName] = field.default === undefined ? '' : String(field.default)
+    })
+
+    return defaults
+  }, [inputEntries])
+
+  const form = useForm({
+    resolver: zodResolver(formSchema),
+    defaultValues,
+  })
+
   useEffect(() => {
-    if (stepRefs.current[currentStepIndex]) {
-      stepRefs.current[currentStepIndex]?.scrollIntoView({
-        behavior: 'smooth',
-        block: 'start',
-      })
-    }
-  }, [currentStepIndex])
+    form.reset(defaultValues)
+    setInputValues(defaultValues)
+    setCurrentStepIndex(0)
+  }, [defaultValues, form])
 
-  const renderStep = (step: (typeof recipe.steps)[0], stepIndex: number) => {
-    const isActive = stepIndex === currentStepIndex
-    const isCompleted = completedSteps.has(stepIndex)
-    const isDisabled = stepIndex > currentStepIndex
+  const componentPaths = useMemo(
+    () =>
+      [
+        ...new Set(
+          template.steps.flatMap((step) => step.components.map((component) => component.path))
+        ),
+      ].filter((path): path is string => typeof path === 'string' && path.length > 0),
+    [template.steps]
+  )
 
-    const commonProps = {
-      isActive,
-      isCompleted,
-      isDisabled,
-    }
+  const {
+    data: componentSources = [],
+    isLoading: isLoadingComponentSources,
+    isFetching: isFetchingComponentSources,
+  } = useTemplateComponentSourcesQuery(
+    { templateUrl, paths: componentPaths },
+    { enabled: currentStepIndex >= 1 && componentPaths.length > 0 }
+  )
 
-    switch (step.type) {
-      case 'input':
-        return (
-          <InputStep
-            step={step}
-            context={context}
-            onComplete={(outputs) => handleStepComplete(stepIndex, outputs)}
-            {...commonProps}
-          />
-        )
+  const componentSourcesByPath = useMemo(
+    () =>
+      new Map(componentSources.map((componentSource) => [componentSource.path, componentSource])),
+    [componentSources]
+  )
 
-      case 'sql':
-        return (
-          <SqlStep
-            step={step}
-            context={context}
-            projectRef={projectRef}
-            connectionString={connectionString}
-            onComplete={(outputs) => handleStepComplete(stepIndex, outputs)}
-            {...commonProps}
-          />
-        )
+  const {
+    mutate: install,
+    isPending: isInstalling,
+    isSuccess: isInstallSuccess,
+  } = useTemplateInstallMutation({
+    onSuccess: () => {
+      toast.success('Template installation started')
+    },
+  })
 
-      case 'edge_function':
-        return (
-          <EdgeFunctionStep
-            step={step}
-            context={context}
-            projectRef={projectRef}
-            onComplete={(outputs) => handleStepComplete(stepIndex, outputs)}
-            {...commonProps}
-          />
-        )
-
-      case 'env':
-        return (
-          <EnvStep
-            step={step}
-            context={context}
-            projectRef={projectRef}
-            connectionString={connectionString}
-            onComplete={() => handleStepComplete(stepIndex)}
-            {...commonProps}
-          />
-        )
-
-      default:
-        return <div>Unknown step type</div>
-    }
+  const onSubmitInputs = (values: Record<string, string>) => {
+    setInputValues(values)
+    setCurrentStepIndex(1)
   }
 
-  const isRecipeComplete = completedSteps.size === recipe.steps.length
+  const handleInstall = () => {
+    install({
+      projectRef,
+      templateUrl,
+      payload: {
+        inputs: inputValues,
+      },
+    })
+  }
+
+  const hasCompletedInputs = currentStepIndex >= 1
+  const showLoadingSources =
+    hasCompletedInputs && (isLoadingComponentSources || isFetchingComponentSources)
 
   return (
-    <PageLayout title={recipe.title} subtitle={recipe.description} size="small">
-      <ScaffoldContainer size="small">
-        <ScaffoldSection isFullWidth>
-          {recipe.steps.map((step, index) => {
-            const isActive = index === currentStepIndex
-            const isCompleted = completedSteps.has(index)
-            const isLastStep = index === recipe.steps.length - 1
+    <div className="w-full">
+      <PageHeader size="small">
+        <PageHeaderMeta>
+          <PageHeaderSummary>
+            <PageHeaderTitle>{template.title}</PageHeaderTitle>
+            <PageHeaderDescription>{template.description}</PageHeaderDescription>
+          </PageHeaderSummary>
+        </PageHeaderMeta>
+      </PageHeader>
 
-            return (
-              <div
-                key={index}
-                ref={(el) => {
-                  stepRefs.current[index] = el
-                }}
-                className={cn(
-                  'flex gap-6',
-                  isActive ? 'opacity-100' : 'opacity-50 pointer-events-none'
-                )}
-              >
-                {/* Step number with connecting line */}
-                <div className="flex flex-col items-center">
-                  <span
-                    className={cn(
-                      'text-xs shrink-0 font-mono text-foreground-light w-7 h-7 bg border flex items-center justify-center rounded-md'
-                    )}
-                  >
-                    {isCompleted ? (
-                      <Check size={16} strokeWidth={1.5} className="text-brand" />
-                    ) : (
-                      index + 1
-                    )}
-                  </span>
-                  {!isLastStep && <div className="w-px bg-border flex-1 h-full mt-2" />}
+      <PageContainer size="small">
+        <PageSection>
+          <PageSectionMeta>
+            <PageSectionSummary>
+              <PageSectionTitle>Inputs</PageSectionTitle>
+              <PageSectionDescription className="text-sm text-foreground-light">
+                Provide values that will be interpolated into template configuration and component
+                source files.
+              </PageSectionDescription>
+            </PageSectionSummary>
+          </PageSectionMeta>
+          <PageSectionContent>
+            <Form_Shadcn_ {...form}>
+              <form onSubmit={form.handleSubmit(onSubmitInputs)} className="flex flex-col gap-6">
+                <div className="flex flex-col gap-4">
+                  {inputEntries.map(([fieldName, field]) => (
+                    <FormField_Shadcn_
+                      key={fieldName}
+                      control={form.control}
+                      name={fieldName}
+                      render={({ field: formField }) => (
+                        <FormItemLayout
+                          label={field.label}
+                          description={getInputDescription(field)}
+                        >
+                          <FormControl_Shadcn_>
+                            {field.type === 'password' ? (
+                              <div className="relative">
+                                <Input_Shadcn_
+                                  type={showValues[fieldName] ? 'text' : 'password'}
+                                  placeholder={
+                                    field.default === undefined ? '' : String(field.default)
+                                  }
+                                  {...formField}
+                                  className="pr-10"
+                                />
+                                <button
+                                  type="button"
+                                  onClick={() =>
+                                    setShowValues((previous) => ({
+                                      ...previous,
+                                      [fieldName]: !previous[fieldName],
+                                    }))
+                                  }
+                                  className="absolute right-2 top-1/2 -translate-y-1/2 text-foreground-muted hover:text-foreground"
+                                >
+                                  {showValues[fieldName] ? (
+                                    <EyeOff className="h-4 w-4" />
+                                  ) : (
+                                    <Eye className="h-4 w-4" />
+                                  )}
+                                </button>
+                              </div>
+                            ) : field.type === 'select' ? (
+                              <Select_Shadcn_
+                                value={formField.value}
+                                onValueChange={formField.onChange}
+                              >
+                                <SelectTrigger_Shadcn_>
+                                  <SelectValue_Shadcn_
+                                    placeholder={`Select ${field.label.toLowerCase()}`}
+                                  />
+                                </SelectTrigger_Shadcn_>
+                                <SelectContent_Shadcn_>
+                                  {(field.options ?? []).map((option) => (
+                                    <SelectItem_Shadcn_ key={option} value={option}>
+                                      {option}
+                                    </SelectItem_Shadcn_>
+                                  ))}
+                                </SelectContent_Shadcn_>
+                              </Select_Shadcn_>
+                            ) : (
+                              <Input_Shadcn_
+                                type={field.type === 'number' ? 'number' : 'text'}
+                                placeholder={
+                                  field.default === undefined ? '' : String(field.default)
+                                }
+                                {...formField}
+                              />
+                            )}
+                          </FormControl_Shadcn_>
+                          <FormMessage_Shadcn_ />
+                        </FormItemLayout>
+                      )}
+                    />
+                  ))}
                 </div>
 
-                {/* Step content */}
-                <div className="flex-1 min-w-0 pb-10">{renderStep(step, index)}</div>
+                <div>
+                  <Button type="primary" htmlType="submit">
+                    Continue
+                  </Button>
+                </div>
+              </form>
+            </Form_Shadcn_>
+          </PageSectionContent>
+        </PageSection>
+
+        <PageSection className={cn(!hasCompletedInputs && 'opacity-50 pointer-events-none')}>
+          <PageSectionMeta>
+            <PageSectionSummary>
+              <PageSectionTitle>What will be installed</PageSectionTitle>
+              <PageSectionDescription className="text-sm text-foreground-light">
+                Preview of component details and source files based on your inputs.
+              </PageSectionDescription>
+            </PageSectionSummary>
+          </PageSectionMeta>
+          <PageSectionContent>
+            {showLoadingSources && (
+              <div className="flex items-center gap-2 text-sm text-foreground-light">
+                <Loader2 className="h-4 w-4 animate-spin" />
+                Loading component sources...
               </div>
-            )
-          })}
+            )}
+            <div className="space-y-8">
+            {template.steps.map((step, stepIndex) => (
+              <div key={`${step.name}-${stepIndex}`}>
+                <div>
+                  <h4 className="heading-default">{step.title}</h4>
+                  <p className="text-sm text-foreground-light">{step.description}</p>
+                </div>
 
-          {/* Completion message */}
-          {isRecipeComplete && (
-            <div>
-              <div className="flex gap-4">
-                {/* Empty spacer to align with step content */}
-                <div className="w-7 shrink-0" />
+                <div className="space-y-6 mt-4">
+                  {step.components.map((component, componentIndex) => {
+                    const parsedComponent = parseTemplateStructure(
+                      component,
+                      inputValues,
+                      inputValues
+                    )
+                    const componentType = String(parsedComponent.type ?? '').toLowerCase()
+                    const isSecretOrVault = componentType === 'secret' || componentType === 'vault'
+                    const componentTitle = isSecretOrVault
+                      ? String(parsedComponent.key ?? parsedComponent.name)
+                      : String(parsedComponent.name)
+                    const componentPath =
+                      typeof component.path === 'string' && component.path.length > 0
+                        ? component.path
+                        : undefined
+                    const componentSource = componentPath
+                      ? componentSourcesByPath.get(componentPath)
+                      : undefined
+                    const parsedSource =
+                      componentSource?.content === undefined
+                        ? undefined
+                        : parseTemplateVariables(componentSource.content, inputValues, inputValues)
 
-                <div className="flex-1 min-w-0">
-                  <div className="bg-brand-200 border border-brand-400 rounded-md p-6">
-                    <h3 className="text-lg font-medium text-brand-600 mb-2">Recipe Complete!</h3>
-                    <p className="text-sm text-brand-600">
-                      All steps have been executed successfully. Your {recipe.title.toLowerCase()}{' '}
-                      setup is now ready to use.
-                    </p>
+                    return (
+                      <div
+                        key={`${component.name}-${componentIndex}`}
+                      >
+                        <div className="flex items-center gap-2 justify-between mb-2">
+                          <p className="heading-default">{componentTitle}</p>
+                          <p className="heading-meta text-light">{componentType}</p>
+                        </div>
+
+                        {isSecretOrVault && (
+                          <Input_Shadcn_
+                            type="password"
+                            value={String(parsedComponent.value ?? '')}
+                            readOnly
+                          />
+                        )}
+
+                        {componentPath && (
+                          <div className="space-y-2">
+                            {componentSource?.error ? (
+                              <div className="rounded-md border border-warning bg-warning/5 p-3">
+                                <p className="text-sm text-foreground-light">
+                                  {componentSource.error}
+                                </p>
+                              </div>
+                            ) : (
+                              <CodeBlock
+                                value={parsedSource ?? '// Unable to load file content'}
+                                language={getCodeLanguageForPath(componentPath)}
+                                hideLineNumbers
+                                className="max-h-96 overflow-auto"
+                              />
+                            )}
+                          </div>
+                        )}
+                      </div>
+                    )
+                  })}
                   </div>
-                </div>
               </div>
+            ))}
             </div>
-          )}
-        </ScaffoldSection>
-      </ScaffoldContainer>
-    </PageLayout>
+
+          </PageSectionContent>
+        </PageSection>
+      </PageContainer>
+
+      <div className="sticky bottom-0 z-10 border-t bg-surface-100/95 backdrop-blur">
+        <PageContainer size="small">
+          <div className="flex items-center justify-between py-4">
+            <p className="text-sm text-foreground-light">
+              Install this template's components to your project
+            </p>
+            <Button
+              type="primary"
+              size="large"
+              loading={isInstalling}
+              disabled={!hasCompletedInputs}
+              onClick={handleInstall}
+            >
+              Install
+            </Button>
+          </div>
+        </PageContainer>
+      </div>
+    </div>
   )
+}
+
+function getInputDescription(field: TemplateRegistryInput) {
+  if (field.description) return field.description
+  return field.required ? 'Required field' : undefined
+}
+
+function getCodeLanguageForPath(path: string) {
+  const normalized = path.toLowerCase()
+  if (normalized.endsWith('.sql')) return 'sql'
+  if (normalized.endsWith('.ts')) return 'ts'
+  if (normalized.endsWith('.tsx')) return 'ts'
+  if (normalized.endsWith('.js')) return 'js'
+  if (normalized.endsWith('.json')) return 'json'
+  if (normalized.endsWith('.yaml') || normalized.endsWith('.yml')) return 'yaml'
+  return 'js'
 }

@@ -6,6 +6,41 @@ export interface CookbookRecipe {
   steps: RecipeStep[]
 }
 
+export type TemplateRegistryInputType = 'string' | 'select' | 'number' | 'password'
+
+export interface TemplateRegistryInput {
+  label: string
+  type: TemplateRegistryInputType
+  required?: boolean
+  default?: string | number
+  options?: string[]
+  description?: string
+}
+
+export interface TemplateRegistryComponent {
+  name: string
+  type: string
+  path?: string
+  output?: Record<string, string>
+  [key: string]: unknown
+}
+
+export interface TemplateRegistryStep {
+  name: string
+  title: string
+  description: string
+  components: TemplateRegistryComponent[]
+}
+
+export interface TemplateRegistryItem {
+  name: string
+  title: string
+  description: string
+  version: string
+  inputs: Record<string, TemplateRegistryInput>
+  steps: TemplateRegistryStep[]
+}
+
 export type RecipeStep = InputStep | SqlStep | EdgeFunctionStep | EnvStep
 
 export interface BaseStep {

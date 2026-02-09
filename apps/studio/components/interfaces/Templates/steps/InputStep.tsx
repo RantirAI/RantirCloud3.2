@@ -1,13 +1,14 @@
 import { zodResolver } from '@hookform/resolvers/zod'
+import { parseTemplateVariables } from 'lib/cookbook/template-parser'
+import { Eye, EyeOff } from 'lucide-react'
 import { useEffect, useMemo, useState } from 'react'
 import { useForm } from 'react-hook-form'
-import * as z from 'zod'
-import { Eye, EyeOff } from 'lucide-react'
+import type { InputStep as InputStepType, RecipeContext } from 'types/cookbook'
 import {
   Button,
+  Form_Shadcn_,
   FormControl_Shadcn_,
   FormField_Shadcn_,
-  Form_Shadcn_,
   Input_Shadcn_,
   Select_Shadcn_,
   SelectContent_Shadcn_,
@@ -16,8 +17,7 @@ import {
   SelectValue_Shadcn_,
 } from 'ui'
 import { FormItemLayout } from 'ui-patterns/form/FormItemLayout/FormItemLayout'
-import type { InputStep as InputStepType, RecipeContext } from 'types/cookbook'
-import { parseTemplateVariables } from 'lib/cookbook/template-parser'
+import * as z from 'zod'
 
 interface InputStepProps {
   step: InputStepType
@@ -162,7 +162,9 @@ export function InputStep({
                         />
                       ) : field.inputType === 'select' && field.options ? (
                         <Select_Shadcn_
-                          value={formField.value}
+                          value={
+                            formField.value === undefined ? undefined : String(formField.value)
+                          }
                           onValueChange={formField.onChange}
                           disabled={isDisabled || isCompleted}
                         >

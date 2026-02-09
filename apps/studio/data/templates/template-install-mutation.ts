@@ -1,42 +1,41 @@
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { toast } from 'sonner'
-
 // import { handleError, post } from 'data/fetchers'
 import type { ResponseError, UseCustomMutationOptions } from 'types'
+
 import { templateKeys } from './keys'
 
 export type TemplateInstallVariables = {
   projectRef: string
-  templateSlug: string
+  templateUrl: string
   payload?: Record<string, unknown>
 }
 
 export type TemplateInstallResponse = {
   projectRef: string
-  templateSlug: string
+  templateUrl: string
   status: 'success'
   installedAt: string
 }
 
 export async function installTemplate({
   projectRef,
-  templateSlug,
+  templateUrl,
   payload,
 }: TemplateInstallVariables) {
   if (!projectRef) throw new Error('projectRef is required')
-  if (!templateSlug) throw new Error('templateSlug is required')
-  void payload
+  if (!templateUrl) throw new Error('templateUrl is required')
 
-  // const { data, error } = await post('/platform/projects/{ref}/templates/{templateSlug}/install', {
-  //   params: { path: { ref: projectRef, templateSlug } },
-  //   body: payload,
+  // const { data, error } = await post('/platform/projects/{ref}/templates/install', {
+  //   params: { path: { ref: projectRef } },
+  //   body: { template_url: templateUrl, payload },
   // })
   // if (error) handleError(error)
   // return data as TemplateInstallResponse
 
   return {
     projectRef,
-    templateSlug,
+    templateUrl,
     status: 'success',
     installedAt: new Date().toISOString(),
   } satisfies TemplateInstallResponse
@@ -57,8 +56,8 @@ export const useTemplateInstallMutation = ({
   return useMutation<TemplateInstallData, ResponseError, TemplateInstallVariables>({
     mutationFn: (vars) => installTemplate(vars),
     async onSuccess(data, variables, context) {
-      const { templateSlug } = variables
-      await queryClient.invalidateQueries({ queryKey: templateKeys.detail(templateSlug) })
+      const { templateUrl } = variables
+      await queryClient.invalidateQueries({ queryKey: templateKeys.detailByUrl(templateUrl) })
       await onSuccess?.(data, variables, context)
     },
     async onError(data, variables, context) {

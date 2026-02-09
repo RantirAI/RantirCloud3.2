@@ -10,31 +10,18 @@ export function parseTemplateVariables(
   inputValues?: Record<string, any>,
   envValues?: Record<string, string>
 ): string {
-  let result = template
+  const scopedContext: RecipeContext = {
+    ...context,
+    context,
+    ...(inputValues ? { ...inputValues, input: inputValues } : {}),
+    ...(envValues ? { ...envValues, env: envValues } : {}),
+  }
 
-  // Replace {{context.variable}} patterns
-  result = result.replace(/\{\{context\.([^}]+)\}\}/g, (match, path) => {
-    const value = getNestedValue(context, path)
+  // Supports {{context.foo}}, {{input.foo}}, {{env.FOO}}, and bare {{foo}}
+  return template.replace(/\{\{\s*([^}]+?)\s*\}\}/g, (match, path) => {
+    const value = getNestedValue(scopedContext, String(path).trim())
     return value !== undefined ? String(value) : match
   })
-
-  // Replace {{input.field}} patterns
-  if (inputValues) {
-    result = result.replace(/\{\{input\.([^}]+)\}\}/g, (match, path) => {
-      const value = getNestedValue(inputValues, path)
-      return value !== undefined ? String(value) : match
-    })
-  }
-
-  // Replace {{env.VAR}} patterns
-  if (envValues) {
-    result = result.replace(/\{\{env\.([^}]+)\}\}/g, (match, varName) => {
-      const value = envValues[varName]
-      return value !== undefined ? String(value) : match
-    })
-  }
-
-  return result
 }
 
 /**
@@ -45,6 +32,33 @@ function getNestedValue(obj: Record<string, any>, path: string): any {
   return path.split('.').reduce((current, key) => {
     return current && current[key] !== undefined ? current[key] : undefined
   }, obj)
+}
+
+export function parseTemplateStructure<T>(
+  value: T,
+  context: RecipeContext,
+  inputValues?: Record<string, any>,
+  envValues?: Record<string, string>
+): T {
+  if (typeof value === 'string') {
+    return parseTemplateVariables(value, context, inputValues, envValues) as T
+  }
+
+  if (Array.isArray(value)) {
+    return value.map((entry) => parseTemplateStructure(entry, context, inputValues, envValues)) as T
+  }
+
+  if (value !== null && typeof value === 'object') {
+    const parsed = Object.fromEntries(
+      Object.entries(value as Record<string, unknown>).map(([key, nestedValue]) => [
+        key,
+        parseTemplateStructure(nestedValue, context, inputValues, envValues),
+      ])
+    )
+    return parsed as T
+  }
+
+  return value
 }
 
 /**
