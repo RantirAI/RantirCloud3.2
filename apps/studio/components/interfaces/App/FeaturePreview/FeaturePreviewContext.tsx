@@ -149,7 +149,12 @@ export const useFeaturePreviewModal = () => {
           return true
       }
     },
-    [gitlessBranchingEnabled, advisorRulesEnabled, isUnifiedLogsPreviewAvailable, isSidebarToolbarAvailable]
+    [
+      gitlessBranchingEnabled,
+      advisorRulesEnabled,
+      isUnifiedLogsPreviewAvailable,
+      isSidebarToolbarAvailable,
+    ]
   )
 
   const selectedFeatureKey = (

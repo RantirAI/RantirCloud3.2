@@ -17,8 +17,8 @@ export const SidebarToolbar = () => {
   const enabledItems = toolbarItems.filter((item) => item.enabled)
 
   return (
-    <div className="flex flex-col w-[40px] h-full border-l">
-      <div className="flex flex-col items-center gap-2 p-2">
+    <div className="fixed inset-x-0 bottom-0 z-40 md:z-auto bg-sidebar md:relative flex flex-col w-full md:w-[40px] md:h-full border-t md:border-l items-center">
+      <div className="flex md:flex-col items-center justify-between md:justify-center w-full md:w-auto max-w-xs gap-2 p-2">
         {enabledItems.map((item) => (
           <ToolbarButton key={item.key} {...item.config} />
         ))}
