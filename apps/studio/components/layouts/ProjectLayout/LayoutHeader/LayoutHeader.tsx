@@ -10,6 +10,7 @@ import { OrganizationDropdown } from 'components/layouts/AppLayout/OrganizationD
 import { ProjectDropdown } from 'components/layouts/AppLayout/ProjectDropdown'
 import { getResourcesExceededLimitsOrg } from 'components/ui/OveragesBanner/OveragesBanner.utils'
 import { useOrgUsageQuery } from 'data/usage/org-usage-query'
+import { DevToolbarTrigger } from 'dev-tools'
 import { AnimatePresence, motion } from 'framer-motion'
 import { useLocalStorageQuery } from 'hooks/misc/useLocalStorage'
 import { useSelectedOrganizationQuery } from 'hooks/misc/useSelectedOrganization'
@@ -22,7 +23,8 @@ import { ReactNode, useMemo } from 'react'
 import { useAppStateSnapshot } from 'state/app-state'
 import { Badge, cn } from 'ui'
 import { CommandMenuTriggerInput } from 'ui-patterns'
-import { DevToolbarTrigger } from 'dev-tools'
+
+import SystemStatusBadge from '../../../ui/SystemStatusBadge'
 import { BreadcrumbsView } from './BreadcrumbsView'
 import { FeedbackDropdown } from './FeedbackDropdown/FeedbackDropdown'
 import { HelpDropdown } from './HelpDropdown/HelpDropdown'
@@ -216,6 +218,7 @@ export const LayoutHeader = ({
             {IS_PLATFORM ? (
               <>
                 <DevToolbarTrigger />
+                <SystemStatusBadge />
                 <FeedbackDropdown />
 
                 <div className="flex items-center gap-2">
