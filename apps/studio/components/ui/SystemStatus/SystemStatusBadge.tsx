@@ -19,7 +19,6 @@ export const SystemStatusBadge = () => {
   const currentMaintenance = maintenanceEvents[0]
 
   const badgeConfig = getBadgeConfig(status)
-
   const isOperational = status === 'operational'
 
   return (
@@ -39,17 +38,13 @@ export const SystemStatusBadge = () => {
           </Link>
         </Badge>
       </TooltipTrigger>
-      <TooltipContent
-        side="bottom"
-        align="start"
-        className="w-screen !max-w-[240px] bg-overlay p-0"
-      >
+      <TooltipContent side="bottom" align="start" className="w-screen !max-w-[240px] p-0">
         {getTooltipContent({
           status,
           incident: currentIncident,
           maintenanceEvent: currentMaintenance,
         })}
-        <footer className="w-full flex flex-col items-start gap-1 p-2 bg-alternative border-t">
+        <footer className="w-full flex flex-col items-start gap-1 p-2 bg-overlay border-t">
           <Button
             type="default"
             size="tiny"
