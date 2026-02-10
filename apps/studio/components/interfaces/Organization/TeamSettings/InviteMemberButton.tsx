@@ -28,11 +28,11 @@ import {
   DialogSectionSeparator,
   DialogTitle,
   DialogTrigger,
+  ExpandingTextArea,
   FormControl_Shadcn_,
   FormField_Shadcn_,
   DialogFooter,
   Form_Shadcn_,
-  Input_Shadcn_,
   SelectContent_Shadcn_,
   SelectGroup_Shadcn_,
   SelectItem_Shadcn_,
@@ -389,12 +389,13 @@ export const InviteMemberButton = () => {
                 render={({ field }) => (
                   <FormItemLayout label="Email addresses">
                     <FormControl_Shadcn_>
-                      <Input_Shadcn_
+                      <ExpandingTextArea
                         autoFocus
                         {...field}
                         autoComplete="off"
                         disabled={isInviting}
                         placeholder="name@example.com, name2@example.com"
+                        className="max-h-48"
                       />
                     </FormControl_Shadcn_>
                   </FormItemLayout>

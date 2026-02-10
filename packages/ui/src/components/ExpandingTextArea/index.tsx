@@ -1,6 +1,6 @@
 'use client'
 
-import React, { forwardRef, useImperativeHandle, useRef } from 'react'
+import React, { forwardRef, useImperativeHandle, useLayoutEffect, useRef } from 'react'
 
 import { cn } from '../../lib/utils'
 import { TextArea } from '../shadcn/ui/text-area'
@@ -31,6 +31,10 @@ const ExpandingTextArea = forwardRef<HTMLTextAreaElement, ExpandingTextAreaProps
         element.style.height = element.scrollHeight + 'px'
       }
     }
+
+    useLayoutEffect(() => {
+      updateTextAreaHeight(internalRef.current)
+    }, [value])
 
     return (
       <TextArea
