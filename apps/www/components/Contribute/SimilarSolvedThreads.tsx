@@ -31,7 +31,7 @@ interface SimilarSolvedThreadsProps {
 
 const SimilarThreadCard = ({ thread }: { thread: SimilarSolvedThread }) => {
   return (
-    <div className="border-b border-border last:border-b-0 px-6 py-6 flex flex-col gap-3">
+    <div className="border-b border-border px-6 py-6 flex flex-col gap-3">
       <div className="flex items-start justify-between gap-4">
         <span className="text-base text-foreground leading-snug">{thread.subject}</span>
         {thread.external_activity_url && (
@@ -92,10 +92,8 @@ export const SimilarSolvedThreads = ({ threads }: SimilarSolvedThreadsProps) => 
             {threads.map((thread, idx) => (
               <SimilarThreadCard key={thread.thread_key || idx} thread={thread} />
             ))}
-            <div className="px-6 py-3 border-t border-border">
-              <p className="text-xs text-foreground-muted">
-                Collected from community discussions
-              </p>
+            <div className="px-6 py-3">
+              <p className="text-xs text-foreground-muted">Collected from community discussions</p>
             </div>
           </CardContent>
         </Card>
