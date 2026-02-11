@@ -3,7 +3,27 @@
 import { useState } from 'react'
 import { Badge, Card, CardContent } from 'ui'
 import { ChevronDown, ExternalLink } from 'lucide-react'
-import type { SimilarSolvedThread } from '~/types/contribute'
+import type {
+  SimilarSolvedThread,
+  SimilarThreadFeedbackSubmission,
+  SimilarThreadFeedbackResult,
+} from '~/types/contribute'
+
+/**
+ * Placeholder -- will be replaced with a real API call that inserts into
+ * the similar_thread_feedback table
+ * (parent_thread_id, similar_thread_key, reaction, feedback, created_at).
+ */
+export const submitSimilarThreadFeedback = async (
+  submission: SimilarThreadFeedbackSubmission
+): Promise<SimilarThreadFeedbackResult> => {
+  console.log('[SimilarThreadFeedback] submitting:', {
+    ...submission,
+    created_at: new Date().toISOString(),
+  })
+  await new Promise((resolve) => setTimeout(resolve, 800))
+  return { success: true }
+}
 
 interface SimilarSolvedThreadsProps {
   threads: SimilarSolvedThread[]

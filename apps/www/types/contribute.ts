@@ -51,3 +51,16 @@ export type LeaderboardRow = {
   author: string | null // sometimes author can be null
   reply_count: number // bigint comes back as number via supabase-js
 }
+
+export type SimilarThreadFeedbackReaction = 'positive' | 'negative'
+
+export interface SimilarThreadFeedbackSubmission {
+  parentThreadId: string // the thread being viewed (e.g. "860-6_dm")
+  similarThreadKey: string // the similar suggestion reacted to
+  reaction: SimilarThreadFeedbackReaction // positive = thumbs-up, negative = thumbs-down
+  feedback?: string // optional freeform text from MessageSquareMore dialog
+}
+
+export interface SimilarThreadFeedbackResult {
+  success: boolean
+}
