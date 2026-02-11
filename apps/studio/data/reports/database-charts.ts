@@ -68,7 +68,10 @@ export const getReportAttributesV2: (
           label: 'Swap Used',
           tooltip:
             'Memory swapped to disk. Any swap usage indicates memory pressure and can severely impact performance',
-          color: '#dc2626', // Danger red color - makes swap instantly visible
+          color: {
+            light: '#dc2626',
+            dark: '#dc2626',
+          }, // Danger red color - makes swap instantly visible
         },
       ],
     },
