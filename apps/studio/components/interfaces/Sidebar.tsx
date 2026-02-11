@@ -33,10 +33,10 @@ import {
   DropdownMenuRadioItem,
   DropdownMenuSeparator,
   DropdownMenuTrigger,
-  Separator,
   SidebarContent as SidebarContentPrimitive,
   SidebarFooter,
   SidebarGroup,
+  SidebarGroupLabel,
   SidebarMenu,
   SidebarMenuButton,
   SidebarMenuItem,
@@ -279,6 +279,9 @@ const ProjectLinks = () => {
             linkElement: <ProjectIndexPageLink projectRef={ref} />,
           }}
         />
+      </SidebarGroup>
+      <SidebarGroup className="gap-0.5">
+        <SidebarGroupLabel>Build</SidebarGroupLabel>
         {toolRoutes.map((route, i) => (
           <SideBarNavLink
             key={`tools-routes-${i}`}
@@ -287,9 +290,6 @@ const ProjectLinks = () => {
             active={activeRoute === route.key}
           />
         ))}
-      </SidebarGroup>
-      <Separator className="w-[calc(100%-1rem)] mx-auto" />
-      <SidebarGroup className="gap-0.5">
         {productRoutes.map((route, i) => (
           <SideBarNavLink
             key={`product-routes-${i}`}
@@ -299,8 +299,8 @@ const ProjectLinks = () => {
           />
         ))}
       </SidebarGroup>
-      <Separator className="w-[calc(100%-1rem)] mx-auto" />
       <SidebarGroup className="gap-0.5">
+        <SidebarGroupLabel>Manage</SidebarGroupLabel>
         {otherRoutes.map((route, i) => {
           if (route.key === 'api') {
             const handleApiClick = () => {
@@ -360,8 +360,8 @@ const ProjectLinks = () => {
           }
         })}
       </SidebarGroup>
-      {/* Settings routes to be added in with project/org nav */}
       <SidebarGroup className="gap-0.5">
+        <SidebarGroupLabel>Configure</SidebarGroupLabel>
         {settingsRoutes.map((route, i) => (
           <SideBarNavLink
             key={`settings-routes-${i}`}
