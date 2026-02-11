@@ -102,6 +102,7 @@ export const LogsBarChart = ({
             cursor={{
               stroke: 'rgba(255, 255, 255, 0.5)',
               strokeWidth: 1,
+              fill: 'none',
             }}
             content={(props) => {
               if (!props.active || !props.payload || props.payload.length === 0) {
