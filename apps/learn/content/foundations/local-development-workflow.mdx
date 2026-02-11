@@ -1,20 +1,223 @@
 ---
 title: Local Development Workflow
-description: Supabase CLI, local stack, and development best practices
+description: Setting up the Supabase CLI, running a local stack, and managing migrations
 ---
 
+You don't need to be connected to a hosted Supabase project to develop. The Supabase CLI lets you run the entire stack locally — Postgres, Auth, Storage, Realtime, and the REST API — all on your own machine using Docker.
 
-## Overview
+## Why develop locally?
 
-Master local development with Supabase CLI and Docker.
+- **Speed** — no network round trips, instant feedback
+- **Offline** — work without an internet connection
+- **Safety** — experiment freely without affecting a shared database
+- **Migrations** — write and test schema changes before pushing them to production
 
-## Topics Covered
+## Installing the CLI
 
-- Supabase CLI installation and initialization
-- Running the local stack with Docker
-- Local vs remote development trade-offs
-- Database seeding and test data management
+The Supabase CLI is available through most package managers:
 
-## Content
+```bash
+# npm (any platform)
+npx supabase --version
 
-_Content coming soon_
+# macOS
+brew install supabase/tap/supabase
+
+# Windows (scoop)
+scoop bucket add supabase https://github.com/supabase/scoop-bucket.git
+scoop install supabase
+```
+
+Verify the installation:
+
+```bash
+supabase --version
+```
+
+You'll also need [Docker Desktop](https://www.docker.com/products/docker-desktop/) running, since the local stack uses Docker containers.
+
+## Initializing a project
+
+Navigate to your app directory and run:
+
+```bash
+supabase init
+```
+
+This creates a `supabase/` directory in your project with the following structure:
+
+```
+supabase/
+├── config.toml      # Local stack configuration
+├── migrations/      # SQL migration files
+├── snippets/        # SQL snippets
+└── seed.sql         # Seed data (optional)
+```
+
+The `config.toml` file controls things like the local port numbers, auth settings, and which services to enable.
+
+## Starting the local stack
+
+Start everything with a single command:
+
+```bash
+supabase start
+```
+
+The first run downloads the Docker images, which takes a few minutes. After that, subsequent starts are fast.
+
+When the stack is ready, the CLI prints your local credentials:
+
+```
+Started supabase local development setup.
+
+╭──────────────────────────────────────╮
+│ 🔧 Development Tools                 │
+├─────────┬────────────────────────────┤
+│ Studio  │ http://127.0.0.1:54323     │
+│ Mailpit │ http://127.0.0.1:54324     │
+│ MCP     │ http://127.0.0.1:54321/mcp │
+╰─────────┴────────────────────────────╯
+
+╭──────────────────────────────────────────────────────╮
+│ 🌐 APIs                                              │
+├────────────────┬─────────────────────────────────────┤
+│ Project URL    │ http://127.0.0.1:54321              │
+│ REST           │ http://127.0.0.1:54321/rest/v1      │
+│ GraphQL        │ http://127.0.0.1:54321/graphql/v1   │
+│ Edge Functions │ http://127.0.0.1:54321/functions/v1 │
+╰────────────────┴─────────────────────────────────────╯
+
+╭───────────────────────────────────────────────────────────────╮
+│ ⛁ Database                                                    │
+├─────┬─────────────────────────────────────────────────────────┤
+│ URL │ postgresql://postgres:postgres@127.0.0.1:54322/postgres │
+╰─────┴─────────────────────────────────────────────────────────╯
+
+╭──────────────────────────────────────────────────────────────╮
+│ 🔑 Authentication Keys                                       │
+├─────────────┬────────────────────────────────────────────────┤
+│ Publishable │ sb_publishable_ACJWlzQHlZjBrEguHvfOxg_3BJgxAaH │
+│ Secret      │ sb_secret_N7UND0UgjKTVK-Uodkm0Hg_xSvEMPvz      │
+╰─────────────┴────────────────────────────────────────────────╯
+
+╭───────────────────────────────────────────────────────────────────────────────╮
+│ 📦 Storage (S3)                                                               │
+├────────────┬──────────────────────────────────────────────────────────────────┤
+│ URL        │ http://127.0.0.1:54321/storage/v1/s3                             │
+│ Access Key │ 625729a08b95bf1b7ff351a663f3a23c                                 │
+│ Secret Key │ 850181e4652dd023b7a98c58ae0d2d34bd487ee0cc3254aed6eda37307425907 │
+│ Region     │ local                                                            │
+╰────────────┴──────────────────────────────────────────────────────────────────╯
+```
+
+You can use these in your app's environment variables just like you would a hosted project. The local API URL and keys work the same way — the only difference is everything runs on your machine.
+
+To stop the stack:
+
+```bash
+supabase stop
+```
+
+## Local Studio
+
+When the local stack is running, you get a full instance of the Supabase Dashboard at `http://127.0.0.1:54323`. You can use it to browse tables, run SQL, manage users, and inspect storage — exactly like the hosted dashboard.
+
+## Migrations
+
+Migrations are SQL files that track changes to your database schema over time. They live in the `supabase/migrations/` directory and are applied in order.
+
+### Creating a migration
+
+```bash
+supabase migration new create_todos_table
+```
+
+This creates a timestamped file like `supabase/migrations/20260210120000_create_todos_table.sql`. Open it and write your SQL:
+
+```sql
+create table todos (
+  id bigint primary key generated always as identity,
+  title text not null,
+  is_complete boolean default false,
+  user_id uuid references auth.users(id),
+  created_at timestamptz default now()
+);
+
+alter table todos enable row level security;
+```
+
+### Applying migrations locally
+
+Reset your local database and re-apply all migrations:
+
+```bash
+supabase db reset
+```
+
+This drops everything and replays your migrations from scratch, then runs `seed.sql` if it exists. It's the easiest way to verify your migrations are clean and repeatable.
+
+### Pushing migrations to production
+
+When you're happy with your changes locally, push them to your hosted project:
+
+```bash
+supabase db push
+```
+
+This applies any new migration files that haven't been run on the remote database yet.
+
+### Why you should capture all changes in migrations
+
+It's tempting to hop into the Studio SQL editor or the Dashboard table editor and make a quick change — add a column, tweak an RLS policy, create an index. But if that change only lives in a running database and not in a migration file, it effectively doesn't exist for the rest of your workflow.
+
+Here's what goes wrong when you skip migrations:
+
+- **Lost on reset** — Running `supabase db reset` replays your migration files from scratch. Any change that isn't captured in a file gets wiped out.
+- **Missing in production** — `supabase db push` only applies migration files. If a schema change isn't in a file, it won't reach your hosted project.
+- **Invisible to your team** — Migration files live in version control. A change made only through the Dashboard is invisible to other developers and won't be part of pull requests or code reviews.
+- **Impossible to reproduce** — Without a migration, there's no reliable way to recreate the same schema on another machine, in CI, or on a new environment.
+
+The rule for your team is simple: **if it changes the database schema, it belongs in a migration file**. This includes tables, columns, indexes, RLS policies, functions, triggers, and enum types.
+
+If you've already made changes through the Dashboard or SQL editor on a running instance, you can pull them into a migration file:
+
+```bash
+supabase db diff -f describe_your_change
+```
+
+This generates a new migration file containing the SQL needed to reproduce the current diff between your migrations and the live database. Review it, commit it, and your change is now part of the project history.
+
+## Seeding data
+
+The `supabase/seed.sql` file runs automatically after migrations when you call `supabase db reset`. Use it to insert test data:
+
+```sql
+insert into todos (title, is_complete)
+values
+  ('Learn Supabase', false),
+  ('Build an app', false),
+  ('Ship it', false);
+```
+
+This gives you a consistent starting state every time you reset your local database.
+
+## Local vs remote development
+
+|                    | Local                        | Remote (hosted)       |
+| ------------------ | ---------------------------- | --------------------- |
+| **Speed**          | Instant, no network          | Depends on latency    |
+| **Collaboration**  | Single developer             | Shared by team        |
+| **Data**           | Test/seed data               | Real or staging data  |
+| **Cost**           | Free (Docker)                | Uses project quota    |
+| **Auth providers** | Limited (no OAuth redirects) | Full provider support |
+
+A common workflow is to develop and test locally, then push migrations to a staging or production project when you're ready. You get the best of both — fast iteration locally and a real environment for testing integrations.
+
+## Linking to a remote project
+
+To push migrations or pull schema changes from a hosted project, link your local directory:
+
+```bash
+supabase link --project-ref your-project-ref
+```
