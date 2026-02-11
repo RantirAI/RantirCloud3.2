@@ -33,6 +33,7 @@ export type MemoryPressureData = {
   level: MemoryPressureLevel
   ramUsedPercent: number
   cachePercent: number
+  swapUsedMB: number
 }
 
 export function parseInfrastructureMetrics(
@@ -101,11 +102,11 @@ export function parseConnectionsData(
 }
 
 /**
- * Calculates memory pressure based on non-cache RAM usage
+ * Calculates memory pressure based on non-cache RAM usage and swap
  * Thresholds:
- * - Low: < 60% non-cache memory used
- * - Medium: 60-80% non-cache memory used
- * - High: > 80% non-cache memory used
+ * - Low: < 60% non-cache memory used AND no swap
+ * - Medium: 60-80% non-cache memory used OR minimal swap (< 100MB)
+ * - High: > 80% non-cache memory used OR significant swap usage (>= 100MB)
  */
 export function parseMemoryPressure(
   infraData: InfraMonitoringResponse | undefined
@@ -120,6 +121,7 @@ export function parseMemoryPressure(
   const ramUsed = parseNumericValue(series.ram_usage_used?.totalAverage)
   const ramCache = parseNumericValue(series.ram_usage_cache_and_buffers?.totalAverage)
   const ramFree = parseNumericValue(series.ram_usage_free?.totalAverage)
+  const swapUsedBytes = parseNumericValue(series.swap_usage?.totalAverage)
 
   const totalRam = ramUsed + ramCache + ramFree
 
@@ -127,23 +129,26 @@ export function parseMemoryPressure(
     return null
   }
 
-  // Calculate percentages
+  // Calculate percentages and swap in MB
   const ramUsedPercent = (ramUsed / totalRam) * 100
   const cachePercent = (ramCache / totalRam) * 100
+  const swapUsedMB = swapUsedBytes / (1024 * 1024) // Convert bytes to MB
 
-  // Determine pressure level based on non-cache memory usage
+  // Determine pressure level based on non-cache memory usage and swap
+  // ANY significant swap usage is a red flag
   let level: MemoryPressureLevel
-  if (ramUsedPercent < 60) {
-    level = 'Low'
-  } else if (ramUsedPercent < 80) {
+  if (swapUsedMB >= 100 || ramUsedPercent >= 80) {
+    level = 'High'
+  } else if (swapUsedMB > 0 || ramUsedPercent >= 60) {
     level = 'Medium'
   } else {
-    level = 'High'
+    level = 'Low'
   }
 
   return {
     level,
     ramUsedPercent,
     cachePercent,
+    swapUsedMB,
   }
 }

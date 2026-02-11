@@ -21,8 +21,8 @@ export const getReportAttributesV2: (
   return [
     {
       id: 'ram-usage',
-      label: 'Memory usage',
-      docsUrl: `${DOCS_URL}/guides/telemetry/reports#memory-usage`,
+      label: 'Memory breakdown',
+      docsUrl: `${DOCS_URL}/guides/telemetry/reports#memory-breakdown`,
       availableIn: ['free', 'pro', 'team', 'enterprise', 'platform'],
       hide: false,
       showTooltip: true,
@@ -41,23 +41,31 @@ export const getReportAttributesV2: (
         {
           attribute: 'ram_usage_used',
           provider: 'infra-monitoring',
-          label: 'Used',
+          label: 'RAM Used',
           tooltip:
             'RAM in use by Postgres and the operating system. Sustained high usage may indicate memory pressure',
         },
         {
           attribute: 'ram_usage_cache_and_buffers',
           provider: 'infra-monitoring',
-          label: 'Cache + Buffers',
+          label: 'RAM Cache + Buffers',
           tooltip:
             'RAM used by the operating system page cache and PostgreSQL buffers to accelerate disk reads/writes',
         },
         {
           attribute: 'ram_usage_free',
           provider: 'infra-monitoring',
-          label: 'Free',
+          label: 'RAM Free',
           tooltip:
             'Unallocated memory available for use. A small portion is always reserved by the operating system',
+        },
+        {
+          attribute: 'swap_usage',
+          provider: 'infra-monitoring',
+          label: 'Swap Used',
+          tooltip:
+            'Memory swapped to disk. Any swap usage indicates memory pressure and can severely impact performance',
+          color: '#dc2626', // Danger red color - makes swap instantly visible
         },
       ],
     },

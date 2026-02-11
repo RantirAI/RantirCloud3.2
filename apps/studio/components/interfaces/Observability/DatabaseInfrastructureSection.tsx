@@ -103,6 +103,7 @@ export const DatabaseInfrastructureSection = ({
       'ram_usage_used',
       'ram_usage_cache_and_buffers',
       'ram_usage_free',
+      'swap_usage',
       'disk_fs_used_system',
       'disk_fs_used_wal',
       'pg_database_size',
@@ -341,11 +342,16 @@ export const DatabaseInfrastructureSection = ({
                     >
                       {memoryPressure.level}
                     </MetricCardValue>
+                    <div
+                      className={cn('text-xs font-medium', {
+                        'text-foreground-light': memoryPressure.swapUsedMB === 0,
+                        'text-destructive': memoryPressure.swapUsedMB > 0,
+                      })}
+                    >
+                      Swap: {memoryPressure.swapUsedMB.toFixed(0)} MB
+                    </div>
                     <div className="text-xs text-foreground-light">
                       Cache hit: {cacheHitRate}
-                    </div>
-                    <div className="text-xs text-foreground-lighter">
-                      Non-cache: {memoryPressure.ramUsedPercent.toFixed(0)}%
                     </div>
                   </div>
                 ) : (
@@ -375,11 +381,16 @@ export const DatabaseInfrastructureSection = ({
                   >
                     {memoryPressure.level}
                   </MetricCardValue>
+                  <div
+                    className={cn('text-xs font-medium', {
+                      'text-foreground-light': memoryPressure.swapUsedMB === 0,
+                      'text-destructive': memoryPressure.swapUsedMB > 0,
+                    })}
+                  >
+                    Swap: {memoryPressure.swapUsedMB.toFixed(0)} MB
+                  </div>
                   <div className="text-xs text-foreground-light">
                     Cache hit: {cacheHitRate}
-                  </div>
-                  <div className="text-xs text-foreground-lighter">
-                    Non-cache: {memoryPressure.ramUsedPercent.toFixed(0)}%
                   </div>
                 </div>
               ) : (
