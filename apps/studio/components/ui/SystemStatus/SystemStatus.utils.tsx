@@ -4,7 +4,7 @@ import { Separator } from 'ui'
 
 import { SystemStatusIcon } from './SystemStatusIcon'
 
-type SystemStatus = 'operational' | 'incident' | 'maintenance'
+export type SystemStatus = 'operational' | 'incident' | 'maintenance'
 
 interface BadgeVariant {
   variant: 'success' | 'warning' | 'default'
