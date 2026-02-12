@@ -17,7 +17,7 @@ export const Branching2Preview = () => {
         src={`${BASE_PATH}/img/previews/branching-preview.png`}
         width={1296}
         height={900}
-        alt="api-docs-side-panel-preview"
+        alt="branching-preview"
         className="rounded border mb-4"
       />
       <div className="my-6">

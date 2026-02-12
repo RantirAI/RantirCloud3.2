@@ -86,7 +86,7 @@ export const FeaturePreviewModal = () => {
         <DialogSectionSeparator />
 
         <DialogSection className="!p-0">
-          {featurePreviews.length > 0 ? (
+          {allFeaturePreviews.length > 0 ? (
             <div className="flex">
               <div>
                 <ScrollArea className="h-[550px] w-[280px] border-r">

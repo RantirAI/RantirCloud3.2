@@ -27,7 +27,7 @@ import {
 import { formatPoliciesForStorage, UNGROUPED_POLICY_SYMBOL } from '../Storage.utils'
 import { StoragePoliciesBucketRow } from './StoragePoliciesBucketRow'
 import { BucketsPolicies, type SelectBucketPolicyForAction } from './StoragePoliciesBucketsSection'
-import StoragePoliciesEditPolicyModal from './StoragePoliciesEditPolicyModal'
+import { StoragePoliciesEditPolicyModal } from './StoragePoliciesEditPolicyModal'
 
 export const StoragePolicies = () => {
   const { ref: projectRef } = useParams()
