@@ -214,7 +214,10 @@ export const DatabaseInfrastructureSection = ({
                 <MetricCardLabel
                   tooltip={
                     <div className="space-y-2">
-                      <p>Active database connections (current/max). Monitor to avoid connection exhaustion.</p>
+                      <p>
+                        Active database connections (current/max). Monitor to avoid connection
+                        exhaustion.
+                      </p>
                       <Link
                         href="https://supabase.com/docs/guides/troubleshooting?search=connections"
                         target="_blank"
@@ -247,7 +250,10 @@ export const DatabaseInfrastructureSection = ({
               <MetricCardLabel
                 tooltip={
                   <div className="space-y-2">
-                    <p>Active database connections (current/max). Monitor to avoid connection exhaustion.</p>
+                    <p>
+                      Active database connections (current/max). Monitor to avoid connection
+                      exhaustion.
+                    </p>
                     <Link
                       href="https://supabase.com/docs/guides/troubleshooting?search=connections"
                       target="_blank"
@@ -320,7 +326,9 @@ export const DatabaseInfrastructureSection = ({
                 <MetricCardLabel
                   tooltip={
                     <div className="space-y-2">
-                      <p>Disk I/O consumption percentage. High values may indicate disk bottlenecks.</p>
+                      <p>
+                        Disk I/O consumption percentage. High values may indicate disk bottlenecks.
+                      </p>
                       <Link
                         href="https://supabase.com/docs/guides/troubleshooting/exhaust-disk-io"
                         target="_blank"
@@ -351,7 +359,9 @@ export const DatabaseInfrastructureSection = ({
               <MetricCardLabel
                 tooltip={
                   <div className="space-y-2">
-                    <p>Disk I/O consumption percentage. High values may indicate disk bottlenecks.</p>
+                    <p>
+                      Disk I/O consumption percentage. High values may indicate disk bottlenecks.
+                    </p>
                     <Link
                       href="https://supabase.com/docs/guides/troubleshooting/exhaust-disk-io"
                       target="_blank"
@@ -573,7 +583,10 @@ export const DatabaseInfrastructureSection = ({
                 <MetricCardLabel
                   tooltip={
                     <div className="space-y-2">
-                      <p>CPU usage percentage. High values may suggest CPU-intensive queries or workloads.</p>
+                      <p>
+                        CPU usage percentage. High values may suggest CPU-intensive queries or
+                        workloads.
+                      </p>
                       <Link
                         href="https://supabase.com/docs/guides/troubleshooting?search=cpu"
                         target="_blank"
@@ -604,7 +617,10 @@ export const DatabaseInfrastructureSection = ({
               <MetricCardLabel
                 tooltip={
                   <div className="space-y-2">
-                    <p>CPU usage percentage. High values may suggest CPU-intensive queries or workloads.</p>
+                    <p>
+                      CPU usage percentage. High values may suggest CPU-intensive queries or
+                      workloads.
+                    </p>
                     <Link
                       href="https://supabase.com/docs/guides/troubleshooting?search=cpu"
                       target="_blank"
