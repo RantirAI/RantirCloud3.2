@@ -78,9 +78,7 @@ const SimilarThreadCard = ({
         <ChannelIcon channel={channel} />
       </div>
       <div className="min-w-0 flex-1 flex flex-col">
-        <h4 className="text-base text-foreground truncate block">
-          {thread.subject}
-        </h4>
+        <h4 className="text-base text-foreground truncate block">{thread.subject}</h4>
         {thread.problem_description ? (
           <p className="text-sm text-foreground-lighter leading-relaxed line-clamp-2">
             {thread.problem_description}
@@ -133,14 +131,14 @@ export const SimilarSolvedThreads = ({ threads, parentThreadId }: SimilarSolvedT
     setIsSubmitting(true)
     const result = MOCK_FEEDBACK
       ? await (async () => {
-        await new Promise((r) => setTimeout(r, 400))
-        return { success: true as const, id: 'mock-feedback-id' }
-      })()
+          await new Promise((r) => setTimeout(r, 400))
+          return { success: true as const, id: 'mock-feedback-id' }
+        })()
       : await submitSimilarThreadFeedback({
-        parentThreadId,
-        reaction,
-        similarThreadKey: null,
-      })
+          parentThreadId,
+          reaction,
+          similarThreadKey: null,
+        })
     setIsSubmitting(false)
     if (result.success) {
       setFeedbackId(result.id ?? null)
@@ -155,14 +153,10 @@ export const SimilarSolvedThreads = ({ threads, parentThreadId }: SimilarSolvedT
     setIsSubmitting(true)
     const result = MOCK_FEEDBACK
       ? await (async () => {
-        await new Promise((r) => setTimeout(r, 400))
-        return { success: true as const }
-      })()
-      : await updateSimilarThreadFeedback(
-        feedbackId,
-        dialogReaction,
-        dialogFeedback.trim() || null
-      )
+          await new Promise((r) => setTimeout(r, 400))
+          return { success: true as const }
+        })()
+      : await updateSimilarThreadFeedback(feedbackId, dialogReaction, dialogFeedback.trim() || null)
     setIsSubmitting(false)
     if (result.success) {
       setSubmittedReaction(dialogReaction)
@@ -198,7 +192,6 @@ export const SimilarSolvedThreads = ({ threads, parentThreadId }: SimilarSolvedT
 
   return (
     <Card className={cn('relative')}>
-
       <CardHeader className={cn('p-0', !isExpanded && 'border-b-0')}>
         <button
           type="button"
@@ -208,8 +201,9 @@ export const SimilarSolvedThreads = ({ threads, parentThreadId }: SimilarSolvedT
           Related solved threads
           <span className="text-foreground-muted tabular-nums font-normal">({threads.length})</span>
           <ChevronDown
-            className={`h-3.5 w-3.5 text-foreground-lighter transition-transform duration-200 ${isExpanded ? 'rotate-0' : '-rotate-90'
-              }`}
+            className={`h-3.5 w-3.5 text-foreground-lighter transition-transform duration-200 ${
+              isExpanded ? 'rotate-0' : '-rotate-90'
+            }`}
           />
         </button>
       </CardHeader>
@@ -226,7 +220,9 @@ export const SimilarSolvedThreads = ({ threads, parentThreadId }: SimilarSolvedT
           </CardContent>
           <CardFooter className="flex items-center justify-between min-h-[58px]">
             {submittedReaction ? (
-              <span className="text-sm text-foreground-muted">Thanks for helping improve related threads</span>
+              <span className="text-sm text-foreground-muted">
+                Thanks for helping improve related threads
+              </span>
             ) : (
               <TooltipProvider>
                 <div className="flex items-center gap-1">
@@ -291,16 +287,12 @@ export const SimilarSolvedThreads = ({ threads, parentThreadId }: SimilarSolvedT
         <DialogContent>
           <DialogHeader>
             <DialogTitle>Help improve related threads</DialogTitle>
-            <DialogDescription>
-              How relevant were these threads to your issue?
-            </DialogDescription>
+            <DialogDescription>How relevant were these threads to your issue?</DialogDescription>
           </DialogHeader>
           <DialogSectionSeparator />
           <DialogSection className="space-y-4">
             <fieldset className="space-y-1">
-              <legend className="text-sm text-foreground">
-                Relevance
-              </legend>
+              <legend className="text-sm text-foreground">Relevance</legend>
               <div className="flex items-center gap-1">
                 <label
                   className={cn(
@@ -343,7 +335,9 @@ export const SimilarSolvedThreads = ({ threads, parentThreadId }: SimilarSolvedT
               </div>
             </fieldset>
             <div className="space-y-1">
-              <Label_Shadcn_ htmlFor="feedback">Additional feedback <span className="text-foreground-muted">(optional)</span></Label_Shadcn_>
+              <Label_Shadcn_ htmlFor="feedback">
+                Additional feedback <span className="text-foreground-muted">(optional)</span>
+              </Label_Shadcn_>
               <TextArea_Shadcn_
                 id="feedback"
                 placeholder="What was helpful or missing?"
@@ -353,14 +347,9 @@ export const SimilarSolvedThreads = ({ threads, parentThreadId }: SimilarSolvedT
                 className="text-sm resize-none"
               />
             </div>
-
           </DialogSection>
           <DialogFooter>
-            <Button
-              onClick={persistAndCloseDialog}
-              disabled={isSubmitting}
-              loading={isSubmitting}
-            >
+            <Button onClick={persistAndCloseDialog} disabled={isSubmitting} loading={isSubmitting}>
               {isSubmitting ? 'Submitting...' : 'Submit feedback'}
             </Button>
           </DialogFooter>

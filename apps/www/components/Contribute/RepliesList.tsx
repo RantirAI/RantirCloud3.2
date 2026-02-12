@@ -34,11 +34,11 @@ export function RepliesList({ replies, questionAuthor, totalReplyCount }: Replie
 
   return (
     <div className="flex flex-col gap-3">
-
       <Card className="relative">
         <CardHeader>
           <CardTitle>
-            Replies <span className="text-foreground-muted tabular-nums font-normal">({displayCount})</span>
+            Replies{' '}
+            <span className="text-foreground-muted tabular-nums font-normal">({displayCount})</span>
           </CardTitle>
         </CardHeader>
         <CardContent className="flex flex-col p-0">

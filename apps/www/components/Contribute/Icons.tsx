@@ -44,13 +44,7 @@ export function GitHubIcon(props: SVGProps<SVGSVGElement>) {
   )
 }
 
-export function ChannelIcon({
-  channel,
-  className,
-}: {
-  channel: ThreadSource
-  className?: string
-}) {
+export function ChannelIcon({ channel, className }: { channel: ThreadSource; className?: string }) {
   const iconClassName = cn('h-4 w-4', className)
   if (channel === 'discord') {
     return <DiscordIcon className={cn(iconClassName, 'text-[#5865F2]')} />

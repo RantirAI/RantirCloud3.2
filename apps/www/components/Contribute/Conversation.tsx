@@ -57,7 +57,6 @@ export async function Conversation({ thread }: { thread: ThreadRow }) {
               </div>
             </div>
 
-
             <Link
               href={thread.external_activity_url}
               target="_blank"
@@ -85,7 +84,6 @@ export async function Conversation({ thread }: { thread: ThreadRow }) {
                 ))}
               </div>
             )}
-
           </header>
 
           {/* Question */}
@@ -96,36 +94,31 @@ export async function Conversation({ thread }: { thread: ThreadRow }) {
               </ReactMarkdown>
             </div>
           </div>
-
-
         </div>
-      )
-      }
+      )}
 
       {/* Summary Section */}
-      {
-        thread.summary && (
-          <Card>
-            <CardHeader>
-              <CardTitle>How to help</CardTitle>
-            </CardHeader>
-            <CardContent className="px-6 py-8 flex flex-col gap-6">
-              <div className="text-base text-foreground">
-                <ReactMarkdown components={markdownComponents} remarkPlugins={[remarkGfm]}>
-                  {thread.summary}
-                </ReactMarkdown>
-              </div>
-              {/* CTA Button */}
-              <div>
-                <HelpOnPlatformButton
-                  channel={thread.channel}
-                  externalActivityUrl={thread.external_activity_url}
-                />
-              </div>
-            </CardContent>
-          </Card>
-        )
-      }
+      {thread.summary && (
+        <Card>
+          <CardHeader>
+            <CardTitle>How to help</CardTitle>
+          </CardHeader>
+          <CardContent className="px-6 py-8 flex flex-col gap-6">
+            <div className="text-base text-foreground">
+              <ReactMarkdown components={markdownComponents} remarkPlugins={[remarkGfm]}>
+                {thread.summary}
+              </ReactMarkdown>
+            </div>
+            {/* CTA Button */}
+            <div>
+              <HelpOnPlatformButton
+                channel={thread.channel}
+                externalActivityUrl={thread.external_activity_url}
+              />
+            </div>
+          </CardContent>
+        </Card>
+      )}
 
       {/* Similar Solved Threads */}
       {thread.similar_solved_threads && thread.similar_solved_threads.length > 0 && (
@@ -133,15 +126,13 @@ export async function Conversation({ thread }: { thread: ThreadRow }) {
       )}
 
       {/* Remaining Replies Section */}
-      {
-        validReplies.length > 0 && (
-          <RepliesList
-            replies={validReplies}
-            questionAuthor={question?.author || null}
-            totalReplyCount={validReplies.length}
-          />
-        )
-      }
-    </div >
+      {validReplies.length > 0 && (
+        <RepliesList
+          replies={validReplies}
+          questionAuthor={question?.author || null}
+          totalReplyCount={validReplies.length}
+        />
+      )}
+    </div>
   )
 }
