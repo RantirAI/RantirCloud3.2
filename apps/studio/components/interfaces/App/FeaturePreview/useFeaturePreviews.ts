@@ -1,12 +1,23 @@
-import { LOCAL_STORAGE_KEYS } from 'common'
+import { LOCAL_STORAGE_KEYS, useFlag } from 'common'
 
-export interface FeaturePreviewFlags {
-  enableSystemStatusBadge?: boolean
-  // Add more flags here as needed
+type FeaturePreview = {
+  key: string
+  name: string
+  discussionsUrl?: string
+  isNew: boolean
+  /** If feature flag is only relevant for the hosted platform */
+  isPlatformOnly: boolean
+  /** If feature flag should be enabled by default for users, if not yet toggled before */
+  isDefaultOptIn: boolean
+  /** Visibility in the feature preview modal (For feature flagging a feature preview) */
+  enabled: boolean
 }
 
-export const getFeaturePreviews = (flags: FeaturePreviewFlags = {}) => {
-  const { enableSystemStatusBadge } = flags
+export const useFeaturePreviews = (): FeaturePreview[] => {
+  const gitlessBranchingEnabled = useFlag('gitlessBranching')
+  const advisorRulesEnabled = useFlag('advisorRules')
+  const isUnifiedLogsPreviewAvailable = useFlag('unifiedLogs')
+  const enableSystemStatusBadge = useFlag('enableSystemStatusBadge')
 
   return [
     {
@@ -15,56 +26,71 @@ export const getFeaturePreviews = (flags: FeaturePreviewFlags = {}) => {
       discussionsUrl: 'https://github.com/orgs/supabase/discussions/37234',
       isNew: true,
       isPlatformOnly: true,
+      isDefaultOptIn: false,
+      enabled: isUnifiedLogsPreviewAvailable,
     },
     {
       key: LOCAL_STORAGE_KEYS.UI_PREVIEW_BRANCHING_2_0,
       name: 'Branching via dashboard',
       discussionsUrl: 'https://github.com/orgs/supabase/discussions/branching-2-0',
+      enabled: gitlessBranchingEnabled,
       isNew: true,
       isPlatformOnly: true,
+      isDefaultOptIn: false,
     },
     {
       key: LOCAL_STORAGE_KEYS.UI_PREVIEW_ADVISOR_RULES,
       name: 'Disable Advisor rules',
       discussionsUrl: undefined,
+      enabled: advisorRulesEnabled,
       isNew: true,
       isPlatformOnly: true,
+      isDefaultOptIn: false,
     },
     {
       key: LOCAL_STORAGE_KEYS.UI_PREVIEW_API_SIDE_PANEL,
       name: 'Project API documentation',
       discussionsUrl: 'https://github.com/orgs/supabase/discussions/18038',
+      enabled: true,
       isNew: false,
       isPlatformOnly: false,
+      isDefaultOptIn: false,
     },
     {
       key: LOCAL_STORAGE_KEYS.UI_PREVIEW_CLS,
       name: 'Column-level privileges',
       discussionsUrl: 'https://github.com/orgs/supabase/discussions/20295',
+      enabled: true,
       isNew: false,
       isPlatformOnly: false,
+      isDefaultOptIn: false,
     },
     {
       key: LOCAL_STORAGE_KEYS.UI_PREVIEW_QUEUE_OPERATIONS,
       name: 'Queue table operations',
       discussionsUrl: 'https://github.com/orgs/supabase/discussions/42460',
+      enabled: true,
       isNew: true,
       isPlatformOnly: false,
+      isDefaultOptIn: false,
     },
     {
       key: LOCAL_STORAGE_KEYS.UI_PREVIEW_TABLE_FILTER_BAR,
       name: 'New Table Filter Bar',
       discussionsUrl: 'https://github.com/orgs/supabase/discussions/42461',
+      enabled: true,
       isNew: true,
       isPlatformOnly: false,
+      isDefaultOptIn: false,
     },
     {
       key: LOCAL_STORAGE_KEYS.UI_PREVIEW_SYSTEM_STATUS_BADGE,
       name: 'System Status Badge',
       discussionsUrl: undefined,
+      enabled: enableSystemStatusBadge,
       isNew: true,
       isPlatformOnly: true,
-      enabled: enableSystemStatusBadge ?? false,
+      isDefaultOptIn: false,
     },
   ]
 }
