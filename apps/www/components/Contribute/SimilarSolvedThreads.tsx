@@ -2,12 +2,22 @@
 
 import { useState } from 'react'
 import { Badge, Card, CardContent, CardFooter, CardHeader, cn } from 'ui'
-import { ChevronDown, ExternalLink } from 'lucide-react'
+import { ChevronDown } from 'lucide-react'
 import type {
   SimilarSolvedThread,
   SimilarThreadFeedbackSubmission,
   SimilarThreadFeedbackResult,
+  ThreadSource,
 } from '~/types/contribute'
+import { ChannelIcon } from './Icons'
+
+function getChannelFromUrl(url: string): ThreadSource {
+  const u = url.toLowerCase()
+  if (u.includes('discord')) return 'discord'
+  if (u.includes('reddit')) return 'reddit'
+  if (u.includes('github')) return 'github'
+  return 'github'
+}
 
 /**
  * Placeholder -- will be replaced with a real API call that inserts into
@@ -36,40 +46,64 @@ const SimilarThreadCard = ({
   thread: SimilarSolvedThread
   className?: string
 }) => {
+  const channel = getChannelFromUrl(thread.external_activity_url || '')
+  const filteredStack = thread.stack?.filter((s) => s !== 'Other') ?? []
+  const hasStack = filteredStack.length > 0
+
+  const url = thread.external_activity_url || null
+
   return (
-    <div className={cn('border-b border-border px-6 py-6 flex flex-col gap-3', className)}>
-      <div className="flex items-start justify-between gap-4">
-        <span className="text-base text-foreground leading-snug">{thread.subject}</span>
-        {thread.external_activity_url && (
+    <div
+      className={cn(
+        'border-b border-border px-6 py-4 flex items-center gap-3 overflow-hidden',
+        className
+      )}
+    >
+      <div className="flex items-center gap-3 overflow-hidden min-w-0 flex-1">
+        {url ? (
           <a
-            href={thread.external_activity_url}
+            href={url}
             target="_blank"
             rel="noopener noreferrer"
-            className="shrink-0 inline-flex items-center gap-1.5 text-sm text-brand-link hover:underline transition-colors"
+            className="flex items-center justify-center bg-surface-200 h-10 w-10 rounded-md shrink-0 hover:opacity-80 transition-opacity"
+            aria-label={`View thread: ${thread.subject}`}
           >
-            View thread
-            <ExternalLink className="h-3.5 w-3.5" />
+            <ChannelIcon channel={channel} />
           </a>
+        ) : (
+          <div className="flex items-center justify-center bg-surface-200 h-10 w-10 rounded-md shrink-0">
+            <ChannelIcon channel={channel} />
+          </div>
         )}
-      </div>
-
-      {thread.problem_description && (
-        <p className="text-sm text-foreground-lighter leading-relaxed">
-          {thread.problem_description}
-        </p>
-      )}
-
-      {thread.stack?.filter((s) => s !== 'Other').length > 0 && (
-        <div className="flex flex-wrap gap-2">
-          {thread.stack
-            .filter((s) => s !== 'Other')
-            .map((tech) => (
-              <Badge key={tech} variant="default">
-                {tech}
-              </Badge>
-            ))}
+        <div className="min-w-0 flex-1 flex flex-col gap-y-0.5">
+          {url ? (
+            <a
+              href={url}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="text-base text-foreground truncate transition-[text-decoration] duration-100 underline-offset-2 hover:underline w-fit"
+            >
+              {thread.subject}
+            </a>
+          ) : (
+            <span className="text-base text-foreground truncate">{thread.subject}</span>
+          )}
+          {thread.problem_description ? (
+            <p className="text-sm text-foreground-lighter leading-relaxed line-clamp-2">
+              {thread.problem_description}
+            </p>
+          ) : null}
+          {hasStack ? (
+            <div className="flex flex-wrap gap-x-1.5 gap-y-1 overflow-hidden pt-0.5">
+              {filteredStack.map((tech) => (
+                <Badge key={tech} variant="default">
+                  {tech}
+                </Badge>
+              ))}
+            </div>
+          ) : null}
         </div>
-      )}
+      </div>
     </div>
   )
 }
