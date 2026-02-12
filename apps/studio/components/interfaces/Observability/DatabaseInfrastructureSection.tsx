@@ -584,7 +584,7 @@ export const DatabaseInfrastructureSection = ({
                   tooltip={
                     <div className="space-y-2">
                       <p>
-                        CPU usage percentage. High values may suggest CPU-intensive queries or
+                        Average CPU usage percentage over the selected time period. High values may suggest CPU-intensive queries or
                         workloads.
                       </p>
                       <Link
@@ -597,7 +597,7 @@ export const DatabaseInfrastructureSection = ({
                     </div>
                   }
                 >
-                  CPU
+                  Avg CPU
                 </MetricCardLabel>
               </MetricCardHeader>
               <MetricCardContent>
@@ -618,7 +618,7 @@ export const DatabaseInfrastructureSection = ({
                 tooltip={
                   <div className="space-y-2">
                     <p>
-                      CPU usage percentage. High values may suggest CPU-intensive queries or
+                      Average CPU usage percentage over the selected time period. High values may suggest CPU-intensive queries or
                       workloads.
                     </p>
                     <Link
@@ -631,7 +631,7 @@ export const DatabaseInfrastructureSection = ({
                   </div>
                 }
               >
-                CPU
+                Avg CPU
               </MetricCardLabel>
             </MetricCardHeader>
             <MetricCardContent>
