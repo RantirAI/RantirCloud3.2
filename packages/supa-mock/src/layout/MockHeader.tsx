@@ -1,6 +1,8 @@
-import { Badge, Button, cn } from 'ui'
-import { Boxes, Box, ChevronsUpDown, Plug } from 'lucide-react'
+import { Plug } from 'lucide-react'
+import { Button, cn } from 'ui'
+
 import { useMockProject } from '../providers/MockProjectContext'
+import { BranchDropdown, OrgDropdown, ProjectDropdown } from './MockHeaderDropdowns'
 
 const LayoutHeaderDivider = ({ className }: { className?: string }) => (
   <span className={cn('text-border-stronger pr-2', className)}>
@@ -21,7 +23,7 @@ const LayoutHeaderDivider = ({ className }: { className?: string }) => (
 )
 
 export function MockHeader() {
-  const { project } = useMockProject()
+  const { project, organizations } = useMockProject()
 
   return (
     <header className="flex h-12 items-center flex-shrink-0 border-b">
@@ -77,44 +79,14 @@ export function MockHeader() {
           </div>
 
           <div className="flex items-center pl-2">
-            {/* Organization */}
             <LayoutHeaderDivider />
-            <div className="flex items-center gap-2 flex-shrink-0 text-sm">
-              <Boxes size={14} strokeWidth={1.5} className="text-foreground-lighter" />
-              <span className="text-foreground">{project.organization.name}</span>
-              <Badge variant="default">{project.organization.plan}</Badge>
-            </div>
-            <Button
-              type="text"
-              className="px-1.5 py-4 [&_svg]:w-5 [&_svg]:h-5 ml-1"
-              iconRight={<ChevronsUpDown strokeWidth={1.5} />}
-            />
+            <OrgDropdown project={project} organizations={organizations} />
 
-            {/* Project */}
             <LayoutHeaderDivider />
-            <div className="flex items-center gap-2 flex-shrink-0 text-sm">
-              <Box size={14} strokeWidth={1.5} className="text-foreground-lighter" />
-              <span className="text-foreground">{project.name}</span>
-            </div>
-            <Button
-              type="text"
-              className="px-1.5 py-4 [&_svg]:w-5 [&_svg]:h-5 ml-1"
-              iconRight={<ChevronsUpDown strokeWidth={1.5} />}
-            />
+            <ProjectDropdown project={project} />
 
-            {/* Branch */}
             <LayoutHeaderDivider />
-            <div className="flex items-center gap-2 flex-shrink-0 text-sm">
-              <span className="text-foreground">{project.branchName}</span>
-              <Badge variant="warning" className="mt-[1px]">
-                Production
-              </Badge>
-            </div>
-            <Button
-              type="text"
-              className="px-1.5 py-4 [&_svg]:w-5 [&_svg]:h-5 ml-1"
-              iconRight={<ChevronsUpDown strokeWidth={1.5} />}
-            />
+            <BranchDropdown project={project} />
 
             {/* Connect button */}
             <div className="ml-3 flex items-center">

@@ -1,7 +1,9 @@
 import {
   ArrowDownNarrowWide,
+  Book,
   ChevronLeft,
   ChevronRight,
+  Copy,
   Download,
   File,
   FolderClosed,
@@ -15,7 +17,21 @@ import {
   Upload,
 } from 'lucide-react'
 import { useState } from 'react'
-import { Badge, Button, cn } from 'ui'
+import {
+  Badge,
+  Button,
+  Card,
+  CardContent,
+  CardFooter,
+  cn,
+  Switch,
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from 'ui'
 
 // ─── Storage Menu ───────────────────────────────────────────────────────
 
@@ -42,7 +58,7 @@ const STORAGE_MENU: StorageMenuGroup[] = [
   },
   {
     title: 'Configuration',
-    items: [{ name: 'S3', key: 's3', disabled: true }],
+    items: [{ name: 'S3', key: 's3' }],
   },
 ]
 
@@ -93,16 +109,16 @@ function generateFiles(count: number): MockFile[] {
 
 const MOCK_BUCKETS: MockBucket[] = [
   {
-    id: 'submissions',
+    id: 'uploads',
     isPublic: true,
     policies: 0,
     fileSizeLimit: '100 MB',
     allowedMimeTypes: 'image/png, image/jpeg, image/webp, video/mp4',
-    folders: ['logos', 'screenshots'],
+    folders: ['thumbnails', 'originals'],
     files: generateFiles(15),
   },
   {
-    id: 'images',
+    id: 'assets',
     isPublic: true,
     policies: 4,
     fileSizeLimit: '100 MB',
@@ -111,7 +127,7 @@ const MOCK_BUCKETS: MockBucket[] = [
     files: generateFiles(28),
   },
   {
-    id: 'submission-media',
+    id: 'media',
     isPublic: true,
     policies: 4,
     fileSizeLimit: '100 MB',
@@ -487,6 +503,128 @@ function BucketsContent({ onOpenBucket }: { onOpenBucket: (bucket: MockBucket) =
   )
 }
 
+// ─── S3 Configuration ───────────────────────────────────────────────────
+
+function CopyInput({ value }: { value: string }) {
+  return (
+    <div className="flex items-center rounded-md border border-default bg-surface-300 h-8 overflow-hidden">
+      <input
+        name={value}
+        readOnly
+        value={value}
+        className="flex-1 bg-transparent text-sm text-foreground-light pl-2 border-none !outline-none !shadow-none font-mono min-w-0"
+      />
+      <button className="flex items-center gap-1.5 px-3 h-full text-foreground-light hover:text-foreground border-l border-default transition-colors flex-shrink-0 bg-surface-200">
+        <Copy size={12} strokeWidth={1.5} />
+        <span className="text-sm">Copy</span>
+      </button>
+    </div>
+  )
+}
+
+function S3Content() {
+  return (
+    <div className="flex-1 overflow-auto">
+      <div className="mx-auto max-w-[1200px] w-full px-6 xl:px-10">
+        {/* Page Title */}
+        <div className="pt-12 pb-4">
+          <h1 className="text-2xl">S3 Configuration</h1>
+        </div>
+
+        {/* Connection Section */}
+        <div className="pt-12 last:pb-12 flex flex-col gap-6">
+          <div className="flex flex-row justify-between items-center">
+            <div className="flex flex-col gap-1">
+              <h2 className="text-lg">Connection</h2>
+              <p className="text-sm text-foreground-light">
+                Connect to your bucket using any S3-compatible service via the S3 protocol
+              </p>
+            </div>
+            <Button type="default" size="tiny" icon={<Book size={14} strokeWidth={1.5} />}>
+              Docs
+            </Button>
+          </div>
+
+          <Card>
+            <CardContent>
+              <div className="flex items-center justify-between">
+                <div className="flex flex-col gap-0.5">
+                  <span className="text-sm text-foreground">S3 protocol connection</span>
+                  <span className="text-sm text-foreground-light">
+                    Allow clients to connect to Supabase Storage via the S3 protocol
+                  </span>
+                </div>
+                <Switch size="large" checked={true} />
+              </div>
+            </CardContent>
+
+            <CardContent>
+              <div className="flex items-center justify-between gap-8">
+                <span className="text-sm text-foreground whitespace-nowrap">Endpoint</span>
+                <div className="md:w-1/2 min-w-[400px]">
+                  <CopyInput value="https://rtlybsbjjaewcbcjqgfu.storage.supabase.co/storage/v1/s3" />
+                </div>
+              </div>
+            </CardContent>
+
+            <CardContent>
+              <div className="flex items-center justify-between gap-8">
+                <span className="text-sm text-foreground whitespace-nowrap">Region</span>
+                <div className="md:w-1/2 min-w-[400px]">
+                  <CopyInput value="us-east-1" />
+                </div>
+              </div>
+            </CardContent>
+
+            <CardFooter className="justify-end">
+              <Button type="primary" size="small">
+                Save
+              </Button>
+            </CardFooter>
+          </Card>
+        </div>
+
+        {/* Access Keys Section */}
+        <div className="pt-12 last:pb-12 flex flex-col gap-6">
+          <div className="flex flex-row justify-between items-center">
+            <div className="flex flex-col gap-1">
+              <h2 className="text-lg">Access keys</h2>
+              <p className="text-sm text-foreground-light">
+                Manage your access keys for this project
+              </p>
+            </div>
+            <Button type="default" size="tiny" icon={<Plus size={14} strokeWidth={1.5} />}>
+              New access key
+            </Button>
+          </div>
+
+          <Card>
+            <Table className="mt-0">
+              <TableHeader>
+                <TableRow>
+                  <TableHead>Name</TableHead>
+                  <TableHead>Key ID</TableHead>
+                  <TableHead>Created at</TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                <TableRow>
+                  <TableCell colSpan={3} className="!rounded-b-md overflow-hidden">
+                    <p className="text-sm text-foreground">No access keys created</p>
+                    <p className="text-sm text-foreground-light">
+                      There are no access keys associated with your project yet
+                    </p>
+                  </TableCell>
+                </TableRow>
+              </TableBody>
+            </Table>
+          </Card>
+        </div>
+      </div>
+    </div>
+  )
+}
+
 // ─── Storage Screen ─────────────────────────────────────────────────────
 
 export function StorageScreen() {
@@ -569,6 +707,8 @@ export function StorageScreen() {
           ) : (
             <BucketsContent onOpenBucket={setOpenBucket} />
           )
+        ) : activeKey === 's3' ? (
+          <S3Content />
         ) : (
           <div className="flex-1 flex items-center justify-center">
             <p className="text-foreground-lighter text-sm">

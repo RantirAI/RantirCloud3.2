@@ -33,113 +33,121 @@ interface MockColumn {
   isPrimary?: boolean
 }
 
-const HACKATHON_IDS = ['f47ac10b-58cc-4372-a567-0e02b2c3d500', '1a93ba5-f676-4d65-baa8-2fa3fdf...']
-
-const MOCK_NAMES = [
-  'SuperDuperAi',
-  'Matthew Habtezgi',
-  'Snap Banana',
-  'BonAppeTeam',
-  'Ittybit',
-  'Peyote',
-  'Table Review',
-  'ScamSniper',
-  '5-Dee Studios',
-  'Moldable',
-  'Pitched App',
-  'MomentoAI',
-  'Svelte Supabase Auth',
-  "Women's Wellness Tracker",
-  'Repatch',
-  'My Events Super Base',
-  'WhatTheStack?!',
-  'PaintPal',
-  'HotOrSlop',
-  'Linkus',
-  'Expressify',
-  'Supa Events',
-  'honk honk',
-  'Alicia',
-  'jsonMartin',
-  'Kimchi',
-  'Interfaze',
-  'MexicoGPT',
-  'call/cc',
-  'DevDash',
-  'SupaFlow',
-  'CodeBuddy',
-  'AIssistant',
-  'DataVault',
-  'CloudPilot',
-  'PixelForge',
-  'StreamLine',
-  'NeuralNest',
-  'ByteCraft',
-  'FormStack',
-  'QueryMaster',
-  'SyncWave',
-  'BlinkDB',
-  'HexaGrid',
-  'VectorVault',
-  'GraphQL Hero',
-  'AuthGuard',
-  'EdgeRunner',
-  'LambdaLab',
-  'ServerPulse',
+const CATEGORY_IDS = [
+  'c1a2b3c4-d5e6-4f70-a890-1b2c3d4e5f60',
+  'a9b8c7d6-e5f4-4321-b098-7654321fedcb',
 ]
 
-const MOCK_DESCRIPTIONS = [
-  'AI Filmmaking Storyboard in Figma',
-  'A mail platform for AI agents',
-  'An AI-Powered Tower Defense Game Ger...',
-  '2 homo sapiens with hands full of fingers.',
-  null,
-  null,
-  'A Supabase-powered web app connectin...',
-  null,
-  'WZRD.Studio : Creative Interface to gene...',
-  'make your app customizable',
-  'Pitched reimagines online dating by lettin...',
-  'Choose Your Mentor. Change Your Life. P...',
-  "I'm working on extending the (now unsup...",
-  'This application tracks health and wellne...',
-  'Autogenerate AI patchnote newsletters a...',
-  'My Events Super Base',
-  'WhatTheStack?! is the simplest way to ch...',
-  'A friendly painting app for Spectacles. Dr...',
-  null,
-  null,
-  "It's augmentative communication mobile/...",
-  null,
-  'kill zombie costs on AWS instantly',
-  null,
-  null,
-  null,
-  'We think postgres should be able to call /...',
-  'Building AI native solutions for LATAM',
-  null,
-  null,
-  null,
-  'Your AI pair programming companion',
-  'An intelligent assistant for developers',
-  'Secure data storage solution',
-  'Cloud infrastructure manager',
-  'Design tool for pixel art',
-  'Workflow automation platform',
-  'Neural network playground',
-  'Byte-level data manipulation',
-  'Dynamic form builder',
-  'Advanced database query tool',
-  'Real-time data synchronization',
-  'Lightning fast database',
-  'Hexagonal grid system',
-  'Vector embedding storage',
-  'GraphQL schema generator',
-  'Authentication guard middleware',
-  'Edge computing framework',
-  'Serverless function lab',
-  'Server monitoring dashboard',
+const PRODUCT_NAMES = [
+  'Wireless Headphones',
+  'Mechanical Keyboard',
+  'USB-C Hub',
+  'Standing Desk',
+  'Monitor Light Bar',
+  'Ergonomic Mouse',
+  'Webcam HD',
+  'Desk Mat XL',
+  'Cable Organizer',
+  'Laptop Stand',
+  'Portable Charger',
+  'Smart Plug',
+  'LED Strip Lights',
+  'Bluetooth Speaker',
+  'Noise Machine',
+  'Screen Protector',
+  'Phone Mount',
+  'Ring Light',
+  'Drawing Tablet',
+  'Mesh Wi-Fi Router',
+  'External SSD',
+  'Docking Station',
+  'Trackpad',
+  'Desk Shelf',
+  'Air Purifier',
+  'Desk Fan',
+  'Footrest',
+  'Wrist Rest',
+  'Monitor Arm',
+  'Surge Protector',
+  'Desk Lamp',
+  'Wireless Charger',
+  'Noise-Canceling Earbuds',
+  'Smart Thermostat',
+  'Portable Monitor',
+  'Keyboard Tray',
+  'Cable Sleeve',
+  'Headphone Stand',
+  'Document Scanner',
+  'Label Maker',
+  'Pen Holder',
+  'Whiteboard',
+  'Timer Cube',
+  'Desk Clock',
+  'Power Strip',
+  'HDMI Adapter',
+  'Privacy Screen',
+  'Clip-on Light',
+  'Mini Projector',
+  'Card Reader',
 ]
+
+const PRODUCT_DESCRIPTIONS: (string | null)[] = [
+  'Over-ear with active noise cancellation',
+  'Cherry MX switches, RGB backlight',
+  '7-in-1 adapter with 4K HDMI output',
+  'Electric height-adjustable, 60x30 inch',
+  null,
+  null,
+  '1080p with autofocus and built-in mic',
+  null,
+  'Premium felt, 90x40cm',
+  'Silicone cable clips, pack of 12',
+  'Aluminum alloy, adjustable height',
+  '10000mAh, USB-C PD fast charging',
+  'Wi-Fi enabled, energy monitoring',
+  null,
+  '10W stereo, waterproof IPX7',
+  'White noise and nature sounds',
+  null,
+  null,
+  'Tempered glass, matte finish',
+  null,
+  'Magnetic car mount, MagSafe compatible',
+  null,
+  null,
+  null,
+  '10-inch with stylus, pressure sensitive',
+  'Tri-band, covers up to 5000 sq ft',
+  null,
+  null,
+  null,
+  '1TB NVMe, USB 3.2 Gen 2',
+  'Triple display support, 100W PD',
+  'Multi-touch, Bluetooth 5.0',
+  'Bamboo desktop organizer',
+  'HEPA filter, covers 400 sq ft',
+  'Rechargeable, oscillating, USB powered',
+  'Adjustable tilt, anti-slip surface',
+  'Memory foam, for 60% keyboards',
+  'Gas spring, VESA 75/100 compatible',
+  '8-outlet, 2 USB ports, 6ft cord',
+  'Adjustable color temperature, CRI 95+',
+  '15W Qi fast charge, slim profile',
+  'ANC, 30hr battery, multipoint pairing',
+  'Smart scheduling, energy saving',
+  '15.6 inch, 1080p IPS, USB-C powered',
+  'Clamp-on, adjustable height',
+  'Neoprene, 10ft length, zip closure',
+  'Walnut wood, universal fit',
+  'Duplex scanning, 600 DPI, Wi-Fi',
+  'Thermal, Bluetooth, label tape included',
+  'Bamboo, 4 compartments',
+]
+
+function seededRandom(seed: number): number {
+  const x = Math.sin(seed + 1) * 10000
+  return x - Math.floor(x)
+}
 
 function generateUUID(seed: number): string {
   const hex = (n: number) => n.toString(16).padStart(8, '0')
@@ -156,53 +164,53 @@ function generateTimestamp(seed: number): string {
   return base.toISOString().replace('T', ' ').replace('Z', '+00')
 }
 
-function generateSubmissionRows(): Record<string, string | null>[] {
+function generateProductRows(): Record<string, string | null>[] {
   const rows: Record<string, string | null>[] = []
   for (let i = 0; i < 100; i++) {
     rows.push({
       id: generateUUID(i + 1000),
-      hackathon_id: HACKATHON_IDS[i % 2],
-      name: MOCK_NAMES[i % MOCK_NAMES.length],
-      description: MOCK_DESCRIPTIONS[i % MOCK_DESCRIPTIONS.length],
+      category_id: CATEGORY_IDS[i % 2],
+      name: PRODUCT_NAMES[i % PRODUCT_NAMES.length],
+      description: PRODUCT_DESCRIPTIONS[i % PRODUCT_DESCRIPTIONS.length],
       created_at: generateTimestamp(i),
     })
   }
   return rows
 }
 
-const SUBMISSIONS_TABLE: MockTable = {
+const PRODUCTS_TABLE: MockTable = {
   id: 1,
-  name: 'submissions',
+  name: 'products',
   hasRls: true,
   columns: [
     { name: 'id', type: 'uuid', isPrimary: true },
-    { name: 'hackathon_id', type: 'uuid' },
+    { name: 'category_id', type: 'uuid' },
     { name: 'name', type: 'text' },
     { name: 'description', type: 'text' },
     { name: 'created_at', type: 'timestamptz' },
   ],
-  rows: generateSubmissionRows(),
+  rows: generateProductRows(),
 }
 
-const TEAMS_TABLE: MockTable = {
+const ORDERS_TABLE: MockTable = {
   id: 2,
-  name: 'teams',
+  name: 'orders',
   hasRls: true,
   columns: [
     { name: 'id', type: 'uuid', isPrimary: true },
-    { name: 'name', type: 'text' },
-    { name: 'submission_id', type: 'uuid' },
+    { name: 'product_id', type: 'uuid' },
+    { name: 'quantity', type: 'int4' },
     { name: 'created_at', type: 'timestamptz' },
   ],
   rows: Array.from({ length: 100 }, (_, i) => ({
     id: generateUUID(i + 5000),
-    name: `Team ${MOCK_NAMES[i % MOCK_NAMES.length]}`,
-    submission_id: generateUUID(i + 1000),
+    product_id: generateUUID(i + 1000),
+    quantity: String(Math.floor(seededRandom(i * 3) * 10) + 1),
     created_at: generateTimestamp(i + 50),
   })),
 }
 
-const ALL_TABLES: MockTable[] = [SUBMISSIONS_TABLE, TEAMS_TABLE]
+const ALL_TABLES: MockTable[] = [PRODUCTS_TABLE, ORDERS_TABLE]
 
 // ─── Mock Data Grid ─────────────────────────────────────────────────────
 
@@ -447,7 +455,7 @@ function MockDataGrid({ table }: { table: MockTable }) {
 // ─── Table Editor Screen ────────────────────────────────────────────────
 
 export function TableEditorScreen() {
-  const [selectedTableId, setSelectedTableId] = useState<number | null>(SUBMISSIONS_TABLE.id)
+  const [selectedTableId, setSelectedTableId] = useState<number | null>(PRODUCTS_TABLE.id)
   const [searchText, setSearchText] = useState('')
 
   const selectedTable = ALL_TABLES.find((t) => t.id === selectedTableId) ?? null

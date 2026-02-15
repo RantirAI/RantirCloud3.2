@@ -11,6 +11,7 @@ export function SupaMock({
   organizationName,
   organizationPlan,
   branchName,
+  organizations,
 }: SupaMockProps) {
   return (
     <div
@@ -26,6 +27,7 @@ export function SupaMock({
         organizationName={organizationName}
         organizationPlan={organizationPlan}
         branchName={branchName}
+        organizations={organizations}
       >
         <MockDashboardLayout />
       </MockProviders>

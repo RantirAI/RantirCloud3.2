@@ -1,6 +1,7 @@
 import type { ReactNode } from 'react'
 
 import { MockRouterProvider } from '../router/MockRouterContext'
+import type { SupaMockOrganization } from '../types'
 import { MockProjectProvider } from './MockProjectContext'
 import { MockUserProvider } from './MockUserContext'
 
@@ -10,6 +11,7 @@ interface MockProvidersProps {
   organizationName?: string
   organizationPlan?: string
   branchName?: string
+  organizations?: SupaMockOrganization[]
   children: ReactNode
 }
 
@@ -19,6 +21,7 @@ export function MockProviders({
   organizationName,
   organizationPlan,
   branchName,
+  organizations,
   children,
 }: MockProvidersProps) {
   return (
@@ -28,6 +31,7 @@ export function MockProviders({
         organizationName={organizationName}
         organizationPlan={organizationPlan}
         branchName={branchName}
+        organizations={organizations}
       >
         <MockUserProvider>{children}</MockUserProvider>
       </MockProjectProvider>

@@ -1,5 +1,10 @@
 import type { ComponentType, ReactNode } from 'react'
 
+export interface SupaMockOrganization {
+  name: string
+  slug: string
+}
+
 export interface SupaMockProps {
   defaultScreen?: string
   className?: string
@@ -7,6 +12,7 @@ export interface SupaMockProps {
   organizationName?: string
   organizationPlan?: string
   branchName?: string
+  organizations?: SupaMockOrganization[]
 }
 
 export interface MockRoute {
@@ -45,6 +51,7 @@ export interface MockUser {
 
 export interface MockProjectContextType {
   project: MockProject
+  organizations: SupaMockOrganization[]
 }
 
 export interface MockUserContextType {

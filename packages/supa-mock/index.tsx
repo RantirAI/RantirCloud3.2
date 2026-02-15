@@ -1,2 +1,2 @@
 export { SupaMock } from './src/SupaMock'
-export type { SupaMockProps } from './src/types'
+export type { SupaMockProps, SupaMockOrganization } from './src/types'

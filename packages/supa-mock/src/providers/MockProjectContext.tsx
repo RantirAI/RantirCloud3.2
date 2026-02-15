@@ -1,6 +1,6 @@
 import { createContext, useContext, useMemo, type ReactNode } from 'react'
 
-import type { MockProject, MockProjectContextType } from '../types'
+import type { MockProject, MockProjectContextType, SupaMockOrganization } from '../types'
 
 const MockProjectContext = createContext<MockProjectContextType | null>(null)
 
@@ -17,6 +17,7 @@ interface MockProjectProviderProps {
   organizationName?: string
   organizationPlan?: string
   branchName?: string
+  organizations?: SupaMockOrganization[]
   children: ReactNode
 }
 
@@ -38,6 +39,7 @@ export function MockProjectProvider({
   organizationName,
   organizationPlan,
   branchName,
+  organizations = [],
   children,
 }: MockProjectProviderProps) {
   const project = useMemo<MockProject>(
@@ -64,5 +66,9 @@ export function MockProjectProvider({
     [projectName, organizationName, organizationPlan, branchName]
   )
 
-  return <MockProjectContext.Provider value={{ project }}>{children}</MockProjectContext.Provider>
+  return (
+    <MockProjectContext.Provider value={{ project, organizations }}>
+      {children}
+    </MockProjectContext.Provider>
+  )
 }
