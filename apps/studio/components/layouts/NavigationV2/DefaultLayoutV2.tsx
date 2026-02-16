@@ -6,6 +6,7 @@ import { AppBannerWrapper } from 'components/interfaces/App/AppBannerWrapper'
 import { SidebarInset, SidebarProvider } from 'ui'
 import { AppSidebarV2 } from './AppSidebarV2'
 import { RightRailLayout } from './RightIconRail'
+import { LayoutSidebarProvider } from '../ProjectLayout/LayoutSidebar/LayoutSidebarProvider'
 import { ProjectContextProvider } from '../ProjectLayout/ProjectContext'
 
 export interface DefaultLayoutV2Props {
@@ -30,17 +31,19 @@ export const DefaultLayoutV2 = ({ children }: PropsWithChildren<DefaultLayoutV2P
 
   return (
     <ProjectContextProvider projectRef={ref}>
-      <div className="flex flex-col h-screen w-screen">
-        <AppBannerWrapper />
-        <RightRailLayout>
-          <SidebarProvider defaultOpen={true}>
-            {!router.pathname.startsWith('/account') && <AppSidebarV2 />}
-            <SidebarInset>
-              <div className="h-full overflow-y-auto">{children}</div>
-            </SidebarInset>
-          </SidebarProvider>
-        </RightRailLayout>
-      </div>
+      <LayoutSidebarProvider>
+        <div className="flex flex-col h-screen w-screen">
+          <AppBannerWrapper />
+          <RightRailLayout>
+            <SidebarProvider defaultOpen={true}>
+              {!router.pathname.startsWith('/account') && <AppSidebarV2 />}
+              <SidebarInset>
+                <div className="h-full overflow-y-auto">{children}</div>
+              </SidebarInset>
+            </SidebarProvider>
+          </RightRailLayout>
+        </div>
+      </LayoutSidebarProvider>
     </ProjectContextProvider>
   )
 }

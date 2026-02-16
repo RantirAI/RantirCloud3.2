@@ -1,40 +1,38 @@
-import { Bell, Bot, CircleHelp, Database, type LucideIcon } from 'lucide-react'
-import { useMemo, useState, type ReactNode } from 'react'
+import { Bot, Lightbulb, PenLine, type LucideIcon } from 'lucide-react'
+import type { ReactNode } from 'react'
 
+import { useSidebarManagerSnapshot } from 'state/sidebar-manager-state'
+import { SIDEBAR_KEYS } from '../ProjectLayout/LayoutSidebar/LayoutSidebarProvider'
 import { cn } from 'ui'
 
-type RailItem = {
+interface RailItem {
+  id: string
   label: string
   icon: LucideIcon
 }
 
-const rightRailItems: RailItem[] = [
-  { label: 'AI', icon: Bot },
-  { label: 'SQL', icon: Database },
-  { label: 'Alerts', icon: Bell },
-  { label: 'Help', icon: CircleHelp },
+const RAIL_ITEMS: RailItem[] = [
+  { id: SIDEBAR_KEYS.AI_ASSISTANT, label: 'AI', icon: Bot },
+  { id: SIDEBAR_KEYS.EDITOR_PANEL, label: 'Editor', icon: PenLine },
+  { id: SIDEBAR_KEYS.ADVISOR_PANEL, label: 'Advisor', icon: Lightbulb },
 ]
 
-export function RightIconRail({
-  activeItemLabel,
-  onSelect,
-}: {
-  activeItemLabel: string | null
-  onSelect: (label: string) => void
-}) {
+function RightIconRail() {
+  const { activeSidebar, toggleSidebar } = useSidebarManagerSnapshot()
+
   return (
-    <aside className="bg-dash-sidebar text-foreground-lighter border-default flex w-12 border-l">
-      <nav className="flex flex-1 flex-col items-center justify-center gap-1 py-2">
-        {rightRailItems.map((item) => {
-          const isActive = activeItemLabel === item.label
+    <aside className="bg-dash-sidebar text-foreground-lighter border-default flex w-12 shrink-0 border-l">
+      <nav className="flex flex-1 flex-col items-center gap-1 py-2 pt-3">
+        {RAIL_ITEMS.map((item) => {
+          const isActive = activeSidebar?.id === item.id
 
           return (
             <button
-              key={item.label}
+              key={item.id}
               type="button"
               aria-label={item.label}
               aria-pressed={isActive}
-              onClick={() => onSelect(item.label)}
+              onClick={() => toggleSidebar(item.id)}
               className={cn(
                 'inline-flex size-8 items-center justify-center rounded-md transition-colors',
                 isActive
@@ -51,40 +49,26 @@ export function RightIconRail({
   )
 }
 
-export function RightRailLayout({ children }: { children: ReactNode }) {
-  const [activeItemLabel, setActiveItemLabel] = useState<string | null>(null)
+function RightSidebarPanel() {
+  const { activeSidebar } = useSidebarManagerSnapshot()
 
-  const activeItem = useMemo(
-    () => rightRailItems.find((item) => item.label === activeItemLabel) ?? null,
-    [activeItemLabel]
-  )
-
-  const handleSelect = (label: string) => {
-    setActiveItemLabel((current) => (current === label ? null : label))
-  }
+  if (!activeSidebar?.component) return null
 
   return (
-    <div className="min-h-svh md:flex">
+    <aside className="bg-dash-sidebar border-default flex w-[420px] shrink-0 flex-col border-l overflow-hidden">
+      {activeSidebar.component()}
+    </aside>
+  )
+}
+
+export function RightRailLayout({ children }: { children: ReactNode }) {
+  return (
+    <div className="flex flex-1 overflow-hidden">
       <div className="min-w-0 flex-1">{children}</div>
 
       <div className="hidden md:flex md:shrink-0">
-        {activeItem ? (
-          <aside className="bg-dash-sidebar border-default flex w-96 flex-col border-l">
-            <header className="border-default border-b p-4">
-              <p className="text-foreground-muted text-xs uppercase font-mono tracking-wide">
-                {activeItem.label}
-              </p>
-            </header>
-            <div className="flex flex-1 flex-col items-center justify-center gap-2 p-4 pt-0 text-center">
-              <h1 className="font-medium text-foreground">Content Area</h1>
-              <p className="text-foreground-muted text-sm">
-                This is the main content area for all pages.
-              </p>
-            </div>
-          </aside>
-        ) : null}
-
-        <RightIconRail activeItemLabel={activeItemLabel} onSelect={handleSelect} />
+        <RightSidebarPanel />
+        <RightIconRail />
       </div>
     </div>
   )
