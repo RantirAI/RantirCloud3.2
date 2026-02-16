@@ -138,7 +138,9 @@ export function AppSidebarV2({ scope }: AppSidebarV2Props = {}) {
         {
           title: 'Home',
           url: ref ? `/project/${ref}` : '/project',
-          icon: <Home size={16} strokeWidth={1.5} />,
+          icon: ({ className }: { className: string }) => (
+            <Home strokeWidth={1.5} className={className} />
+          ),
         },
         {
           title: 'Project Settings',
@@ -295,14 +297,19 @@ export function AppSidebarV2({ scope }: AppSidebarV2Props = {}) {
           <SidebarContent className="h-full gap-0">
             {isProjectScope ? (
               <>
-                <NavGroup label="Project" items={projectItems} />
-                <NavGroup label="Database" items={databaseItems} />
-                <NavGroup label="Platform" items={platformItems} />
-                <NavGroup label="Observability" items={observabilityItems} />
-                <NavGroup label="Integrations" items={integrationsItems} />
+                <NavGroup id="project" label="Project" items={projectItems} />
+                <NavGroup id="database" label="Database" items={databaseItems} />
+                <NavGroup id="platform" label="Platform" items={platformItems} />
+                <NavGroup id="observability" label="Observability" items={observabilityItems} />
+                <NavGroup id="integrations" label="Integrations" items={integrationsItems} />
               </>
             ) : (
-              <NavGroup label="Organization" items={organizationItems} isCollapsible={false} />
+              <NavGroup
+                id="organization"
+                label="Organization"
+                items={organizationItems}
+                isCollapsible={false}
+              />
             )}
           </SidebarContent>
           <div
