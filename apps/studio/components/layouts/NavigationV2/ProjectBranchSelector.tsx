@@ -56,6 +56,7 @@ export function ProjectBranchSelector() {
   const projectCreationEnabled = useIsFeatureEnabled('projects:create')
 
   const isBranch = project?.parentRef !== project?.ref
+  const isProductionBranch = !isBranch
   const { data: parentProject } = useProjectDetailQuery(
     { ref: project?.parent_project_ref },
     { enabled: isBranch }
@@ -147,10 +148,22 @@ export function ProjectBranchSelector() {
               size="lg"
               className="data-[state=open]:bg-sidebar-accent data-[state=open]:text-sidebar-accent-foreground gap-3 h-auto text-left group px-2"
             >
-              <span className="relative flex h-8 w-8 shrink-0 items-center justify-center rounded border bg-surface-100 text-xs font-medium text-foreground-lighter">
+              <span
+                className={cn(
+                  'relative flex h-8 w-8 shrink-0 items-center justify-center rounded border text-xs font-medium',
+                  isProductionBranch
+                    ? 'bg-warning-600 border-warning-600 text-white'
+                    : 'bg-surface-100 text-foreground-lighter'
+                )}
+              >
                 <span className="group-hover:hidden">{selectedOrgInitial}</span>
                 <span
-                  className="hidden group-hover:flex h-full w-full items-center justify-center text-foreground hover:text-foreground-light cursor-pointer"
+                  className={cn(
+                    'hidden group-hover:flex h-full w-full items-center justify-center cursor-pointer',
+                    isProductionBranch
+                      ? 'text-white hover:text-white/90'
+                      : 'text-foreground hover:text-foreground-light'
+                  )}
                   role="button"
                   tabIndex={0}
                   aria-label="Go to organization"

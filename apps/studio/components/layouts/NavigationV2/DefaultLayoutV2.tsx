@@ -1,8 +1,8 @@
-import { useParams } from 'common'
+import { useBreakpoint, useParams } from 'common'
 import { AppBannerWrapper } from 'components/interfaces/App/AppBannerWrapper'
 import { useRouter } from 'next/router'
 import { PropsWithChildren } from 'react'
-import { SidebarInset, SidebarProvider } from 'ui'
+import { ResizableHandle, ResizablePanel, ResizablePanelGroup, SidebarProvider } from 'ui'
 
 import { LayoutSidebarProvider } from '../ProjectLayout/LayoutSidebar/LayoutSidebarProvider'
 import { ProjectContextProvider } from '../ProjectLayout/ProjectContext'
@@ -13,11 +13,15 @@ export interface DefaultLayoutV2Props {
   headerTitle?: string
 }
 
+const LEFT_SIDEBAR_MIN_SIZE_PERCENTAGE = 14
+const LEFT_SIDEBAR_DEFAULT_SIZE_PERCENTAGE = 18
+const LEFT_SIDEBAR_MAX_SIZE_PERCENTAGE = 32
+
 /**
  * New three-column layout for the dashboard (V2 navigation).
  *
  * Layout structure:
- * 1. Left sidebar (collapsible) - navigation with groups (Database, Platform, Observability, Integrations)
+ * 1. Left sidebar - navigation with groups (Database, Platform, Observability, Integrations)
  * 2. Main content area - page content (no secondary nav bar)
  * 3. Right icon rail - AI, SQL, Alerts, Help panels
  *
@@ -28,7 +32,9 @@ export interface DefaultLayoutV2Props {
 export const DefaultLayoutV2 = ({ children }: PropsWithChildren<DefaultLayoutV2Props>) => {
   const { ref } = useParams()
   const router = useRouter()
+  const isMobile = useBreakpoint('md')
   const scope = router.pathname.startsWith('/project') ? 'project' : 'organization'
+  const showLeftSidebar = !router.pathname.startsWith('/account') && !isMobile
 
   return (
     <ProjectContextProvider projectRef={ref}>
@@ -37,10 +43,37 @@ export const DefaultLayoutV2 = ({ children }: PropsWithChildren<DefaultLayoutV2P
           <AppBannerWrapper />
           <RightRailLayout>
             <SidebarProvider defaultOpen={true} className="h-full min-h-0 overflow-hidden">
-              {!router.pathname.startsWith('/account') && <AppSidebarV2 scope={scope} />}
-              <SidebarInset className="h-full min-h-0 overflow-hidden">
+              {showLeftSidebar ? (
+                <ResizablePanelGroup
+                  direction="horizontal"
+                  autoSaveId="default-layout-v2-left-sidebar"
+                  className="h-full w-full overflow-hidden"
+                >
+                  <ResizablePanel
+                    id="panel-v2-left-sidebar"
+                    order={1}
+                    minSize={LEFT_SIDEBAR_MIN_SIZE_PERCENTAGE}
+                    maxSize={LEFT_SIDEBAR_MAX_SIZE_PERCENTAGE}
+                    defaultSize={LEFT_SIDEBAR_DEFAULT_SIZE_PERCENTAGE}
+                    className="h-full min-h-0 overflow-hidden"
+                  >
+                    <AppSidebarV2 scope={scope} />
+                  </ResizablePanel>
+                  <ResizableHandle withHandle className="hidden md:flex" />
+                  <ResizablePanel
+                    id="panel-v2-main-content"
+                    order={2}
+                    minSize={100 - LEFT_SIDEBAR_MAX_SIZE_PERCENTAGE}
+                    maxSize={100 - LEFT_SIDEBAR_MIN_SIZE_PERCENTAGE}
+                    defaultSize={100 - LEFT_SIDEBAR_DEFAULT_SIZE_PERCENTAGE}
+                    className="h-full min-h-0 min-w-0 overflow-hidden"
+                  >
+                    <div className="flex h-full min-h-0 flex-1 overflow-hidden">{children}</div>
+                  </ResizablePanel>
+                </ResizablePanelGroup>
+              ) : (
                 <div className="flex h-full min-h-0 flex-1 overflow-hidden">{children}</div>
-              </SidebarInset>
+              )}
             </SidebarProvider>
           </RightRailLayout>
         </div>

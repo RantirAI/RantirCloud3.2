@@ -15,10 +15,20 @@ import { useSelectedProjectQuery } from 'hooks/misc/useSelectedProject'
 import { usePHFlag } from 'hooks/ui/useFlag'
 import { Home } from 'icons'
 import { IS_PLATFORM, PROJECT_STATUS } from 'lib/constants'
-import { Blocks, Boxes, ChartArea, Compass, Plug, Receipt, Search, Settings, Users } from 'lucide-react'
+import {
+  Blocks,
+  Boxes,
+  ChartArea,
+  Compass,
+  Plug,
+  Receipt,
+  Search,
+  Settings,
+  Users,
+} from 'lucide-react'
 import { useRouter } from 'next/router'
 import { parseAsBoolean, useQueryState } from 'nuqs'
-import { Button, Sidebar, SidebarContent, SidebarFooter, SidebarHeader, SidebarRail } from 'ui'
+import { Button, Sidebar, SidebarContent, SidebarFooter, SidebarHeader } from 'ui'
 import { useSetCommandMenuOpen } from 'ui-patterns'
 
 import { generateSettingsMenu } from '../ProjectSettingsLayout/SettingsMenu.utils'
@@ -50,7 +60,8 @@ export function AppSidebarV2({ scope }: AppSidebarV2Props = {}) {
   const isFlagResolved = connectSheetFlag !== undefined
   const isConnectSheetEnabled = connectSheetFlag === true || connectSheetFlag === 'variation'
 
-  const currentScope = scope ?? (router.pathname.startsWith('/project') ? 'project' : 'organization')
+  const currentScope =
+    scope ?? (router.pathname.startsWith('/project') ? 'project' : 'organization')
   const isProjectScope = currentScope === 'project'
 
   const ref = projectRef ?? project?.ref ?? ''
@@ -60,12 +71,15 @@ export function AppSidebarV2({ scope }: AppSidebarV2Props = {}) {
   const isProjectBuilding = project?.status === PROJECT_STATUS.COMING_UP
 
   // Database flags
-  const { data: extensions } = useDatabaseExtensionsQuery({
-    projectRef: project?.ref,
-    connectionString: project?.connectionString,
-  }, {
-    enabled: isProjectScope,
-  })
+  const { data: extensions } = useDatabaseExtensionsQuery(
+    {
+      projectRef: project?.ref,
+      connectionString: project?.connectionString,
+    },
+    {
+      enabled: isProjectScope,
+    }
+  )
   const { data: addons } = useProjectAddonsQuery(
     { projectRef: project?.ref },
     { enabled: isProjectScope }
@@ -246,7 +260,7 @@ export function AppSidebarV2({ scope }: AppSidebarV2Props = {}) {
 
   return (
     <>
-      <Sidebar collapsible="icon" className="h-full min-h-0">
+      <Sidebar collapsible="none" className="h-full min-h-0 w-full border-r border-default group">
         <SidebarHeader className="gap-2 pt-4">
           <div className="space-y-2">
             {isProjectScope ? <ProjectBranchSelector /> : IS_PLATFORM ? <OrgSelector /> : null}
@@ -301,14 +315,15 @@ export function AppSidebarV2({ scope }: AppSidebarV2Props = {}) {
           />
         </div>
         <SidebarFooter>{IS_PLATFORM && <NavUser />}</SidebarFooter>
-        <SidebarRail />
       </Sidebar>
 
-      {isProjectScope && isFlagResolved
-        ? isConnectSheetEnabled
-          ? <ConnectSheet />
-          : <Connect />
-        : null}
+      {isProjectScope && isFlagResolved ? (
+        isConnectSheetEnabled ? (
+          <ConnectSheet />
+        ) : (
+          <Connect />
+        )
+      ) : null}
     </>
   )
 }
