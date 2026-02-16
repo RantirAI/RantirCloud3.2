@@ -59,8 +59,8 @@ function RightIconRail() {
   const { activeSidebar, toggleSidebar } = useSidebarManagerSnapshot()
 
   return (
-    <aside className="bg-background text-foreground-lighter border-default flex w-12 shrink-0 border-l">
-      <nav className="flex flex-1 flex-col items-center justify-center gap-1 py-2 pt-3">
+    <aside className="bg-dash-sidebar text-foreground-lighter border-default flex w-10 shrink-0 border-l">
+      <nav className="flex flex-1 flex-col items-center justify-center gap-2 py-2 pt-3">
         {RAIL_ITEMS.map((item) => {
           const isActive = activeSidebar?.id === item.id
 

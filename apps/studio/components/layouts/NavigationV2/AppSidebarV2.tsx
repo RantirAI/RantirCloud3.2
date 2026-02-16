@@ -291,8 +291,8 @@ export function AppSidebarV2({ scope }: AppSidebarV2Props = {}) {
                   onClick={() => {
                     setCommandMenuOpen(true)
                   }}
-                  className="h-8 w-8 px-0 justify-center text-foreground-lighter font-normal bg-transparent"
-                  icon={<Search size={14} strokeWidth={1.5} />}
+                  className="h-8 min-w-8 !w-8 px-0 justify-center text-foreground-lighter font-normal bg-transparent"
+                  icon={<Search strokeWidth={1.5} />}
                 />
                 <Button
                   type="default"
@@ -301,8 +301,8 @@ export function AppSidebarV2({ scope }: AppSidebarV2Props = {}) {
                   onClick={() => {
                     setShowConnect(true)
                   }}
-                  className="h-8 flex-1 justify-center gap-0"
-                  icon={<Plug size={14} strokeWidth={1.5} />}
+                  className="h-8 flex-1 justify-center gap-0 pl-2"
+                  icon={<Plug className="rotate-90" strokeWidth={1.5} />}
                 >
                   <span>Connect</span>
                 </Button>

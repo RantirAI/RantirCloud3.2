@@ -75,7 +75,7 @@ export function NavGroup({ id, label, items, isCollapsible = true }: NavGroupPro
                   className="gap-2 text-foreground-light !py-1.5 !h-7"
                 >
                   <NavItemIcon icon={item.icon} />
-                  <span>{item.title}</span>
+                  <span className="truncate">{item.title}</span>
                   {item.label && (
                     <Badge className="ml-1 px-1.5 py-0.5 bg-transparent !border-stronger text-[10px] leading-none font-medium">
                       {item.label}
