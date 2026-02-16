@@ -70,6 +70,7 @@ export const InviteMemberButton = () => {
   const orgScopedRoles = allRoles?.org_scoped_roles ?? []
 
   const currentPlan = organization?.plan
+  const isFreeOrProPlan = currentPlan?.id === 'free' || currentPlan?.id === 'pro'
   const hasAccessToProjectLevelPermissions = useHasAccessToProjectLevelPermissions(slug as string)
 
   const userMemberData = members?.find((m) => m.gotrue_id === profile?.gotrue_id)
@@ -258,7 +259,7 @@ export const InviteMemberButton = () => {
           type="note"
           showIcon={false}
           title="Single Sign-On (SSO) available"
-          layout="horizontal"
+          layout={isFreeOrProPlan ? 'vertical' : 'horizontal'}
           className="rounded-none border-t-0 border-x-0 px-5"
           description="Enforce login via your company identity provider for added security and access control. Available on Team plan and above."
           actions={
@@ -268,13 +269,13 @@ export const InviteMemberButton = () => {
                   Learn more
                 </Link>
               </Button>
-              {(currentPlan?.id === 'free' || currentPlan?.id === 'pro') && (
+              {isFreeOrProPlan ? (
                 <UpgradePlanButton
                   plan="Team"
                   source="inviteMemberSSO"
                   featureProposition="enable Single Sign-on (SSO)"
                 />
-              )}
+              ) : null}
             </>
           }
         />
