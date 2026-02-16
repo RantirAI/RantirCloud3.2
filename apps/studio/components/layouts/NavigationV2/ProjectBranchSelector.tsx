@@ -162,7 +162,7 @@ export function ProjectBranchSelector() {
                 projectCreationEnabled={projectCreationEnabled}
               />
               <BranchColumn
-                ref={ref}
+                projectRef={ref}
                 branches={branchList}
                 selectedBranch={selectedBranch}
                 isBranchingEnabled={isBranchingEnabled}
@@ -317,7 +317,7 @@ function ProjectColumn({
 // ─── Branch column (right) ────────────────────────────────────────────────────
 
 function BranchColumn({
-  ref: projectRef,
+  projectRef,
   branches,
   selectedBranch,
   isBranchingEnabled,
@@ -326,7 +326,7 @@ function BranchColumn({
   onCreateBranch,
   onManageBranches,
 }: {
-  ref?: string
+  projectRef?: string
   branches: Branch[]
   selectedBranch?: Branch
   isBranchingEnabled: boolean
