@@ -1,4 +1,5 @@
 import { QueryClient, useQuery } from '@tanstack/react-query'
+import { IS_PLATFORM } from 'common'
 import { UseCustomQueryOptions } from 'types'
 
 import { useConnectionStringForReadOps } from '../read-replicas/replicas-query'
@@ -149,6 +150,7 @@ export const useForeignKeyConstraintsQuery = <TData = ForeignKeyConstraintsData>
       enabled &&
       typeof projectRef !== 'undefined' &&
       typeof schema !== 'undefined' &&
+      (!IS_PLATFORM || typeof connectionString !== 'undefined') &&
       schema.length > 0,
     ...options,
   })

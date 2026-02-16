@@ -401,7 +401,7 @@ export const useTableRowsQuery = <TData = TableRowsData>(
   { enabled = true, ...options }: UseCustomQueryOptions<TableRowsData, TableRowsError, TData> = {}
 ) => {
   const queryClient = useQueryClient()
-  const { connectionString: connectionStringReadOps } = useConnectionStringForReadOps()
+  const { connectionString: connectionStringReadOps, type } = useConnectionStringForReadOps()
   const connectionString = connectionStringOverride || connectionStringReadOps
 
   return useQuery<TableRowsData, TableRowsError, TData>({
@@ -411,7 +411,11 @@ export const useTableRowsQuery = <TData = TableRowsData>(
     }),
     queryFn: ({ signal }) =>
       getTableRows({ queryClient, projectRef, connectionString, tableId, ...args }, signal),
-    enabled: enabled && typeof projectRef !== 'undefined' && typeof tableId !== 'undefined',
+    enabled:
+      enabled &&
+      typeof projectRef !== 'undefined' &&
+      typeof tableId !== 'undefined' &&
+      (!IS_PLATFORM || typeof connectionString !== 'undefined'),
     ...options,
   })
 }

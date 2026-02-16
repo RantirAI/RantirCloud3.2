@@ -4,6 +4,7 @@ import {
   THRESHOLD_COUNT,
 } from '@supabase/pg-meta/src/sql/studio/get-count-estimate'
 import { QueryClient, useQuery, useQueryClient } from '@tanstack/react-query'
+import { IS_PLATFORM } from 'common'
 import { parseSupaTable } from 'components/grid/SupabaseGrid.utils'
 import type { Filter, SupaTable } from 'components/grid/types'
 import { prefetchTableEditor } from 'data/table-editor/table-editor-query'
@@ -162,7 +163,11 @@ export const useTableRowsCountQuery = <TData = TableRowsCountData>(
     queryKey: tableRowKeys.tableRowsCount(projectRef, { table: { id: tableId }, ...args }),
     queryFn: ({ signal }) =>
       getTableRowsCount({ queryClient, projectRef, connectionString, tableId, ...args }, signal),
-    enabled: enabled && typeof projectRef !== 'undefined' && typeof tableId !== 'undefined',
+    enabled:
+      enabled &&
+      typeof projectRef !== 'undefined' &&
+      typeof tableId !== 'undefined' &&
+      (!IS_PLATFORM || typeof connectionString !== 'undefined'),
     ...options,
   })
 }

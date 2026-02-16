@@ -59,8 +59,8 @@ export const usePrimaryDatabase = ({ projectRef }: { projectRef?: string }) => {
 }
 
 /**
- * [Joshen] JFYI this is logic here can and should be optimized
- * Use connection string of read replica if available, otherwise default to project's (primary)
+ * [Joshen] JFYI this logic here can and should be optimized
+ * Returns the connection string of read replica if available, otherwise default to project's (primary)
  * If multiple read replicas available, (naively) prioritise replica in the same region as primary
  * to minimize any latency. Otherwise just use the first available read replica
  */
@@ -69,16 +69,16 @@ export const useConnectionStringForReadOps = () => {
   const defaultToReadReplicaConnectionString = useFlag('defaultToReadReplicaConnectionString')
 
   const { data: project, isSuccess: isSuccessProject } = useSelectedProjectQuery()
-  const { data: databases = [], isSuccess: isSuccessDatabases } = useReadReplicasQuery({
+  const { data: databases = [], isLoading: isLoadingDatabases } = useReadReplicasQuery({
     projectRef: project?.ref,
   })
 
   const readReplicas = databases.filter((x) => x.identifier !== project?.ref)
-  const readReplica = databases.some((x) => x.region === project?.region)
-    ? databases.find((x) => x.region === project?.region)
+  const readReplica = readReplicas.some((x) => x.region === project?.region)
+    ? readReplicas.find((x) => x.region === project?.region)
     : readReplicas[0]
 
-  if (!isSuccessProject || !isSuccessDatabases || !flagsLoaded) {
+  if (!isSuccessProject || isLoadingDatabases || !flagsLoaded) {
     return { connectionString: undefined, type: undefined }
   }
 
