@@ -27,5 +27,6 @@ file_env() {
 file_env 'POSTGRES_PASSWORD'
 file_env 'SUPABASE_ANON_KEY'
 file_env 'SUPABASE_SERVICE_KEY'
+file_env 'KONG_MIDDLEWARE_KEY'
 
 exec "${@}"

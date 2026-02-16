@@ -296,3 +296,8 @@ services:
       - name: basic-auth
         config:
           hide_credentials: true
+      - name: request-transformer
+        config:
+          add:
+            headers:
+              - x-middleware-auth:$KONG_MIDDLEWARE_KEY

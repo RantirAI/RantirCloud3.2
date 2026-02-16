@@ -60,6 +60,8 @@ logflare_private_access_token=$(gen_base64 24)
 s3_protocol_access_key_id=$(gen_hex 16)
 s3_protocol_access_key_secret=$(gen_hex 32)
 
+kong_middleware_key=$(gen_hex 32)
+
 echo ""
 echo "JWT_SECRET=${jwt_secret}"
 echo ""
@@ -73,6 +75,7 @@ echo "VAULT_ENC_KEY=${vault_enc_key}"
 echo "PG_META_CRYPTO_KEY=${pg_meta_crypto_key}"
 echo "LOGFLARE_PUBLIC_ACCESS_TOKEN=${logflare_public_access_token}"
 echo "LOGFLARE_PRIVATE_ACCESS_TOKEN=${logflare_private_access_token}"
+echo "KONG_MIDDLEWARE_KEY=${kong_middleware_key}"
 echo "S3_PROTOCOL_ACCESS_KEY_ID=${s3_protocol_access_key_id}"
 echo "S3_PROTOCOL_ACCESS_KEY_SECRET=${s3_protocol_access_key_secret}"
 echo ""
@@ -112,6 +115,7 @@ sed \
     -e "s|^PG_META_CRYPTO_KEY=.*$|PG_META_CRYPTO_KEY=${pg_meta_crypto_key}|" \
     -e "s|^LOGFLARE_PUBLIC_ACCESS_TOKEN=.*$|LOGFLARE_PUBLIC_ACCESS_TOKEN=${logflare_public_access_token}|" \
     -e "s|^LOGFLARE_PRIVATE_ACCESS_TOKEN=.*$|LOGFLARE_PRIVATE_ACCESS_TOKEN=${logflare_private_access_token}|" \
+    -e "s|^KONG_MIDDLEWARE_KEY=.*$|KONG_MIDDLEWARE_KEY=${kong_middleware_key}|" \
     -e "s|^S3_PROTOCOL_ACCESS_KEY_ID=.*$|S3_PROTOCOL_ACCESS_KEY_ID=${s3_protocol_access_key_id}|" \
     -e "s|^S3_PROTOCOL_ACCESS_KEY_SECRET=.*$|S3_PROTOCOL_ACCESS_KEY_SECRET=${s3_protocol_access_key_secret}|" \
     -e "s|^POSTGRES_PASSWORD=.*$|POSTGRES_PASSWORD=${postgres_password}|" \

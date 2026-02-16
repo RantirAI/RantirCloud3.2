@@ -43,6 +43,18 @@ export default async function apiWrapper(
       }
     }
 
+    if (!IS_PLATFORM) {
+      const middlewareAuth = process.env.KONG_MIDDLEWARE_KEY
+      // if a middleware key has been set for kong, verify that it matches header supplied by kong
+      if(middlewareAuth && req.headers['x-middleware-auth'] !== middlewareAuth) {
+        return res.status(401).json({
+          error: {
+            message: `Unauthorized: middleware auth failed`,
+          },
+        })
+      }
+    }
+
     return handler(req, res)
   } catch (error) {
     return res.status(500).json({ error })

@@ -19,7 +19,7 @@ services:
           "CMD",
           "node",
           "-e",
-          "fetch('http://studio:3000/api/platform/profile').then((r) => {if (r.status !== 200) throw new Error(r.status)})"
+          "fetch('http://studio:3000/api/platform/profile', {headers:{'x-middleware-auth':process.env.KONG_MIDDLEWARE_KEY}}).then((r) => {if (r.status !== 200) throw new Error(r.status)})"
         ]
       timeout: 10s
       interval: 5s
@@ -47,7 +47,8 @@ services:
       SUPABASE_ANON_KEY: ${ANON_KEY}
       SUPABASE_SERVICE_KEY: ${SERVICE_ROLE_KEY}
       AUTH_JWT_SECRET: ${JWT_SECRET}
-
+      # validate requests come through kong
+      KONG_MIDDLEWARE_KEY: ${KONG_MIDDLEWARE_KEY}
       # LOGFLARE_API_KEY is deprecated
       LOGFLARE_API_KEY: ${LOGFLARE_PUBLIC_ACCESS_TOKEN}
       LOGFLARE_PUBLIC_ACCESS_TOKEN: ${LOGFLARE_PUBLIC_ACCESS_TOKEN}
@@ -90,6 +91,7 @@ services:
       SUPABASE_SERVICE_KEY: ${SERVICE_ROLE_KEY}
       DASHBOARD_USERNAME: ${DASHBOARD_USERNAME}
       DASHBOARD_PASSWORD: ${DASHBOARD_PASSWORD}
+      KONG_MIDDLEWARE_KEY: ${KONG_MIDDLEWARE_KEY}
     # https://unix.stackexchange.com/a/294837
     entrypoint: bash -c 'eval "echo \"$$(cat ~/temp.yml)\"" > ~/kong.yml && /docker-entrypoint.sh kong docker-start'
 
