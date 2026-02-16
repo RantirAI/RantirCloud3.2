@@ -29,6 +29,7 @@ import {
 } from 'ui'
 
 import { NavGroup } from './NavGroup'
+import { NavUser } from './NavUser'
 import {
   generateDatabaseNavItems,
   generateIntegrationsNavItems,
@@ -168,6 +169,7 @@ export function AppSidebarV2() {
             </SidebarMenuButton>
           </SidebarMenuItem>
         </SidebarMenu>
+        {IS_PLATFORM && <NavUser />}
       </SidebarFooter>
       <SidebarRail />
     </Sidebar>
