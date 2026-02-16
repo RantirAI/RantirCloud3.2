@@ -6,6 +6,7 @@ import Link from 'next/link'
 import { isValidElement } from 'react'
 import type { ReactNode } from 'react'
 import {
+  Badge,
   Collapsible_Shadcn_ as Collapsible,
   CollapsibleContent_Shadcn_ as CollapsibleContent,
   CollapsibleTrigger_Shadcn_ as CollapsibleTrigger,
@@ -76,9 +77,9 @@ export function NavGroup({ id, label, items, isCollapsible = true }: NavGroupPro
                   <NavItemIcon icon={item.icon} />
                   <span>{item.title}</span>
                   {item.label && (
-                    <span className="ml-1 rounded bg-foreground-muted/20 px-1.5 py-0.5 text-[10px] leading-none font-medium">
+                    <Badge className="ml-1 px-1.5 py-0.5 bg-transparent !border-stronger text-[10px] leading-none font-medium">
                       {item.label}
-                    </span>
+                    </Badge>
                   )}
                   <ChevronRight
                     strokeWidth={1.5}
@@ -87,7 +88,7 @@ export function NavGroup({ id, label, items, isCollapsible = true }: NavGroupPro
                 </SidebarMenuButton>
               </CollapsibleTrigger>
               <CollapsibleContent>
-                <SidebarMenuSub className="gap-[2px] ml-3 mr-0 px-3.5">
+                <SidebarMenuSub className="gap-[2px] ml-3 mr-0 pl-3.5 pr-0">
                   {item.items.map((subItem) => (
                     <SidebarMenuSubItem key={subItem.title}>
                       <SidebarMenuSubButton asChild isActive={subItem.isActive}>
@@ -113,9 +114,9 @@ export function NavGroup({ id, label, items, isCollapsible = true }: NavGroupPro
                 <NavItemIcon icon={item.icon} />
                 <span>{item.title}</span>
                 {item.label && (
-                  <span className="ml-1 rounded bg-foreground-muted/20 px-1.5 py-0.5 text-[10px] leading-none font-medium">
+                  <Badge className="ml-1 px-1.5 py-0.5 bg-transparent !border-stronger text-[10px] leading-none font-medium">
                     {item.label}
-                  </span>
+                  </Badge>
                 )}
               </Link>
             </SidebarMenuButton>
