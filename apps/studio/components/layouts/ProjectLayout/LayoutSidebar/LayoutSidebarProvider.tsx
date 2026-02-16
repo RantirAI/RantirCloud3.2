@@ -1,8 +1,5 @@
-import { useRouter } from 'next/router'
-import { parseAsString, useQueryState } from 'nuqs'
-import { PropsWithChildren, useEffect } from 'react'
-
 import { LOCAL_STORAGE_KEYS } from 'common'
+import { SupportFormPage } from 'components/interfaces/Support/SupportFormPage'
 import { AdvisorPanel } from 'components/ui/AdvisorPanel/AdvisorPanel'
 import { AIAssistant } from 'components/ui/AIAssistantPanel/AIAssistant'
 import { EditorPanel } from 'components/ui/EditorPanel/EditorPanel'
@@ -11,12 +8,16 @@ import useLatest from 'hooks/misc/useLatest'
 import { useLocalStorageQuery } from 'hooks/misc/useLocalStorage'
 import { useSelectedOrganizationQuery } from 'hooks/misc/useSelectedOrganization'
 import { useSelectedProjectQuery } from 'hooks/misc/useSelectedProject'
+import { useRouter } from 'next/router'
+import { parseAsString, useQueryState } from 'nuqs'
+import { PropsWithChildren, useEffect } from 'react'
 import { useRegisterSidebar, useSidebarManagerSnapshot } from 'state/sidebar-manager-state'
 
 export const SIDEBAR_KEYS = {
   AI_ASSISTANT: 'ai-assistant',
   EDITOR_PANEL: 'editor-panel',
   ADVISOR_PANEL: 'advisor-panel',
+  SUPPORT_PANEL: 'support-panel',
 } as const
 
 export const LayoutSidebarProvider = ({ children }: PropsWithChildren) => {
@@ -36,6 +37,13 @@ export const LayoutSidebarProvider = ({ children }: PropsWithChildren) => {
   useRegisterSidebar(SIDEBAR_KEYS.AI_ASSISTANT, () => <AIAssistant />, {}, 'i', !!project)
   useRegisterSidebar(SIDEBAR_KEYS.EDITOR_PANEL, () => <EditorPanel />, {}, 'e', !!project)
   useRegisterSidebar(SIDEBAR_KEYS.ADVISOR_PANEL, () => <AdvisorPanel />, {}, undefined, true)
+  useRegisterSidebar(
+    SIDEBAR_KEYS.SUPPORT_PANEL,
+    () => <SupportFormPage variant="inline" />,
+    {},
+    undefined,
+    true
+  )
 
   useEffect(() => {
     if (!!project) {
