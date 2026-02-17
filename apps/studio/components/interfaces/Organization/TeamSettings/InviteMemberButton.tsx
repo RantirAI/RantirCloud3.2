@@ -228,15 +228,17 @@ export const InviteMemberButton = () => {
   }, [isSuccess, isOpen])
 
   const handleOpenChange = (open: boolean) => {
-    if (!open) {
-      form.reset({
-        email: '',
-        role: '',
-        applyToOrg: true,
-        projectRef: '',
-      })
-    }
     setIsOpen(open)
+  }
+
+  const handleCancel = () => {
+    form.reset({
+      email: '',
+      role: '',
+      applyToOrg: true,
+      projectRef: '',
+    })
+    setIsOpen(false)
   }
 
   return (
@@ -403,8 +405,11 @@ export const InviteMemberButton = () => {
                 )}
               />
             </DialogSection>
-            <DialogFooter>
-              <Button block htmlType="submit" loading={isInviting}>
+            <DialogFooter className="!justify-between">
+              <Button type="default" onClick={handleCancel}>
+                Cancel
+              </Button>
+              <Button type="primary" htmlType="submit" loading={isInviting}>
                 {emailCount >= 2 ? 'Send invitations' : 'Send invitation'}
               </Button>
             </DialogFooter>
