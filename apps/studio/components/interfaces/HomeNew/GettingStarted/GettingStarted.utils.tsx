@@ -107,14 +107,19 @@ export const getCodeWorkflowSteps = ({
     {
       key: 'add-rls-policies',
       status: hasRlsPolicies ? 'complete' : 'incomplete',
-      title: 'Secure your data with RLS policies',
+      title: 'Define who can access your data',
       icon: <Shield strokeWidth={1} className="text-foreground-muted" size={16} />,
       description:
-        "Let's secure your data by enabling Row Level Security (per-row access rules that decide who can read or write specific records) and defining policies in a migration file, either configuring them manually or letting the AI assistant draft policies for your tables.",
+        "Secure your data by enabling Row Level Security (per-row access rules that decide who can read or write specific records) and defining policies in a migration file. You'll also want to ensure your tables have the right Data API privileges granted to the anon and authenticated roles—without these grants, tables won't be accessible via the Data API or client libraries.",
       actions: [
         {
           label: 'Create a migration file',
           href: `/project/${ref}/auth/policies`,
+          variant: 'default',
+        },
+        {
+          label: 'Manage API privileges',
+          href: `${DOCS_URL}/guides/database/hardening-data-api#adjusting-table-level-privileges`,
           variant: 'default',
         },
         {
@@ -280,14 +285,19 @@ export const getNoCodeWorkflowSteps = ({
     {
       key: 'add-rls-policies',
       status: hasRlsPolicies ? 'complete' : 'incomplete',
-      title: 'Secure your data with Row Level Security',
+      title: 'Define who can access your data',
       icon: <Shield strokeWidth={1} className="text-foreground-muted" size={16} />,
       description:
-        "Now that you have some data, let's secure it by enabling Row Level Security (row-specific access rules that control who can view or modify records) and creating policies yourself or with help from the AI assistant.",
+        "Now that you have some data, secure it by enabling Row Level Security (row-specific access rules that control who can view or modify records) and creating policies. You should also check that your tables have the appropriate Data API privileges—these control whether the anon and authenticated roles can access your tables via the Data API and client libraries.",
       actions: [
         {
           label: 'Create a policy',
           href: `/project/${ref}/auth/policies`,
+          variant: 'default',
+        },
+        {
+          label: 'Manage API privileges',
+          href: `/project/${ref}/integrations/data_api/settings`,
           variant: 'default',
         },
         {
