@@ -17,6 +17,7 @@ import {
 } from 'ui-patterns/PageHeader'
 import { PageSection, PageSectionContent } from 'ui-patterns/PageSection'
 import type { NextPageWithLayout } from 'types'
+import { JITAccess } from 'components/interfaces/Settings/Database/JITAccess'
 import { SettingsDatabaseEmptyStateLocal } from 'components/interfaces/Settings/Database/SettingsDatabaseEmptyStateLocal'
 
 const SSLConfiguration = dynamic(
@@ -69,6 +70,7 @@ const ProjectSettings: NextPageWithLayout = () => {
             ) : (
               <DiskSizeConfiguration />
             )}
+            <JITAccess />
             {databaseNetworkRestrictions && <NetworkRestrictions />}
             <BannedIPs />
           </PageContainer>
