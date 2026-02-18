@@ -69,8 +69,8 @@ export function OrgSelector() {
       <span className="flex w-8 aspect-square shrink-0 items-center justify-center rounded border bg-surface-100 text-xs font-medium text-foreground-lighter">
         {selectedOrgInitial}
       </span>
-      <div className="text-left min-w-0 -mb-0.5">
-        <div className="truncate text-foreground font-medium leading-tight">
+      <div className="flex min-w-0 flex-1 flex-col text-left -mb-0.5">
+        <div className="truncate text-foreground font-medium leading-tight min-w-[100px] max-w-[250px]">
           {selectedOrganization?.name ?? 'Select organization'}
         </div>
         <div className="flex items-center gap-1 truncate text-foreground-light leading-tight text-xs">
@@ -80,7 +80,7 @@ export function OrgSelector() {
       </div>
       <ChevronsUpDown
         strokeWidth={1}
-        className="ml-auto text-foreground-light hidden group-hover:block !w-4 !h-4"
+        className="ml-auto text-foreground-light md:hidden md:group-hover:block !w-4 !h-4"
       />
     </SidebarMenuButton>
   )
@@ -88,7 +88,7 @@ export function OrgSelector() {
   if (isMobile) {
     return (
       <>
-        <SidebarMenu>
+        <SidebarMenu className="flex-shrink">
           <SidebarMenuItem>{triggerButton}</SidebarMenuItem>
         </SidebarMenu>
         <OrgSelectorSheet

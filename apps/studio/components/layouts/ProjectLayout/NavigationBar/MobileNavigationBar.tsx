@@ -31,20 +31,10 @@ const MobileNavigationBar = ({ hideMobileMenu }: { hideMobileMenu?: boolean }) =
           'hide-scrollbar flex flex-row items-center justify-between overflow-x-auto'
         )}
       >
-        <div className="flex items-center gap-2">
-          {/* <Link
-            href={IS_PLATFORM ? '/organizations' : `/project/${projectRef}`}
-            className="flex items-center h-[26px] w-[26px] min-w-[26px]"
-          >
-            <img
-              alt="Supabase"
-              src={`${router.basePath}/img/supabase-logo.svg`}
-              className="absolute h-[26px] w-[26px] cursor-pointer rounded"
-            />
-          </Link> */}
+        <div className="flex min-w-0 flex-shrink items-center gap-2">
           {isProjectScope ? <ProjectBranchSelector /> : IS_PLATFORM ? <OrgSelector /> : null}
         </div>
-        <div className="flex gap-2">
+        <div className="flex flex-shrink-0 gap-2">
           <CommandMenuTrigger>
             <button
               className={cn(

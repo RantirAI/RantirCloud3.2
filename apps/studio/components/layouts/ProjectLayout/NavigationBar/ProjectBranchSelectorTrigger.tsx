@@ -58,7 +58,7 @@ export function ProjectBranchSelectorTrigger({
         </button>
       </div>
       <div className="text-left flex-grow min-w-0">
-        <div className="w-full truncate text-foreground font-medium leading-tight">
+        <div className="w-full truncate text-foreground font-medium leading-tight min-w-[100px] max-w-[250px]">
           {displayProjectName}
         </div>
         <div
@@ -74,7 +74,7 @@ export function ProjectBranchSelectorTrigger({
 
       <ChevronsUpDown
         strokeWidth={1.5}
-        className="ml-auto text-foreground-lighter !w-4 !h-4 hidden group-hover:flex"
+        className="ml-auto text-foreground-lighter !w-4 !h-4 md:hidden md:group-hover:flex"
       />
     </SidebarMenuButton>
   )
