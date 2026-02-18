@@ -76,7 +76,7 @@ Returns the current user's UUID, extracted from the JWT. This is the most common
 using (user_id = auth.uid())
 ```
 
-If the request is unauthenticated (made with the anon key and no user token), `auth.uid()` returns `null`.
+If the request is unauthenticated (made with the Publishable Key and no user token), `auth.uid()` returns `null`.
 
 ### auth.jwt()
 

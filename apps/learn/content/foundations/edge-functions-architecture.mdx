@@ -47,7 +47,7 @@ To test a function:
 
 ```bash
 curl -i --location --request POST 'http://localhost:54321/functions/v1/hello-world' \
-  --header 'Authorization: Bearer your-anon-key' \
+  --header 'Authorization: Bearer your-publishable-key' \
   --header 'Content-Type: application/json' \
   --data '{"name": "World"}'
 ```
@@ -88,8 +88,8 @@ Your Supabase project URL and keys are available automatically — you don't nee
 
 ```ts
 const supabaseUrl = Deno.env.get('SUPABASE_URL')
-const supabaseAnonKey = Deno.env.get('SUPABASE_ANON_KEY')
-const supabaseSecretKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')
+const supabasePublishableKey = Deno.env.get('SUPABASE_PUBLISHABLE_KEY')
+const supabaseSecretKey = Deno.env.get('SUPABASE_SECRET_KEY')
 ```
 
 ## Deploying

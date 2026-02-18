@@ -68,7 +68,7 @@ Deno.serve(async (req) => {
   // Store it in the database
   const supabase = createClient(
     Deno.env.get('SUPABASE_URL')!,
-    Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!
+    Deno.env.get('SUPABASE_SECRET_KEY')!
   )
 
   const { error } = await supabase

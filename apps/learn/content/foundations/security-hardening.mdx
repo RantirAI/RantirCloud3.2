@@ -31,7 +31,7 @@ Custom domains are configured in the Dashboard under **Project Settings > Custom
 
 Your project has two main keys:
 
-- **Publishable Key (anon)** — safe to use in client-side code. Requests made with this key are subject to RLS policies. This is what your browser app uses.
+- **Publishable Key** — safe to use in client-side code. Requests made with this key are subject to RLS policies. This is what your browser app uses.
 - **Secret Key** — bypasses RLS entirely. Only use this in server-side code (API routes, Edge Functions, background jobs). Never expose it in your frontend, never commit it to version control, and never share it in logs or error messages.
 
 If you suspect a key has been compromised, you can rotate it in the Dashboard under **Project Settings > API**. Rotating a key immediately invalidates the old one, so make sure your app is updated to use the new key before (or immediately after) rotating.
@@ -74,7 +74,7 @@ create table public.new_table (
 alter table public.new_table enable row level security;
 ```
 
-A table without RLS is accessible to anyone with your publishable API key. This is the most common security mistake in Supabase projects.
+A table without RLS is accessible to anyone with your Publishable Key. This is the most common security mistake in Supabase projects.
 
 ## Database roles and permissions
 
@@ -82,7 +82,7 @@ Supabase creates several database roles, each with different levels of access:
 
 - **`anon`** — the role used for unauthenticated requests. Only has access to data permitted by RLS policies.
 - **`authenticated`** — the role used for requests with a valid user token. Also subject to RLS.
-- **`service_role`** — bypasses RLS. Used by the Secret Key.
+- **`service_role`** — bypasses RLS. This is the role used when you connect with the Secret Key.
 - **`postgres`** — the superuser role. Full access to everything. Used by the Dashboard and direct database connections.
 
 You shouldn't need to modify these roles, but understanding them helps when debugging access issues — if a query works in the SQL Editor (which runs as `postgres`) but fails from your app (which runs as `authenticated`), the issue is almost certainly an RLS policy.
@@ -91,7 +91,7 @@ You shouldn't need to modify these roles, but understanding them helps when debu
 
 - RLS is enabled on all tables with user data
 - Secret Key is only used server-side
-- Publishable key is used in client code
+- Publishable Key is used in client code
 - Email confirmation is enabled
 - Redirect URLs only include production domains
 - IP restrictions are configured for direct database access
