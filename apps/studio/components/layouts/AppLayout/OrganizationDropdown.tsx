@@ -104,7 +104,7 @@ export const OrganizationDropdown = ({
     )
     if (wrapInScrollArea) {
       return (
-        <ScrollArea className={(organizations || []).length > 7 ? 'h-[210px]' : ''}>
+        <ScrollArea className={(organizations || []).length > 7 ? 'md:h-[210px]' : ''}>
           {list}
         </ScrollArea>
       )
@@ -147,7 +147,7 @@ export const OrganizationDropdown = ({
         wrapperClassName="shrink-0"
         className="text-base sm:text-sm"
       />
-      <CommandList_Shadcn_ className="flex flex-col flex-1 min-h-0 overflow-y-auto !max-h-none">
+      <CommandList_Shadcn_ className="flex flex-col flex-1 min-h-0 overflow-y-auto p-1 !max-h-none">
         <CommandEmpty_Shadcn_>No organizations found</CommandEmpty_Shadcn_>
         <CommandGroup_Shadcn_ className="min-h-0">{orgListItems(false)}</CommandGroup_Shadcn_>
       </CommandList_Shadcn_>

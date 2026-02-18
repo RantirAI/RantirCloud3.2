@@ -171,7 +171,7 @@ export const OrganizationProjectSelector = ({
     }
     if (embedded) {
       return (
-        <div className="min-h-0">
+        <div className="min-h-0 p-1">
           {projects?.map((project) => (
             <CommandItem_Shadcn_
               key={project.ref}

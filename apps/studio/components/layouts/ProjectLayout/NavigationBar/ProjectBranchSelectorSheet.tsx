@@ -53,10 +53,6 @@ export function ProjectBranchSelectorSheet({
   const projectLabel = selectedProjectName ?? displayProject?.name
   const branchLabel = selectedBranchName ?? selectedBranch?.name ?? 'main'
 
-  console.log('displayProject', displayProject)
-  console.log('selectedBranch', selectedBranch)
-  console.log('isMainBranch', isMainBranch)
-
   const tabs = [
     orgLabel && {
       value: 'organization' as const,
