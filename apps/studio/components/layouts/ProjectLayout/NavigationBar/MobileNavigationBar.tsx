@@ -36,7 +36,7 @@ const MobileNavigationBar = ({ hideMobileMenu }: { hideMobileMenu?: boolean }) =
           {isProjectScope ? (
             <>
               <ProjectBranchSelector />
-              <ConnectButton />
+              <ConnectButton className="[&_span]:hidden h-8 w-8" />
             </>
           ) : IS_PLATFORM ? (
             <OrgSelector />
@@ -66,7 +66,7 @@ const MobileNavigationBar = ({ hideMobileMenu }: { hideMobileMenu?: boolean }) =
             <Button
               title="Menu dropdown button"
               type="default"
-              className="flex lg:hidden border-default bg-surface-100/75 text-foreground-light rounded-md min-w-[30px] w-[30px] h-[30px] data-[state=open]:bg-overlay-hover/30"
+              className="flex lg:hidden rounded-md min-w-[30px] w-[30px] h-[30px] data-[state=open]:bg-overlay-hover/30"
               icon={<Menu />}
               onClick={() => setIsSheetOpen(true)}
             />
