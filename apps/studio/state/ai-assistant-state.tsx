@@ -254,7 +254,9 @@ function createChatInstance(
             model: state.model,
             ...opts.body,
           },
-          ...(IS_PLATFORM ? { headers: { Authorization: authorizationHeader ?? '' } } : {}),
+          ...(IS_PLATFORM
+            ? { headers: { Authorization: authorizationHeader ?? '', 'X-Client-Info': 'supabase-studio/ai-assistant' } }
+            : {}),
         }
       },
     }),
