@@ -33,8 +33,14 @@ const MobileNavigationBar = ({ hideMobileMenu }: { hideMobileMenu?: boolean }) =
       >
         <div className={cn('flex min-w-0 flex-shrink items-center gap-2', !IS_PLATFORM && 'pl-2')}>
           {!IS_PLATFORM && <HomeIcon />}
-          {isProjectScope ? <ProjectBranchSelector /> : IS_PLATFORM ? <OrgSelector /> : null}
-          <ConnectButton />
+          {isProjectScope ? (
+            <>
+              <ProjectBranchSelector />
+              <ConnectButton />
+            </>
+          ) : IS_PLATFORM ? (
+            <OrgSelector />
+          ) : null}
         </div>
         <div className="flex flex-shrink-0 gap-2">
           <CommandMenuTrigger>
