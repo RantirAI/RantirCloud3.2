@@ -3,7 +3,7 @@ import Link from 'next/link'
 import { useParams } from 'common'
 import { DOCS_URL } from 'lib/constants'
 import { Button } from 'ui'
-import { NoticeBar } from './ui/NoticeBar'
+import { Admonition } from 'ui-patterns/admonition'
 import {
   PageSection,
   PageSectionContent,
@@ -26,8 +26,7 @@ export function DiskManagementPanelForm() {
         <DocsButton href={`${DOCS_URL}/guides/platform/database-size#disk-management`} />
       </PageSectionMeta>
       <PageSectionContent>
-        <NoticeBar
-          visible={true}
+        <Admonition
           type="default"
           title="Disk management has moved"
           description="Disk management is now handled alongside Project Compute on the Compute and Disk page."
