@@ -1,5 +1,7 @@
 import { useParams } from 'common'
+import { ConnectButton } from 'components/interfaces/ConnectButton/ConnectButton'
 import { SidebarContent } from 'components/interfaces/Sidebar'
+import { UserDropdown } from 'components/interfaces/UserDropdown'
 import { IS_PLATFORM } from 'lib/constants'
 import { Menu, Search } from 'lucide-react'
 import { useState } from 'react'
@@ -7,7 +9,7 @@ import { Button, cn } from 'ui'
 import { CommandMenuTrigger } from 'ui-patterns'
 import MobileSheetNav from 'ui-patterns/MobileSheetNav/MobileSheetNav'
 
-import { UserDropdown } from '../../../interfaces/UserDropdown'
+import { HomeIcon } from '../LayoutHeader/HomeIcon'
 import { OrgSelector } from './OrgSelector'
 import { ProjectBranchSelector } from './ProjectBranchSelector'
 
@@ -20,17 +22,19 @@ const MobileNavigationBar = ({ hideMobileMenu }: { hideMobileMenu?: boolean }) =
   const isProjectScope = !!projectRef
 
   return (
-    <div className="h-14 w-full flex flex-row md:hidden">
+    <div className="w-full flex flex-row md:hidden">
       <nav
         className={cn(
-          'group pr-4 pl-2 z-10 w-full h-14',
+          'group pr-3 pl-2 z-10 w-full h-12 gap-2',
           'border-b bg-dash-sidebar border-default shadow-xl',
           'transition-width duration-200',
           'hide-scrollbar flex flex-row items-center justify-between overflow-x-auto'
         )}
       >
-        <div className="flex min-w-0 flex-shrink items-center gap-2">
+        <div className={cn('flex min-w-0 flex-shrink items-center gap-2', !IS_PLATFORM && 'pl-2')}>
+          {!IS_PLATFORM && <HomeIcon />}
           {isProjectScope ? <ProjectBranchSelector /> : IS_PLATFORM ? <OrgSelector /> : null}
+          <ConnectButton />
         </div>
         <div className="flex flex-shrink-0 gap-2">
           <CommandMenuTrigger>

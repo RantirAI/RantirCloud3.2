@@ -17,12 +17,14 @@ import {
   CommandInput_Shadcn_,
   CommandItem_Shadcn_,
   CommandList_Shadcn_,
+  CommandSeparator_Shadcn_,
   Popover_Shadcn_,
   PopoverContent_Shadcn_,
   PopoverTrigger_Shadcn_,
   ScrollArea,
 } from 'ui'
 import { ShimmeringLoader } from 'ui-patterns/ShimmeringLoader'
+import { CommandSeparator } from 'ui/src/components/shadcn/ui/command'
 
 interface OrganizationDropdownProps {
   /** When true, render only the command list (no link/trigger). For use inside sheet or popover. */
@@ -158,6 +160,7 @@ export const OrganizationDropdown = ({
       <CommandList_Shadcn_>
         <CommandEmpty_Shadcn_>No organizations found</CommandEmpty_Shadcn_>
         <CommandGroup_Shadcn_>{orgListItems(true)}</CommandGroup_Shadcn_>
+        <CommandSeparator_Shadcn_ />
         <CommandGroup_Shadcn_>
           <CommandItem_Shadcn_
             className="cursor-pointer w-full"
@@ -173,21 +176,24 @@ export const OrganizationDropdown = ({
           </CommandItem_Shadcn_>
         </CommandGroup_Shadcn_>
         {organizationCreationEnabled && (
-          <CommandGroup_Shadcn_>
-            <CommandItem_Shadcn_
-              className="cursor-pointer w-full"
-              onSelect={() => {
-                close()
-                router.push('/new')
-              }}
-              onClick={() => close()}
-            >
-              <Link href="/new" className="flex items-center gap-2 w-full">
-                <Plus size={14} strokeWidth={1.5} />
-                <p>New organization</p>
-              </Link>
-            </CommandItem_Shadcn_>
-          </CommandGroup_Shadcn_>
+          <>
+            <CommandSeparator_Shadcn_ />
+            <CommandGroup_Shadcn_>
+              <CommandItem_Shadcn_
+                className="cursor-pointer w-full"
+                onSelect={() => {
+                  close()
+                  router.push('/new')
+                }}
+                onClick={() => close()}
+              >
+                <Link href="/new" className="flex items-center gap-2 w-full">
+                  <Plus size={14} strokeWidth={1.5} />
+                  <p>New organization</p>
+                </Link>
+              </CommandItem_Shadcn_>
+            </CommandGroup_Shadcn_>
+          </>
         )}
       </CommandList_Shadcn_>
     </Command_Shadcn_>

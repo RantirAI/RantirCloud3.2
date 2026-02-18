@@ -61,9 +61,7 @@ export function ProjectBranchSelector() {
     return (
       <SidebarMenu>
         <SidebarMenuItem>
-          <div className="">
-            <ShimmeringLoader className="w-full py-3" />
-          </div>
+          <ShimmeringLoader className="w-full py-3" />
         </SidebarMenuItem>
       </SidebarMenu>
     )
@@ -73,10 +71,8 @@ export function ProjectBranchSelector() {
     return (
       <SidebarMenu>
         <SidebarMenuItem>
-          <SidebarMenuButton size="lg" className="gap-3">
-            <div className="grid flex-1 text-left text-sm leading-tight">
-              <span className="truncate">{displayProject.name}</span>
-            </div>
+          <SidebarMenuButton className="grid flex-1 text-left text-sm leading-tight text-foreground">
+            <span className="truncate">{displayProject.name}</span>
           </SidebarMenuButton>
         </SidebarMenuItem>
       </SidebarMenu>

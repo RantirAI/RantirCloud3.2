@@ -154,7 +154,7 @@ export const LayoutHeader = ({
                       ease: 'easeOut',
                     }}
                   >
-                    <LayoutHeaderDivider />
+                    {IS_PLATFORM && <LayoutHeaderDivider />}
                     <ProjectDropdown />
 
                     {exceedingLimits && (
@@ -165,10 +165,10 @@ export const LayoutHeader = ({
                       </div>
                     )}
 
-                    {selectedProject && (
+                    {selectedProject && IS_PLATFORM && (
                       <>
                         <LayoutHeaderDivider />
-                        {IS_PLATFORM && <BranchDropdown />}
+                        <BranchDropdown />
                       </>
                     )}
                   </motion.div>
@@ -269,7 +269,7 @@ export const LayoutHeader = ({
                     )}
                   </AnimatePresence>
                 </div>
-                <LocalDropdown />
+                <LocalDropdown triggerClassName="hidden md:flex" />
               </>
             )}
           </div>

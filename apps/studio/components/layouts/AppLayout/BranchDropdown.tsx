@@ -128,7 +128,7 @@ export const BranchDropdown = ({
 
   const commandContent = embedded ? (
     <Command_Shadcn_ className={cn(className, 'flex flex-col flex-1 min-h-0 overflow-hidden')}>
-      <div className="grid grid-cols-2 gap-2 shrink-0 p-2">
+      <div className="grid grid-cols-2 gap-2 shrink-0 p-2 border-b">
         <Button
           type="text"
           size="small"
