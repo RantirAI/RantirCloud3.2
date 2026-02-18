@@ -1,14 +1,16 @@
+import { useParams } from 'common'
+import { SidebarContent } from 'components/interfaces/Sidebar'
+import { IS_PLATFORM } from 'lib/constants'
 import { Menu, Search } from 'lucide-react'
 import Link from 'next/link'
 import { useRouter } from 'next/router'
 import { useState } from 'react'
-
-import { useParams } from 'common'
-import { SidebarContent } from 'components/interfaces/Sidebar'
-import { IS_PLATFORM } from 'lib/constants'
 import { Button, cn } from 'ui'
 import { CommandMenuTrigger } from 'ui-patterns'
 import MobileSheetNav from 'ui-patterns/MobileSheetNav/MobileSheetNav'
+
+import { OrgSelector } from './OrgSelector'
+import { ProjectBranchSelector } from './ProjectBranchSelector'
 
 export const ICON_SIZE = 20
 export const ICON_STROKE_WIDTH = 1.5
@@ -17,27 +19,31 @@ const MobileNavigationBar = ({ hideMobileMenu }: { hideMobileMenu?: boolean }) =
   const router = useRouter()
   const [isSheetOpen, setIsSheetOpen] = useState(false)
   const { ref: projectRef } = useParams()
+  const isProjectScope = !!projectRef
 
   return (
     <div className="h-14 w-full flex flex-row md:hidden">
       <nav
         className={cn(
-          'group px-4 z-10 w-full h-14',
+          'group pr-4 pl-2 z-10 w-full h-14',
           'border-b bg-dash-sidebar border-default shadow-xl',
           'transition-width duration-200',
           'hide-scrollbar flex flex-row items-center justify-between overflow-x-auto'
         )}
       >
-        <Link
-          href={IS_PLATFORM ? '/organizations' : `/project/${projectRef}`}
-          className="flex items-center h-[26px] w-[26px] min-w-[26px]"
-        >
-          <img
-            alt="Supabase"
-            src={`${router.basePath}/img/supabase-logo.svg`}
-            className="absolute h-[26px] w-[26px] cursor-pointer rounded"
-          />
-        </Link>
+        <div className="flex items-center gap-2">
+          {/* <Link
+            href={IS_PLATFORM ? '/organizations' : `/project/${projectRef}`}
+            className="flex items-center h-[26px] w-[26px] min-w-[26px]"
+          >
+            <img
+              alt="Supabase"
+              src={`${router.basePath}/img/supabase-logo.svg`}
+              className="absolute h-[26px] w-[26px] cursor-pointer rounded"
+            />
+          </Link> */}
+          {isProjectScope ? <ProjectBranchSelector /> : IS_PLATFORM ? <OrgSelector /> : null}
+        </div>
         <div className="flex gap-2">
           <CommandMenuTrigger>
             <button
