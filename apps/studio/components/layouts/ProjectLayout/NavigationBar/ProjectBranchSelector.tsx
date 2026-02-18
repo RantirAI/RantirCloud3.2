@@ -41,7 +41,10 @@ export function ProjectBranchSelector() {
     { projectRef: project?.parent_project_ref || ref },
     { enabled: open && Boolean(project) }
   )
+
   const selectedBranch = branches?.find((b) => b.project_ref === ref)
+  /** When branching is disabled we're always on main; when enabled, main is the branch with is_default. */
+  const isMainBranch = !isBranchingEnabled || selectedBranch?.is_default === true
   const branchDisplayName = isBranchingEnabled ? selectedBranch?.name ?? 'main' : 'main'
   const selectedOrgInitial = selectedOrganization?.name?.trim().charAt(0).toUpperCase() || 'O'
   const organizationHref = selectedOrganization?.slug
@@ -101,6 +104,7 @@ export function ProjectBranchSelector() {
           selectedOrganization={selectedOrganization ?? null}
           displayProject={displayProject ?? null}
           selectedBranch={selectedBranch ?? null}
+          isMainBranch={isMainBranch}
         />
       </>
     )

@@ -53,7 +53,7 @@ const BranchLink = ({
     <Link passHref href={href}>
       <CommandItem_Shadcn_
         value={branch.name.replaceAll('"', '')}
-        className="cursor-pointer w-full flex items-center justify-between "
+        className="cursor-pointer w-full flex items-center justify-between text-sm md:text-xs"
         onSelect={() => {
           onClose()
           router.push(href)
@@ -128,12 +128,12 @@ export const BranchDropdown = ({
 
   const commandContent = embedded ? (
     <Command_Shadcn_ className={cn(className, 'flex flex-col flex-1 min-h-0 overflow-hidden')}>
-      <div className="flex items-center gap-2 shrink-0 p-2">
+      <div className="grid grid-cols-2 gap-2 shrink-0 p-2">
         <Button
           type="text"
-          className=""
-          block
+          size="small"
           asChild
+          block
           icon={<ListTree size={14} strokeWidth={1.5} />}
         >
           <Link
@@ -141,39 +141,38 @@ export const BranchDropdown = ({
             className="flex items-center gap-1.5 px-3 py-2 text-xs text-foreground-light hover:text-foreground transition-colors rounded-md hover:bg-surface-200"
             onClick={() => close()}
           >
-            <span>Manage branches</span>
+            Manage branches
           </Link>
         </Button>
         <Button
           type="text"
-          className=""
-          block
+          size="small"
           asChild
-          icon={<MessageCircle size={14} strokeWidth={1} className="text-muted mt-0.5" />}
+          block
+          icon={<MessageCircle size={14} strokeWidth={1.5} />}
         >
           <a
             target="_blank"
             rel="noreferrer noopener"
             href={BRANCHING_GITHUB_DISCUSSION_LINK}
             onClick={() => close()}
-            className="flex items-center gap-1.5 px-3 py-2 text-xs text-foreground-light hover:text-foreground transition-colors rounded-md hover:bg-surface-200"
+            className="flex w-full items-center px-3 py-2 text-xs text-foreground-light hover:text-foreground transition-colors rounded-md hover:bg-surface-200"
           >
-            <span>Branching feedback</span>
+            Branching feedback
           </a>
         </Button>
-      </div>
-      <div className="flex items-center gap-2 shrink-0 border-b p-2">
         <Button
           type="default"
+          size="small"
           block
-          className=" flex items-center gap-1.5 px-3 py-2 text-xs text-foreground-light hover:text-foreground transition-colors rounded-md hover:bg-surface-200"
+          className="col-span-full flex items-center  px-3 py-2 text-xs text-foreground-light hover:text-foreground transition-colors rounded-md hover:bg-surface-200"
           onClick={() => {
             close()
             snap.setShowCreateBranchModal(true)
           }}
           icon={<Plus size={14} strokeWidth={1.5} />}
         >
-          <span>Create branch</span>
+          Create branch
         </Button>
       </div>
       {isBranchingEnabled && (
@@ -263,7 +262,7 @@ export const BranchDropdown = ({
               onClick={() => close()}
               className="w-full flex gap-2"
             >
-              <MessageCircle size={14} strokeWidth={1} className="text-muted mt-0.5" />
+              <MessageCircle size={14} strokeWidth={1} className="mt-0.5" />
               <div>
                 <p>Branching feedback</p>
                 <p className="text-lighter">Join GitHub Discussion</p>

@@ -33,6 +33,7 @@ export interface ProjectBranchSelectorSheetProps {
   selectedOrganizationName?: string | null
   selectedProjectName?: string | null
   selectedBranchName?: string | null
+  isMainBranch?: boolean
 }
 
 export function ProjectBranchSelectorSheet({
@@ -46,11 +47,15 @@ export function ProjectBranchSelectorSheet({
   selectedOrganizationName,
   selectedProjectName,
   selectedBranchName,
+  isMainBranch,
 }: ProjectBranchSelectorSheetProps) {
   const orgLabel = selectedOrganizationName ?? selectedOrganization?.name
   const projectLabel = selectedProjectName ?? displayProject?.name
   const branchLabel = selectedBranchName ?? selectedBranch?.name ?? 'main'
-  const isProductionBranch = selectedBranch?.is_default
+
+  console.log('displayProject', displayProject)
+  console.log('selectedBranch', selectedBranch)
+  console.log('isMainBranch', isMainBranch)
 
   const tabs = [
     orgLabel && {
@@ -104,14 +109,14 @@ export function ProjectBranchSelectorSheet({
           >
             {tabs.map(({ value, label, icon: Icon }) => {
               const isBranch = value === 'branch'
+              const isProductionBranch = isBranch && isMainBranch
               return (
                 <TabsTrigger_Shadcn_
                   key={value}
                   value={value}
                   className={cn(
-                    'text-xs flex flex-col items-center gap-1.5 px-4 py-3 data-[state=active]:bg-surface-200 data-[state=active]:border-foreground-light border-b',
-                    isBranch &&
-                      isProductionBranch &&
+                    'text-xs flex flex-col items-center gap-1.5 px-4 py-3 data-[state=active]:bg-surface-200 data-[state=active]:border-foreground-light border-b border-r !border-r-muted last:border-r-0',
+                    isProductionBranch &&
                       'text-warning data-[state=active]:text-warning hover:text-warning hover:opacity-70'
                   )}
                 >
@@ -135,7 +140,7 @@ export function ProjectBranchSelectorSheet({
         {tabs.some((t) => t.value === 'project') && (
           <TabsContent_Shadcn_
             value="project"
-            className="flex-1 min-h-0 overflow-hidden flex flex-col mt-0 p-0 data-[state=inactive]:hidden"
+            className="flex-1 min-h-0 overflow-hidden flex flex-col mt-0 py-0 data-[state=inactive]:hidden"
           >
             <ProjectDropdown embedded className={embeddedClassName} onClose={onClose} />
           </TabsContent_Shadcn_>

@@ -87,7 +87,10 @@ export const OrganizationDropdown = ({
               }}
               onClick={() => close()}
             >
-              <Link href={href} className="w-full flex items-center justify-between">
+              <Link
+                href={href}
+                className="w-full flex items-center justify-between text-sm md:text-xs"
+              >
                 <div className={cn('flex items-center gap-2', !wrapInScrollArea && 'p-0.5 md:p-0')}>
                   <span>{org.name}</span>
                   <PartnerIcon organization={org} />
@@ -112,30 +115,37 @@ export const OrganizationDropdown = ({
   const commandContent = embedded ? (
     <Command_Shadcn_ className={cn(className, 'flex flex-col flex-1 min-h-0 overflow-hidden')}>
       <div className="flex items-center gap-2 shrink-0 border-b p-2">
-        <Button type="text" block asChild>
+        <Button type="text" block size="small" asChild>
           <Link
             href="/organizations"
-            className="flex items-center gap-1.5 px-3 py-2 text-xs text-foreground-light hover:text-foreground transition-colors rounded-md hover:bg-surface-200"
+            className="text-xs text-foreground-light hover:text-foreground"
             onClick={() => close()}
           >
-            <span>All Organizations</span>
+            All Organizations
           </Link>
         </Button>
         {organizationCreationEnabled && (
-          <Button type="default" block asChild icon={<Plus size={14} strokeWidth={1.5} />}>
+          <Button
+            type="default"
+            block
+            size="small"
+            asChild
+            icon={<Plus size={14} strokeWidth={1.5} />}
+          >
             <Link
               href="/new"
-              className="flex items-center gap-1.5 px-3 py-2 text-xs text-foreground-light hover:text-foreground transition-colors rounded-md hover:bg-surface-200"
+              className="text-xs text-foreground-light hover:text-foreground"
               onClick={() => close()}
             >
-              <span>New organization</span>
+              New organization
             </Link>
           </Button>
         )}
       </div>
       <CommandInput_Shadcn_
         placeholder="Find organization..."
-        wrapperClassName="shrink-0 border-b"
+        wrapperClassName="shrink-0"
+        className="text-base sm:text-sm"
       />
       <CommandList_Shadcn_ className="flex flex-col flex-1 min-h-0 overflow-y-auto !max-h-none">
         <CommandEmpty_Shadcn_>No organizations found</CommandEmpty_Shadcn_>
@@ -203,7 +213,7 @@ export const OrganizationDropdown = ({
         <Boxes size={14} strokeWidth={1.5} className="text-foreground-lighter" />
         <span
           className={cn(
-            'max-w-32 lg:max-w-none truncate hidden md:block',
+            'md:max-w-32 lg:max-w-none truncate hidden md:block',
             !!selectedOrganization ? 'text-foreground' : 'text-foreground-lighter'
           )}
         >

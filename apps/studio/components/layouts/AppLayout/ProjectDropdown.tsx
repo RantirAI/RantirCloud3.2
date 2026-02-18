@@ -83,8 +83,11 @@ export const ProjectDropdown = ({
       const isPaused = project.status === 'INACTIVE'
 
       return (
-        <Link href={href} className="w-full flex items-center justify-between p-0.5 md:p-0">
-          <span className={cn('truncate', isSelected ? 'max-w-60' : 'max-w-64')}>
+        <Link
+          href={href}
+          className="w-full flex items-center justify-between p-0.5 md:p-0 text-sm md:text-xs"
+        >
+          <span className={cn('truncate', isSelected ? 'md:max-w-60' : 'md:max-w-64')}>
             {project.name}
             {isPaused && <Badge className="ml-2">Paused</Badge>}
           </span>
@@ -95,13 +98,19 @@ export const ProjectDropdown = ({
     renderActions: (_setOpen: (value: boolean) => void, options?: { embedded?: boolean }) =>
       projectCreationEnabled ? (
         options?.embedded ? (
-          <Button type="default" block asChild icon={<Plus size={14} strokeWidth={1.5} />}>
+          <Button
+            type="default"
+            block
+            size="small"
+            asChild
+            icon={<Plus size={14} strokeWidth={1.5} />}
+          >
             <Link
               href={`/new/${selectedOrganization?.slug}`}
               onClick={() => close()}
-              className="shrink-0 flex items-center gap-1.5 px-3 py-2 text-xs text-foreground-light hover:text-foreground transition-colors rounded-md hover:bg-surface-200"
+              className="text-xs text-foreground-light hover:text-foreground"
             >
-              <span>New project</span>
+              New project
             </Link>
           </Button>
         ) : (

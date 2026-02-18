@@ -39,10 +39,7 @@ interface OrganizationProjectSelectorSelectorProps {
     project?: OrgProject
   }) => ReactNode
   /** When embedded, call with setOpen and { embedded: true } to render top action row (horizontal buttons). */
-  renderActions?: (
-    setOpen: (value: boolean) => void,
-    options?: { embedded?: boolean }
-  ) => ReactNode
+  renderActions?: (setOpen: (value: boolean) => void, options?: { embedded?: boolean }) => ReactNode
   onSelect?: (project: OrgProject) => void
   onInitialLoad?: (projects: OrgProject[]) => void
   isOptionDisabled?: (project: OrgProject) => boolean
@@ -192,7 +189,7 @@ export const OrganizationProjectSelector = ({
               ) : (
                 <div
                   className={cn(
-                    'w-full flex items-center !text-2xl',
+                    'w-full flex items-center',
                     checkPosition === 'left' ? 'gap-x-2' : 'justify-between',
                     project.ref !== selectedRef && checkPosition === 'left' && 'ml-6'
                   )}
@@ -271,6 +268,7 @@ export const OrganizationProjectSelector = ({
         placeholder={searchPlaceholder}
         handleReset={() => setSearch('')}
         wrapperClassName={embedded ? 'shrink-0 border-b' : undefined}
+        className="text-base sm:text-sm"
       />
       <CommandList_Shadcn_
         className={
