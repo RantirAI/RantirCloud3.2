@@ -65,7 +65,7 @@ export const SessionTimeoutModal = ({
             className={InlineLinkClassName}
             queryParams={{ subject: 'Session timed out' }}
           >
-            Contact support
+            contact support
           </SupportLink>
           .
         </p>
