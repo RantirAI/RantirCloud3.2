@@ -393,7 +393,7 @@ export const InviteMemberButton = () => {
                         {...field}
                         autoComplete="off"
                         disabled={isInviting}
-                        placeholder="name@example.com, name2@example.com"
+                        placeholder="name@example.com, name2@example.com, ..."
                         className="max-h-48"
                         data-1p-ignore
                         data-lpignore="true"
