@@ -2,13 +2,12 @@ import { useParams } from 'common'
 import { SidebarContent } from 'components/interfaces/Sidebar'
 import { IS_PLATFORM } from 'lib/constants'
 import { Menu, Search } from 'lucide-react'
-import Link from 'next/link'
-import { useRouter } from 'next/router'
 import { useState } from 'react'
 import { Button, cn } from 'ui'
 import { CommandMenuTrigger } from 'ui-patterns'
 import MobileSheetNav from 'ui-patterns/MobileSheetNav/MobileSheetNav'
 
+import { UserDropdown } from '../../../interfaces/UserDropdown'
 import { OrgSelector } from './OrgSelector'
 import { ProjectBranchSelector } from './ProjectBranchSelector'
 
@@ -16,7 +15,6 @@ export const ICON_SIZE = 20
 export const ICON_STROKE_WIDTH = 1.5
 
 const MobileNavigationBar = ({ hideMobileMenu }: { hideMobileMenu?: boolean }) => {
-  const router = useRouter()
   const [isSheetOpen, setIsSheetOpen] = useState(false)
   const { ref: projectRef } = useParams()
   const isProjectScope = !!projectRef
@@ -53,6 +51,7 @@ const MobileNavigationBar = ({ hideMobileMenu }: { hideMobileMenu?: boolean }) =
               </div>
             </button>
           </CommandMenuTrigger>
+          <UserDropdown />
           {!hideMobileMenu && (
             <Button
               title="Menu dropdown button"

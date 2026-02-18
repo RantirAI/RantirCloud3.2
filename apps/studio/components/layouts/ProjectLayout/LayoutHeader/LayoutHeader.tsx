@@ -102,7 +102,7 @@ export const LayoutHeader = ({
 
   return (
     <>
-      <header className={cn('flex h-12 items-center flex-shrink-0 border-b')}>
+      <header className={cn('flex h-11 md:h-12 items-center flex-shrink-0 border-b')}>
         {backToDashboardURL && isAccountPage && (
           <div className="flex items-center justify-center border-r flex-0 md:hidden h-full aspect-square">
             <Link
@@ -132,7 +132,8 @@ export const LayoutHeader = ({
             'flex items-center justify-between h-full pr-3 flex-1 overflow-x-auto gap-x-8 pl-4'
           )}
         >
-          <div className="flex items-center text-sm">
+          <div className="flex md:hidden items-center text-sm not-sr-only" />
+          <div className="hidden md:flex items-center text-sm">
             <HomeIcon />
             <div className="flex items-center md:pl-2">
               {showOrgSelection && IS_PLATFORM ? (
@@ -219,7 +220,7 @@ export const LayoutHeader = ({
                 <DevToolbarTrigger />
                 <FeedbackDropdown />
 
-                <div className="flex items-center gap-2">
+                <div className="flex items-center gap-1 md:gap-2">
                   <CommandMenuTriggerInput
                     showShortcut={commandMenuEnabled}
                     placeholder="Search..."
@@ -242,12 +243,12 @@ export const LayoutHeader = ({
                     )}
                   </AnimatePresence>
                 </div>
-                <UserDropdown />
+                <UserDropdown triggerClassName="hidden md:flex" />
               </>
             ) : (
               <>
                 <LocalVersionPopover />
-                <div className="flex items-center gap-2">
+                <div className="flex items-center gap-1 md:gap-2">
                   <CommandMenuTriggerInput
                     placeholder="Search..."
                     className="hidden md:flex md:min-w-32 xl:min-w-32 rounded-full bg-transparent
