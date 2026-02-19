@@ -191,7 +191,7 @@ const FloatingBottomNavbar = ({ hideMobileMenu }: { hideMobileMenu?: boolean }) 
       ref={navRef}
       aria-label="Floating navigation"
       className={cn(
-        'flex pointer-events-auto cursor-grab active:cursor-grabbing flex-row items-center justify-between w-auto rounded-full bg-overlay/90 backdrop-blur-md pl-2 pr-4 py-2 gap-2 border shadow-[0px_3px_6px_-2px_rgba(0,0,0,0.07),0px_10px_30px_0px_rgba(0,0,0,0.10)]',
+        'flex pointer-events-auto cursor-grab active:cursor-grabbing flex-row items-center justify-between w-auto rounded-full bg-overlay/80 backdrop-blur-md pl-2 pr-4 py-2 gap-2 border shadow-[0px_3px_6px_-2px_rgba(0,0,0,0.07),0px_10px_30px_0px_rgba(0,0,0,0.10)]',
         'fixed md:hidden'
       )}
       style={style}
