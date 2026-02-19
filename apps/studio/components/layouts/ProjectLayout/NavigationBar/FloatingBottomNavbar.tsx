@@ -13,7 +13,7 @@ import { HelpDropdown } from '../LayoutHeader/HelpDropdown/HelpDropdown'
 import { useMobileSidebarSheet } from '../LayoutSidebar/MobileSidebarSheetContext'
 
 const DRAG_THRESHOLD_PX = 8
-const GAP_FROM_BOTTOM = 100
+const GAP_FROM_BOTTOM = 50
 /** Fraction of viewport the sheet does not cover when open (sheet is h-[85dvh], so gap is 15%) */
 const SHEET_OPEN_GAP_FRACTION = 0.15
 
