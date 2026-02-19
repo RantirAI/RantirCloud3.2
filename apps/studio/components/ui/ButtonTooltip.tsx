@@ -1,5 +1,5 @@
-import { ComponentProps, ComponentPropsWithoutRef, ElementRef, ReactNode, forwardRef } from 'react'
-import { Button, Tooltip, TooltipContent, TooltipTrigger, cn } from 'ui'
+import { ComponentProps, ComponentPropsWithoutRef, ElementRef, forwardRef, ReactNode } from 'react'
+import { Button, cn, Tooltip, TooltipContent, TooltipTrigger } from 'ui'
 
 export const ButtonTooltip = forwardRef<
   ElementRef<typeof Button>,
@@ -14,7 +14,11 @@ export const ButtonTooltip = forwardRef<
   return (
     <Tooltip>
       <TooltipTrigger asChild>
-        <Button ref={ref} {...props} className={cn(props.className, 'pointer-events-auto')}>
+        <Button
+          ref={ref}
+          {...props}
+          className={cn(props.className, 'border-stronger pointer-events-auto')}
+        >
           {props.children}
         </Button>
       </TooltipTrigger>
