@@ -209,7 +209,7 @@ export async function getThreadById(id: string): Promise<ThreadRow | null> {
     similar_solved_threads: triage?.similar_solved_threads ?? null,
   }
 
-  return mapThreadRowToThread(threadWithTriage as Thread)
+  return mapThreadRowToThread(threadWithTriage as unknown as Thread)
 }
 
 export async function getThreadRepliesById(thread_key: string | null) {
