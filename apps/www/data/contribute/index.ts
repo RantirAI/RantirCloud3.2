@@ -185,9 +185,9 @@ export async function getThreadById(id: string): Promise<ThreadRow | null> {
   const supabase = createClient(supabaseUrl, supabasePublishableKey)
 
   const { data, error } = await supabase
-    .from('v_contribute_threads')
+    .from('contribute_threads')
     .select(
-      'thread_id, subject, status, author, conversation, external_activity_url, created_at, source, product_areas, stack, category, sub_category, summary, first_msg_time, message_count, thread_key, similar_solved_threads'
+      'thread_id, subject, status, author, conversation, external_activity_url, created_at, source, product_areas, stack, category, sub_category, summary, first_msg_time, message_count, thread_key, contribute_thread_triage(similar_solved_threads)'
     )
     .eq('thread_id', id)
     .single()
@@ -201,7 +201,15 @@ export async function getThreadById(id: string): Promise<ThreadRow | null> {
     return null
   }
 
-  return mapThreadRowToThread(data as Thread)
+  const triage = Array.isArray(data.contribute_thread_triage)
+    ? data.contribute_thread_triage[0]
+    : data.contribute_thread_triage
+  const threadWithTriage = {
+    ...data,
+    similar_solved_threads: triage?.similar_solved_threads ?? null,
+  }
+
+  return mapThreadRowToThread(threadWithTriage as Thread)
 }
 
 export async function getThreadRepliesById(thread_key: string | null) {
