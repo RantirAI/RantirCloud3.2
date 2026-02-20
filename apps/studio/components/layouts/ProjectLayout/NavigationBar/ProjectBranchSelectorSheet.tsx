@@ -107,6 +107,7 @@ export function ProjectBranchSelectorSheet({
               const isBranch = value === 'branch'
               const isProductionBranch = isBranch && isMainBranch
               const isLast = index === tabs.length - 1
+
               return (
                 <TabsTrigger_Shadcn_
                   key={value}

@@ -1,13 +1,17 @@
-import { useParams } from 'common'
+import { LOCAL_STORAGE_KEYS, useParams } from 'common'
 import { ConnectButton } from 'components/interfaces/ConnectButton/ConnectButton'
 import { UserDropdown } from 'components/interfaces/UserDropdown'
+import { useLocalStorageQuery } from 'hooks/misc/useLocalStorage'
 import { IS_PLATFORM } from 'lib/constants'
 import { Search } from 'lucide-react'
+import { parseAsString, useQueryState } from 'nuqs'
+import { useEffect } from 'react'
 import { cn } from 'ui'
 import { CommandMenuTrigger } from 'ui-patterns'
 
 import { HomeIcon } from '../LayoutHeader/HomeIcon'
 import FloatingBottomNavbar from './FloatingBottomNavbar'
+import FloatingBottomNavbarBreadcrumb from './FloatingBottomNavbarBreadcrumb'
 import { OrgSelector } from './OrgSelector'
 import { ProjectBranchSelector } from './ProjectBranchSelector'
 
@@ -16,6 +20,21 @@ export const ICON_STROKE_WIDTH = 1.5
 
 const MobileNavigationBar = ({ hideMobileMenu }: { hideMobileMenu?: boolean }) => {
   const { ref: projectRef } = useParams()
+  const [urlShowNavbarB] = useQueryState('showNavbarB', parseAsString)
+  const [localShowNavbarB, setLocalShowNavbarB] = useLocalStorageQuery(
+    LOCAL_STORAGE_KEYS.SHOW_NAVBAR_B,
+    false
+  )
+
+  // When the flag is in the URL, use it and persist to localStorage
+  useEffect(() => {
+    if (urlShowNavbarB !== null) {
+      const value = urlShowNavbarB === 'true'
+      setLocalShowNavbarB(value)
+    }
+  }, [urlShowNavbarB, setLocalShowNavbarB])
+
+  const showNavbarB = urlShowNavbarB !== null ? urlShowNavbarB === 'true' : localShowNavbarB
   const isProjectScope = !!projectRef
 
   return (
@@ -62,7 +81,7 @@ const MobileNavigationBar = ({ hideMobileMenu }: { hideMobileMenu?: boolean }) =
           <UserDropdown />
         </div>
       </nav>
-      <FloatingBottomNavbar hideMobileMenu={hideMobileMenu} />
+      {showNavbarB ? <FloatingBottomNavbarBreadcrumb /> : <FloatingBottomNavbar hideMobileMenu={hideMobileMenu} />}
     </div>
   )
 }

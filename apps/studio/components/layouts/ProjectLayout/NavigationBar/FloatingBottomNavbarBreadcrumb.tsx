@@ -1,24 +1,75 @@
 import { useParams } from 'common'
-import { AdvisorButton } from 'components/layouts/AppLayout/AdvisorButton'
-import { AssistantButton } from 'components/layouts/AppLayout/AssistantButton'
-import { InlineEditorButton } from 'components/layouts/AppLayout/InlineEditorButton'
-import { SIDEBAR_KEYS } from 'components/layouts/ProjectLayout/LayoutSidebar/LayoutSidebarProvider'
+import { generateAuthMenu } from 'components/layouts/AuthLayout/AuthLayout.utils'
+import { generateDatabaseMenu } from 'components/layouts/DatabaseLayout/DatabaseMenu.utils'
+import { getSectionKeyFromPathname } from 'components/layouts/ProjectLayout/MobileMenuContent/getSectionKeyFromPathname'
+import { generateSettingsMenu } from 'components/layouts/ProjectSettingsLayout/SettingsMenu.utils'
 import { AnimatePresence } from 'framer-motion'
+import { useSelectedOrganizationQuery } from 'hooks/misc/useSelectedOrganization'
+import { useSelectedProjectQuery } from 'hooks/misc/useSelectedProject'
 import { Menu, X } from 'lucide-react'
 import { useRouter } from 'next/router'
-import { useCallback, useLayoutEffect, useRef, useState } from 'react'
+import { useCallback, useLayoutEffect, useMemo, useRef, useState } from 'react'
 import { useSidebarManagerSnapshot } from 'state/sidebar-manager-state'
 import { Button, cn } from 'ui'
 
-import { HelpDropdown } from '../LayoutHeader/HelpDropdown/HelpDropdown'
 import { useMobileSidebarSheet } from '../LayoutSidebar/MobileSidebarSheetContext'
+
+/** Section key → top-level nav label (matches NavigationBar.utils / MobileMenuContent) */
+const SECTION_TOP_LEVEL_LABELS: Record<string, string> = {
+  editor: 'Table Editor',
+  sql: 'SQL Editor',
+  database: 'Database',
+  auth: 'Authentication',
+  storage: 'Storage',
+  functions: 'Edge Functions',
+  realtime: 'Realtime',
+  advisors: 'Advisors',
+  observability: 'Observability',
+  logs: 'Logs',
+  api: 'API Docs',
+  integrations: 'Integrations',
+  settings: 'Project Settings',
+}
+
+/** Org scope: path segment → breadcrumb label (matches OrgMenuContent / Sidebar OrganizationLinks) */
+const ORG_PAGE_LABELS: Record<string, string> = {
+  team: 'Team',
+  integrations: 'Integrations',
+  usage: 'Usage',
+  billing: 'Billing',
+  general: 'Organization settings',
+  audit: 'Audit',
+  documents: 'Documents',
+  apps: 'Apps',
+  security: 'Security',
+  sso: 'SSO',
+}
+
+function findPageLabelInGroups(
+  groups: Array<{ items?: Array<{ key?: string; name?: string }> }>,
+  segment: string
+): string | null {
+  for (const group of groups) {
+    for (const item of group.items ?? []) {
+      if (item.key === segment && item.name) return item.name
+    }
+  }
+  return null
+}
+
+function humanizeSegment(segment: string): string {
+  return segment
+    .split(/[-_]/)
+    .map((word) => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase())
+    .join(' ')
+}
 
 const DRAG_THRESHOLD_PX = 8
 const GAP_FROM_BOTTOM = 50
 /** Fraction of viewport the sheet does not cover when open (sheet is h-[85dvh], so gap is 15%) */
 const SHEET_OPEN_GAP_FRACTION = 0.15
 
-const FloatingBottomNavbar = ({ hideMobileMenu }: { hideMobileMenu?: boolean }) => {
+const FloatingBottomNavbarBreadcrumb = ({ hideMobileMenu }: { hideMobileMenu?: boolean }) => {
   const {
     content: sheetContent,
     isOpen: isSheetOpen,
@@ -26,9 +77,69 @@ const FloatingBottomNavbar = ({ hideMobileMenu }: { hideMobileMenu?: boolean }) 
   } = useMobileSidebarSheet()
   const { activeSidebar, openSidebar, clearActiveSidebar } = useSidebarManagerSnapshot()
   const { ref: projectRef } = useParams()
+  const { data: project } = useSelectedProjectQuery()
+  const { data: selectedOrg } = useSelectedOrganizationQuery()
   const router = useRouter()
   const pathname = router.asPath?.split('?')[0] ?? router.pathname
+
   const showMenuButton = pathname.startsWith('/project/') || pathname.startsWith('/org/')
+
+  const { topLevelLabel, pageLabel } = useMemo(() => {
+    const segments = pathname.split('/').filter(Boolean)
+
+    // Organization list: /organizations
+    if (pathname === '/organizations' || pathname.startsWith('/organizations/')) {
+      return {
+        topLevelLabel: 'Organizations',
+        pageLabel: null as string | null,
+      }
+    }
+
+    // Org scope: /org/[slug] or /org/[slug]/team, etc.
+    if (pathname.startsWith('/org/')) {
+      const slugSegment = segments[1]
+      const pageSegment = segments[2] ?? null
+      const topLevel = selectedOrg?.name ?? (slugSegment ? 'Organization' : 'Organizations')
+      const page: string | null =
+        pageSegment == null || pageSegment === slugSegment
+          ? 'Projects'
+          : ORG_PAGE_LABELS[pageSegment] ?? humanizeSegment(pageSegment)
+      return {
+        topLevelLabel: topLevel,
+        pageLabel: pageSegment == null ? 'Projects' : page,
+      }
+    }
+
+    // Project scope: /project/[ref]/...
+    const sectionKey = getSectionKeyFromPathname(pathname)
+    const pageSegment = pathname.split('/')[4] ?? null
+
+    if (!sectionKey) {
+      return {
+        topLevelLabel: 'Project Overview',
+        pageLabel: null as string | null,
+      }
+    }
+
+    const topLevel = SECTION_TOP_LEVEL_LABELS[sectionKey] ?? humanizeSegment(sectionKey)
+
+    let page: string | null = null
+    if (pageSegment) {
+      if (sectionKey === 'database' && project) {
+        const groups = generateDatabaseMenu(project)
+        page = findPageLabelInGroups(groups, pageSegment)
+      } else if (sectionKey === 'auth' && projectRef) {
+        const groups = generateAuthMenu(projectRef)
+        page = findPageLabelInGroups(groups, pageSegment)
+      } else if (sectionKey === 'settings' && projectRef) {
+        const groups = generateSettingsMenu(projectRef, project)
+        page = findPageLabelInGroups(groups, pageSegment)
+      }
+      if (!page) page = humanizeSegment(pageSegment)
+    }
+
+    return { topLevelLabel: topLevel, pageLabel: page }
+  }, [pathname, project, projectRef, selectedOrg?.name])
 
   const handleNavClickCapture = useCallback(
     (e: React.MouseEvent) => {
@@ -171,7 +282,7 @@ const FloatingBottomNavbar = ({ hideMobileMenu }: { hideMobileMenu?: boolean }) 
     const base = {
       zIndex: isSheetOpen ? 101 : 41,
       transition,
-      touchAction: '',
+      touchAction: 'none',
     }
 
     const menuSheetOpen = isSheetOpen
@@ -218,43 +329,43 @@ const FloatingBottomNavbar = ({ hideMobileMenu }: { hideMobileMenu?: boolean }) 
       <div
         className={cn(
           'flex pointer-events-auto cursor-grab active:cursor-grabbing flex-row items-center justify-between w-auto rounded-full',
-          'bg-overlay/80 backdrop-blur-md px-2.5 py-2 gap-2',
+          'bg-overlay/80 backdrop-blur-md h-12 p-4 py-2 gap-4',
           'border border-strong shadow-[0px_3px_6px_-2px_rgba(0,0,0,0.07),0px_10px_30px_0px_rgba(0,0,0,0.10)]'
         )}
       >
         <AnimatePresence initial={false}>
-          {!!projectRef && (
-            <>
-              <span data-sidebar-id={SIDEBAR_KEYS.AI_ASSISTANT}>
-                <AssistantButton />
+          <div className="flex min-w-0 flex-col items-start text-left">
+            <span className="truncate text-xs font-medium text-foreground leading-tight">
+              {topLevelLabel}
+            </span>
+            {pageLabel && (
+              <span className="truncate text-xs text-foreground-lighter leading-tight">
+                {pageLabel}
               </span>
-              <span data-sidebar-id={SIDEBAR_KEYS.EDITOR_PANEL}>
-                <InlineEditorButton />
-              </span>
-            </>
-          )}
-          <span data-sidebar-id={SIDEBAR_KEYS.ADVISOR_PANEL}>
-            <AdvisorButton projectRef={projectRef} />
-          </span>
-          <HelpDropdown />
+            )}
+          </div>
           {showMenuButton && !hideMobileMenu && (
             <Button
               title="Menu dropdown button"
               type={sheetContent === 'menu' ? 'secondary' : 'default'}
               className={cn(
-                'flex lg:hidden mr-1 rounded-md min-w-[30px] w-[30px] h-[30px] data-[state=open]:bg-overlay-hover/30',
+                'flex lg:hidden -mr-2 rounded-full min-w-[36px] w-[36px] h-[36px] data-[state=open]:bg-overlay-hover/30',
                 sheetContent !== 'menu' && '!bg-surface-300'
               )}
-              icon={<Menu />}
+              icon={sheetContent === 'menu' ? <X /> : <Menu />}
               onClick={() => {
-                clearActiveSidebar()
-                setSheetContent('menu')
+                if (sheetContent === 'menu') {
+                  setSheetContent(null)
+                } else {
+                  clearActiveSidebar()
+                  setSheetContent('menu')
+                }
               }}
             />
           )}
         </AnimatePresence>
       </div>
-      <AnimatePresence initial={false}>
+      {/* <AnimatePresence initial={false}>
         <Button
           title="close"
           type="text"
@@ -272,9 +383,9 @@ const FloatingBottomNavbar = ({ hideMobileMenu }: { hideMobileMenu?: boolean }) 
             setSheetContent(null)
           }}
         />
-      </AnimatePresence>
+      </AnimatePresence> */}
     </nav>
   )
 }
 
-export default FloatingBottomNavbar
+export default FloatingBottomNavbarBreadcrumb
