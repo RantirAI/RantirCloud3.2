@@ -1,10 +1,5 @@
 import { zodResolver } from '@hookform/resolvers/zod'
 import { PermissionAction } from '@supabase/shared-types/out/constants'
-import { useEffect, useState } from 'react'
-import { useForm } from 'react-hook-form'
-import { toast } from 'sonner'
-import * as z from 'zod'
-
 import { ScaffoldSection, ScaffoldSectionTitle } from 'components/layouts/Scaffold'
 import AlertError from 'components/ui/AlertError'
 import NoPermission from 'components/ui/NoPermission'
@@ -16,6 +11,9 @@ import { useAsyncCheckPermissions } from 'hooks/misc/useCheckPermissions'
 import { useSelectedOrganizationQuery } from 'hooks/misc/useSelectedOrganization'
 import { useSelectedProjectQuery } from 'hooks/misc/useSelectedProject'
 import { IS_PLATFORM } from 'lib/constants'
+import { useEffect, useMemo, useState } from 'react'
+import { useForm } from 'react-hook-form'
+import { toast } from 'sonner'
 import {
   Button,
   Card,
@@ -34,6 +32,9 @@ import {
 } from 'ui'
 import { GenericSkeletonLoader, ShimmeringLoader } from 'ui-patterns'
 import { FormItemLayout } from 'ui-patterns/form/FormItemLayout/FormItemLayout'
+import * as z from 'zod'
+
+const MAX_POOL_SIZE_PERCENT = 0.8
 
 const FormSchema = z.object({
   API_MAX_REQUEST_DURATION: z.coerce
@@ -84,13 +85,36 @@ export const PerformanceSettingsForm = () => {
     defaultValues: { API_MAX_REQUEST_DURATION: 10 },
   })
 
+  const maxAbsolutePoolSize = Math.floor(maxConnectionLimit * MAX_POOL_SIZE_PERCENT)
+  const maxPercentPoolSize = Math.floor(MAX_POOL_SIZE_PERCENT * 100)
+
+  const databaseFormSchema = useMemo(
+    () =>
+      z
+        .object({
+          DB_MAX_POOL_SIZE: z.coerce.number().min(1),
+          DB_MAX_POOL_SIZE_UNIT: FormSchema.shape.DB_MAX_POOL_SIZE_UNIT,
+        })
+        .superRefine((data, ctx) => {
+          const maxPoolSize =
+            data.DB_MAX_POOL_SIZE_UNIT === 'percent' ? maxPercentPoolSize : maxAbsolutePoolSize
+
+          if (data.DB_MAX_POOL_SIZE > maxPoolSize) {
+            ctx.addIssue({
+              code: z.ZodIssueCode.too_big,
+              maximum: maxPoolSize,
+              type: 'number',
+              inclusive: true,
+              message: `Value must be less than or equal to ${maxPoolSize}.`,
+              path: ['DB_MAX_POOL_SIZE'],
+            })
+          }
+        }),
+    [maxAbsolutePoolSize, maxPercentPoolSize]
+  )
+
   const databaseForm = useForm({
-    resolver: zodResolver(
-      z.object({
-        DB_MAX_POOL_SIZE: FormSchema.shape.DB_MAX_POOL_SIZE,
-        DB_MAX_POOL_SIZE_UNIT: FormSchema.shape.DB_MAX_POOL_SIZE_UNIT,
-      })
-    ),
+    resolver: zodResolver(databaseFormSchema),
     defaultValues: {
       DB_MAX_POOL_SIZE: 10,
       DB_MAX_POOL_SIZE_UNIT: 'connections',
@@ -307,15 +331,22 @@ export const PerformanceSettingsForm = () => {
                               let preservedPoolSize: number
                               if (value === 'percent') {
                                 // convert from absolute number to roughly the same percentage
-                                preservedPoolSize = Math.ceil(
-                                  (Math.min(maxConnectionLimit, currentValue) /
-                                    maxConnectionLimit) *
-                                    100
+                                preservedPoolSize = Math.min(
+                                  maxPercentPoolSize,
+                                  Math.ceil(
+                                    (Math.min(maxAbsolutePoolSize, currentValue) /
+                                      maxConnectionLimit) *
+                                      100
+                                  )
                                 )
                               } else {
                                 // convert from percentage to roughly the same connection number
-                                preservedPoolSize = Math.floor(
-                                  maxConnectionLimit * (Math.min(100, currentValue) / 100)
+                                preservedPoolSize = Math.min(
+                                  maxAbsolutePoolSize,
+                                  Math.floor(
+                                    maxConnectionLimit *
+                                      (Math.min(maxPercentPoolSize, currentValue) / 100)
+                                  )
                                 )
                               }
 
@@ -373,8 +404,8 @@ export const PerformanceSettingsForm = () => {
                                 min={3}
                                 max={
                                   chosenUnit === 'percent'
-                                    ? 80
-                                    : Math.floor(maxConnectionLimit * 0.8)
+                                    ? maxPercentPoolSize
+                                    : maxAbsolutePoolSize
                                 }
                                 disabled={!canUpdateConfig || promptProPlanUpgrade}
                               />
@@ -387,9 +418,10 @@ export const PerformanceSettingsForm = () => {
                               <span className="text-foreground-light">
                                 {chosenUnit === 'percent'
                                   ? Math.floor(
-                                      maxConnectionLimit * (Math.min(100, field.value!) / 100)
+                                      maxConnectionLimit *
+                                        (Math.min(maxPercentPoolSize, field.value!) / 100)
                                     ).toString()
-                                  : Math.min(maxConnectionLimit, field.value!)}
+                                  : Math.min(maxAbsolutePoolSize, field.value!)}
                               </span>{' '}
                               / {maxConnectionLimit}
                             </p>
