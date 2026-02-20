@@ -1,6 +1,6 @@
 import Head from 'next/head'
 import { useRouter } from 'next/router'
-import { forwardRef, Fragment, PropsWithChildren, ReactNode, useEffect } from 'react'
+import { forwardRef, Fragment, PropsWithChildren, ReactNode, useEffect, useLayoutEffect } from 'react'
 
 import { mergeRefs, useParams } from 'common'
 import { CreateBranchModal } from 'components/interfaces/BranchManagement/CreateBranchModal'
@@ -14,14 +14,9 @@ import { withAuth } from 'hooks/misc/withAuth'
 import { usePHFlag } from 'hooks/ui/useFlag'
 import { PROJECT_STATUS } from 'lib/constants'
 import { useAppStateSnapshot } from 'state/app-state'
-import {
-  sidebarManagerState,
-  useSidebarManagerSnapshot,
-} from 'state/sidebar-manager-state'
 import { useMobileSidebarSheet } from './LayoutSidebar/MobileSidebarSheetContext'
 import { useDatabaseSelectorStateSnapshot } from 'state/database-selector'
 import { cn, LogoLoader, ResizableHandle, ResizablePanel, ResizablePanelGroup } from 'ui'
-import MobileSheetNav from 'ui-patterns/MobileSheetNav/MobileSheetNav'
 import { useEditorType } from '../editors/EditorsLayout.hooks'
 import { useSetMainScrollContainer } from '../MainScrollContainerContext'
 import BuildingState from './BuildingState'
@@ -95,8 +90,7 @@ export const ProjectLayout = forwardRef<HTMLDivElement, PropsWithChildren<Projec
     const { data: selectedOrganization } = useSelectedOrganizationQuery()
     const { data: selectedProject } = useSelectedProjectQuery()
     const { showSidebar } = useAppStateSnapshot()
-    const { content: mobileSheetContent, setContent: setMobileSheetContent } = useMobileSidebarSheet()
-    const { activeSidebar } = useSidebarManagerSnapshot()
+    const { setContent: setMobileSheetContent, setMenuContent } = useMobileSidebarSheet()
 
     const pathname = router.asPath?.split('?')[0] ?? router.pathname
     const currentSectionKey = getSectionKeyFromPathname(pathname)
@@ -125,6 +119,18 @@ export const ProjectLayout = forwardRef<HTMLDivElement, PropsWithChildren<Projec
     const sidebarMinSizePercentage = 1
     const sidebarDefaultSizePercentage = 15
     const sidebarMaxSizePercentage = 33
+
+    useLayoutEffect(() => {
+      setMenuContent(
+        <MobileMenuContent
+          currentProductMenu={productMenu ?? null}
+          currentProduct={product}
+          currentSectionKey={currentSectionKey}
+          onCloseSheet={() => setMobileSheetContent(null)}
+        />
+      )
+      return () => setMenuContent(null)
+    }, [productMenu, product, currentSectionKey, setMenuContent, setMobileSheetContent])
 
     return (
       <>
@@ -222,26 +228,6 @@ export const ProjectLayout = forwardRef<HTMLDivElement, PropsWithChildren<Projec
         </div>
         <CreateBranchModal />
         <ProjectAPIDocs />
-        <MobileSheetNav
-          open={mobileSheetContent !== null}
-          onOpenChange={(open) => {
-            if (!open) {
-              setMobileSheetContent(null)
-              sidebarManagerState.closeActive()
-            }
-          }}
-        >
-          {mobileSheetContent === 'menu' ? (
-            <MobileMenuContent
-              currentProductMenu={productMenu ?? null}
-              currentProduct={product}
-              currentSectionKey={currentSectionKey}
-              onCloseSheet={() => setMobileSheetContent(null)}
-            />
-          ) : activeSidebar?.component ? (
-            activeSidebar.component()
-          ) : null}
-        </MobileSheetNav>
       </>
     )
   }

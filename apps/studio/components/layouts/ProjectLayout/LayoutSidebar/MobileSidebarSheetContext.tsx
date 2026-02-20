@@ -1,4 +1,4 @@
-import type { PropsWithChildren } from 'react'
+import type { PropsWithChildren, ReactNode } from 'react'
 import { createContext, useCallback, useContext, useState } from 'react'
 
 export type MobileSheetContentType = null | 'menu' | string
@@ -11,12 +11,16 @@ type MobileSidebarSheetContextValue = {
   isOpen: boolean
   /** @deprecated Use setContent(null) to close, setContent('menu' | sidebarId) to open */
   setOpen: (open: boolean) => void
+  /** Menu content (project or org nav) shown when content === 'menu'. Set by ProjectLayout / OrganizationLayout. */
+  menuContent: ReactNode
+  setMenuContent: (content: ReactNode) => void
 }
 
 const MobileSidebarSheetContext = createContext<MobileSidebarSheetContextValue | null>(null)
 
 export function MobileSidebarSheetProvider({ children }: PropsWithChildren) {
   const [content, setContentState] = useState<MobileSheetContentType>(null)
+  const [menuContent, setMenuContentState] = useState<ReactNode>(null)
   const isOpen = content !== null
 
   const setOpen = useCallback((open: boolean) => {
@@ -27,9 +31,13 @@ export function MobileSidebarSheetProvider({ children }: PropsWithChildren) {
     setContentState(next)
   }, [])
 
+  const setMenuContent = useCallback((next: ReactNode) => {
+    setMenuContentState(next)
+  }, [])
+
   return (
     <MobileSidebarSheetContext.Provider
-      value={{ content, setContent, isOpen, setOpen }}
+      value={{ content, setContent, isOpen, setOpen, menuContent, setMenuContent }}
     >
       {children}
     </MobileSidebarSheetContext.Provider>
