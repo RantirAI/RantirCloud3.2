@@ -1,24 +1,45 @@
 'use client'
 
-import { useParams } from 'common'
-import type { Route } from 'components/ui/ui.types'
+import { useFlag, useParams } from 'common'
+import {
+  useIsAPIDocsSidePanelEnabled,
+  useUnifiedLogsPreview,
+} from 'components/interfaces/App/FeaturePreview/FeaturePreviewContext'
+import { ICON_SIZE, ICON_STROKE_WIDTH } from 'components/interfaces/Sidebar'
 import {
   generateOtherRoutes,
   generateProductRoutes,
   generateSettingsRoutes,
   generateToolRoutes,
 } from 'components/layouts/ProjectLayout/NavigationBar/NavigationBar.utils'
-import { useIsAPIDocsSidePanelEnabled, useUnifiedLogsPreview } from 'components/interfaces/App/FeaturePreview/FeaturePreviewContext'
-import { useFlag } from 'common'
+import type { Route } from 'components/ui/ui.types'
 import { useIsFeatureEnabled } from 'hooks/misc/useIsFeatureEnabled'
 import { useSelectedProjectQuery } from 'hooks/misc/useSelectedProject'
+import { Home } from 'icons'
 import { ChevronLeft } from 'lucide-react'
 import Link from 'next/link'
 import { useRouter } from 'next/router'
 import React, { useCallback, useMemo, useState } from 'react'
-import { Button, cn } from 'ui'
+import {
+  Button,
+  cn,
+  Separator,
+  SidebarGroup,
+  SidebarMenu,
+  sidebarMenuButtonVariants,
+  SidebarMenuItem,
+} from 'ui'
 
 import { getProductMenuComponent } from './mobileProductMenuRegistry'
+
+/** Tool routes navigate directly at top level; section/product menu is shown only when already in that section */
+const TOP_LEVEL_DIRECT_LINK_KEYS = ['editor', 'sql'] as const
+
+function isDirectLinkAtTopLevel(route: Route): boolean {
+  return TOP_LEVEL_DIRECT_LINK_KEYS.includes(
+    route.key as (typeof TOP_LEVEL_DIRECT_LINK_KEYS)[number]
+  )
+}
 
 export interface MobileMenuContentProps {
   currentProductMenu: React.ReactNode
@@ -60,10 +81,7 @@ export function MobileMenuContent({
   const isNewAPIDocsEnabled = useIsAPIDocsSidePanelEnabled()
   const { isEnabled: isUnifiedLogsEnabled } = useUnifiedLogsPreview()
 
-  const toolRoutes = useMemo(
-    () => generateToolRoutes(ref, project),
-    [ref, project]
-  )
+  const toolRoutes = useMemo(() => generateToolRoutes(ref, project), [ref, project])
   const productRoutes = useMemo(
     () =>
       generateProductRoutes(ref, project, {
@@ -92,45 +110,37 @@ export function MobileMenuContent({
       }),
     [ref, project, isUnifiedLogsEnabled, showReports, isNewAPIDocsEnabled]
   )
-  const settingsRoutes = useMemo(
-    () => generateSettingsRoutes(ref, project),
-    [ref, project]
-  )
+  const settingsRoutes = useMemo(() => generateSettingsRoutes(ref, project), [ref, project])
 
   const homeRoute: Route = useMemo(
     () => ({
       key: 'HOME',
       label: 'Project Overview',
-      icon: null,
+      icon: <Home size={ICON_SIZE} strokeWidth={ICON_STROKE_WIDTH} />,
       link: ref ? `/project/${ref}` : undefined,
     }),
     [ref]
   )
 
   const allTopLevelRoutes = useMemo(
-    () => [
-      homeRoute,
-      ...toolRoutes,
-      ...productRoutes,
-      ...otherRoutes,
-      ...settingsRoutes,
-    ],
+    () => [homeRoute, ...toolRoutes, ...productRoutes, ...otherRoutes, ...settingsRoutes],
     [homeRoute, toolRoutes, productRoutes, otherRoutes, settingsRoutes]
   )
 
-  const hasSubmenu = useCallback(
-    (route: Route) => {
-      if (route.items && Array.isArray(route.items) && route.items.length > 0)
-        return true
-      const component = getProductMenuComponent(route.key)
-      return component !== null
-    },
-    []
-  )
+  const hasSubmenu = useCallback((route: Route) => {
+    if (route.items && Array.isArray(route.items) && route.items.length > 0) return true
+    const component = getProductMenuComponent(route.key)
+    return component !== null
+  }, [])
 
   const handleTopLevelClick = useCallback(
     (route: Route) => {
       if (route.disabled) return
+      if (isDirectLinkAtTopLevel(route) && route.link) {
+        router.push(route.link)
+        onCloseSheet?.()
+        return
+      }
       if (hasSubmenu(route)) {
         setSelectedSectionKey(route.key)
         setViewLevel('section')
@@ -159,6 +169,55 @@ export function MobileMenuContent({
   const SectionMenuContent = sectionKeyToShow ? getProductMenuComponent(sectionKeyToShow) : null
   const pageSegment = pathname.split('/')[4]
 
+  const renderTopLevelRoute = useCallback(
+    (route: Route, isActive: boolean) => {
+      const hasItems = hasSubmenu(route) && !isDirectLinkAtTopLevel(route)
+      const content = (
+        <>
+          {route.icon && (
+            <span className="flex size-5 shrink-0 items-center justify-center [&>svg]:size-5 [&>svg]:shrink-0">
+              {route.icon}
+            </span>
+          )}
+          <span className="truncate">{route.label}</span>
+        </>
+      )
+      const menuButtonClass = cn(
+        sidebarMenuButtonVariants({ size: 'default', hasIcon: !!route.icon }),
+        route.disabled && 'opacity-50 pointer-events-none'
+      )
+      return (
+        <SidebarMenuItem key={route.key}>
+          {hasItems ? (
+            <button
+              type="button"
+              data-active={isActive}
+              onClick={() => handleTopLevelClick(route)}
+              disabled={route.disabled}
+              className={menuButtonClass}
+            >
+              {content}
+            </button>
+          ) : route.link ? (
+            <Link
+              href={route.link}
+              onClick={onCloseSheet}
+              data-active={isActive}
+              className={menuButtonClass}
+            >
+              {content}
+            </Link>
+          ) : (
+            <span data-active={false} className={cn(menuButtonClass, 'cursor-default')}>
+              {content}
+            </span>
+          )}
+        </SidebarMenuItem>
+      )
+    },
+    [hasSubmenu, handleTopLevelClick, onCloseSheet]
+  )
+
   return (
     <div className="flex flex-col h-full">
       {viewLevel === 'section' && sectionLabel && (
@@ -177,70 +236,49 @@ export function MobileMenuContent({
           <span className="font-medium truncate">{sectionLabel}</span>
         </div>
       )}
-      <div className="flex-1 overflow-y-auto">
+      <div className="flex-1 overflow-y-auto bg-sidebar text-sidebar-foreground">
         {viewLevel === 'top' && (
-          <nav className="py-2 px-3" aria-label="Project menu">
-            <ul className="flex flex-col gap-0.5">
-              {allTopLevelRoutes.map((route) => {
-                const isActive = activeRoute === route.key || (route.key === 'HOME' && !activeRoute)
-                const hasItems = hasSubmenu(route)
-                const content = (
-                  <>
-                    {route.icon && (
-                      <span className="flex items-center justify-center w-6 h-6 flex-shrink-0">
-                        {route.icon}
-                      </span>
-                    )}
-                    <span className="truncate">{route.label}</span>
-                  </>
-                )
-                return (
-                  <li key={route.key}>
-                    {hasItems ? (
-                      <button
-                        type="button"
-                        onClick={() => handleTopLevelClick(route)}
-                        disabled={route.disabled}
-                        className={cn(
-                          'flex items-center gap-3 w-full rounded-md px-3 py-2.5 text-left text-sm',
-                          'hover:bg-overlay-hover',
-                          isActive && 'bg-overlay-hover',
-                          route.disabled && 'opacity-50 pointer-events-none'
-                        )}
-                      >
-                        {content}
-                      </button>
-                    ) : route.link ? (
-                      <Link
-                        href={route.link}
-                        onClick={onCloseSheet}
-                        className={cn(
-                          'flex items-center gap-3 w-full rounded-md px-3 py-2.5 text-left text-sm',
-                          'hover:bg-overlay-hover',
-                          isActive && 'bg-overlay-hover'
-                        )}
-                      >
-                        {content}
-                      </Link>
-                    ) : (
-                      <span className="flex items-center gap-3 w-full rounded-md px-3 py-2.5 text-sm opacity-50">
-                        {content}
-                      </span>
-                    )}
-                  </li>
-                )
-              })}
-            </ul>
+          <nav className="flex flex-col gap-2 p-1" aria-label="Project menu">
+            <SidebarMenu>
+              <SidebarGroup className="gap-0.5">
+                {[homeRoute, ...toolRoutes].map((route) =>
+                  renderTopLevelRoute(
+                    route,
+                    activeRoute === route.key || (route.key === 'HOME' && !activeRoute)
+                  )
+                )}
+              </SidebarGroup>
+              <Separator className="mx-2 w-auto bg-sidebar-border" />
+              <SidebarGroup className="gap-0.5">
+                {productRoutes.map((route) =>
+                  renderTopLevelRoute(route, activeRoute === route.key)
+                )}
+              </SidebarGroup>
+              <Separator className="mx-2 w-auto bg-sidebar-border" />
+              <SidebarGroup className="gap-0.5">
+                {otherRoutes.map((route) => renderTopLevelRoute(route, activeRoute === route.key))}
+              </SidebarGroup>
+              <Separator className="mx-2 w-auto bg-sidebar-border" />
+              <SidebarGroup className="gap-0.5">
+                {settingsRoutes.map((route) =>
+                  renderTopLevelRoute(route, activeRoute === route.key)
+                )}
+              </SidebarGroup>
+            </SidebarMenu>
           </nav>
         )}
         {viewLevel === 'section' && sectionKeyToShow && (
-          <div className="px-3 py-4">
+          <div className="px-2 py-2">
             {sectionKeyToShow === currentSectionKey && currentProductMenu ? (
               currentProductMenu
             ) : SectionMenuContent ? (
-              <React.Suspense fallback={<div className="py-4 text-sm text-foreground-muted">Loading...</div>}>
+              <React.Suspense
+                fallback={<div className="py-4 text-sm text-foreground-muted">Loading...</div>}
+              >
                 {sectionKeyToShow === 'advisors' ? (
-                  <SectionMenuContent {...({ page: pageSegment } as React.ComponentProps<typeof SectionMenuContent>)} />
+                  <SectionMenuContent
+                    {...({ page: pageSegment } as React.ComponentProps<typeof SectionMenuContent>)}
+                  />
                 ) : (
                   <SectionMenuContent />
                 )}
