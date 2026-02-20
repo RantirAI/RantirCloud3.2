@@ -102,7 +102,7 @@ export const LayoutHeader = ({
 
   return (
     <>
-      <header className={cn('flex h-11 md:h-12 items-center flex-shrink-0 border-b')}>
+      <header className={cn('hidden md:flex h-11 md:h-12 items-center flex-shrink-0 border-b')}>
         {backToDashboardURL && isAccountPage && (
           <div className="flex items-center justify-center border-r flex-0 md:hidden h-full aspect-square">
             <Link

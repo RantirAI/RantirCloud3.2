@@ -6,6 +6,7 @@ import { SIDEBAR_KEYS } from 'components/layouts/ProjectLayout/LayoutSidebar/Lay
 import { AnimatePresence } from 'framer-motion'
 import { Menu, X } from 'lucide-react'
 import { useCallback, useLayoutEffect, useRef, useState } from 'react'
+import { useAppStateSnapshot } from 'state/app-state'
 import { useSidebarManagerSnapshot } from 'state/sidebar-manager-state'
 import { Button, cn } from 'ui'
 
@@ -18,15 +19,18 @@ const GAP_FROM_BOTTOM = 50
 const SHEET_OPEN_GAP_FRACTION = 0.15
 
 const FloatingBottomNavbar = ({ hideMobileMenu }: { hideMobileMenu?: boolean }) => {
-  const { isOpen: isSheetOpen, setOpen: setIsSheetOpen } = useMobileSidebarSheet()
+  const { isOpen: isSheetOpen } = useMobileSidebarSheet()
+  const { mobileMenuOpen, setMobileMenuOpen } = useAppStateSnapshot()
   const { activeSidebar, openSidebar } = useSidebarManagerSnapshot()
   const { ref: projectRef } = useParams()
 
   const handleNavClickCapture = useCallback(
     (e: React.MouseEvent) => {
-      if (!isSheetOpen) return
+      console.log('handleNavClickCapture', isSheetOpen)
+      // if (!isSheetOpen) return
       const target = (e.target as HTMLElement).closest?.('[data-sidebar-id]')
       const sidebarId = target?.getAttribute('data-sidebar-id')
+      console.log('handleNavClickCapture sidebar', sidebarId, activeSidebar)
       if (sidebarId && activeSidebar?.id !== sidebarId) {
         e.preventDefault()
         e.stopPropagation()
@@ -65,7 +69,7 @@ const FloatingBottomNavbar = ({ hideMobileMenu }: { hideMobileMenu?: boolean }) 
   }, [])
 
   useLayoutEffect(() => {
-    if (!isSheetOpen) return
+    if (!isSheetOpen && !mobileMenuOpen) return
     const raf = requestAnimationFrame(() => {
       const el = navRef.current
       if (!el) return
@@ -77,7 +81,7 @@ const FloatingBottomNavbar = ({ hideMobileMenu }: { hideMobileMenu?: boolean }) 
       )
     })
     return () => cancelAnimationFrame(raf)
-  }, [isSheetOpen])
+  }, [isSheetOpen, mobileMenuOpen])
 
   const applyMove = useCallback((clientX: number, clientY: number) => {
     const state = dragStartRef.current
@@ -99,6 +103,8 @@ const FloatingBottomNavbar = ({ hideMobileMenu }: { hideMobileMenu?: boolean }) 
 
   const handlePointerDown = useCallback(
     (e: React.PointerEvent) => {
+      e.preventDefault()
+      e.stopPropagation()
       const rect = navRef.current?.getBoundingClientRect()
       if (!rect) return
       const currentX = position?.x ?? rect.left
@@ -111,11 +117,15 @@ const FloatingBottomNavbar = ({ hideMobileMenu }: { hideMobileMenu?: boolean }) 
         startY: e.clientY,
         pointerId,
       }
-      const el = e.currentTarget
-      if (el.setPointerCapture) el.setPointerCapture(pointerId)
 
       const onWindowPointerMove = (moveEvent: PointerEvent) => {
-        if (dragStartRef.current?.pointerId !== moveEvent.pointerId) return
+        const state = dragStartRef.current
+        if (!state || state.pointerId !== moveEvent.pointerId) return
+        const dist = Math.hypot(moveEvent.clientX - state.startX, moveEvent.clientY - state.startY)
+        if (dist >= DRAG_THRESHOLD_PX) {
+          const el = navRef.current
+          if (el?.setPointerCapture) el.setPointerCapture(moveEvent.pointerId)
+        }
         applyMove(moveEvent.clientX, moveEvent.clientY)
       }
       const onWindowPointerUpOrCancel = (upEvent: PointerEvent) => {
@@ -155,22 +165,23 @@ const FloatingBottomNavbar = ({ hideMobileMenu }: { hideMobileMenu?: boolean }) 
       ? 'transform 0ms, z-index 0s'
       : 'transform 300ms cubic-bezier(0.4, 0, 0.2, 1), z-index 0s'
     const base = {
-      zIndex: isSheetOpen ? 101 : 41,
+      zIndex: isSheetOpen || mobileMenuOpen ? 501 : 41,
       transition,
-      touchAction: 'none',
+      touchAction: '',
     }
 
+    const menuSheetOpen = isSheetOpen || mobileMenuOpen
     if (position === null) {
       return {
         ...base,
         left: '50%',
         top: 0,
-        transform: isSheetOpen
+        transform: menuSheetOpen
           ? `translate(-50%, ${topWhenSheetOpen}px)`
           : `translate(-50%, ${defaultYClosed}px)`,
       }
     }
-    if (isSheetOpen) {
+    if (menuSheetOpen) {
       return {
         ...base,
         left: 0,
@@ -217,13 +228,13 @@ const FloatingBottomNavbar = ({ hideMobileMenu }: { hideMobileMenu?: boolean }) 
         {!hideMobileMenu && (
           <Button
             title="Menu dropdown button"
-            type={isSheetOpen ? 'secondary' : 'default'}
+            type={mobileMenuOpen ? 'secondary' : 'default'}
             className={cn(
               'flex lg:hidden rounded-md min-w-[30px] w-[30px] h-[30px] data-[state=open]:bg-overlay-hover/30',
-              !isSheetOpen && '!bg-surface-300'
+              !mobileMenuOpen && '!bg-surface-300'
             )}
-            icon={isSheetOpen ? <X /> : <Menu />}
-            onClick={() => setIsSheetOpen(true)}
+            icon={mobileMenuOpen ? <X /> : <Menu />}
+            onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
           />
         )}
       </AnimatePresence>

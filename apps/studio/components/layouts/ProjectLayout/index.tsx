@@ -25,6 +25,7 @@ import { LoadingState } from './LoadingState'
 import { ProjectPausedState } from './PausedState/ProjectPausedState'
 import { PauseFailedState } from './PauseFailedState'
 import { PausingState } from './PausingState'
+import { getSectionKeyFromPathname, MobileMenuContent } from './MobileMenuContent'
 import ProductMenuBar from './ProductMenuBar'
 import { ResizingState } from './ResizingState'
 import RestartingState from './RestartingState'
@@ -89,6 +90,9 @@ export const ProjectLayout = forwardRef<HTMLDivElement, PropsWithChildren<Projec
     const { data: selectedOrganization } = useSelectedOrganizationQuery()
     const { data: selectedProject } = useSelectedProjectQuery()
     const { mobileMenuOpen, showSidebar, setMobileMenuOpen } = useAppStateSnapshot()
+
+    const pathname = router.asPath?.split('?')[0] ?? router.pathname
+    const currentSectionKey = getSectionKeyFromPathname(pathname)
 
     const setMainScrollContainer = useSetMainScrollContainer()
     const combinedRef = mergeRefs(ref, setMainScrollContainer)
@@ -212,7 +216,12 @@ export const ProjectLayout = forwardRef<HTMLDivElement, PropsWithChildren<Projec
         <CreateBranchModal />
         <ProjectAPIDocs />
         <MobileSheetNav open={mobileMenuOpen} onOpenChange={setMobileMenuOpen}>
-          {productMenu}
+          <MobileMenuContent
+            currentProductMenu={productMenu ?? null}
+            currentProduct={product}
+            currentSectionKey={currentSectionKey}
+            onCloseSheet={() => setMobileMenuOpen(false)}
+          />
         </MobileSheetNav>
       </>
     )
