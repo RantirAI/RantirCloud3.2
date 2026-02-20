@@ -30,7 +30,7 @@ export const LayoutSidebar = ({
       if (activeSidebar?.component) {
         setMobileSheetOpen(true)
       } else {
-        setMobileSheetOpen(false)
+        // setMobileSheetOpen(false)
       }
     }
   }, [isMobile, activeSidebar, setMobileSheetOpen])

@@ -6,8 +6,7 @@ import { SIDEBAR_KEYS } from 'components/layouts/ProjectLayout/LayoutSidebar/Lay
 import { AnimatePresence } from 'framer-motion'
 import { Menu, X } from 'lucide-react'
 import { useCallback, useLayoutEffect, useRef, useState } from 'react'
-import { useAppStateSnapshot } from 'state/app-state'
-import { useSidebarManagerSnapshot } from 'state/sidebar-manager-state'
+import { sidebarManagerState, useSidebarManagerSnapshot } from 'state/sidebar-manager-state'
 import { Button, cn } from 'ui'
 
 import { HelpDropdown } from '../LayoutHeader/HelpDropdown/HelpDropdown'
@@ -19,25 +18,26 @@ const GAP_FROM_BOTTOM = 50
 const SHEET_OPEN_GAP_FRACTION = 0.15
 
 const FloatingBottomNavbar = ({ hideMobileMenu }: { hideMobileMenu?: boolean }) => {
-  const { isOpen: isSheetOpen } = useMobileSidebarSheet()
-  const { mobileMenuOpen, setMobileMenuOpen } = useAppStateSnapshot()
-  const { activeSidebar, openSidebar } = useSidebarManagerSnapshot()
+  const {
+    content: sheetContent,
+    isOpen: isSheetOpen,
+    setContent: setSheetContent,
+  } = useMobileSidebarSheet()
+  const { activeSidebar, openSidebar, clearActiveSidebar } = useSidebarManagerSnapshot()
   const { ref: projectRef } = useParams()
 
   const handleNavClickCapture = useCallback(
     (e: React.MouseEvent) => {
-      console.log('handleNavClickCapture', isSheetOpen)
-      // if (!isSheetOpen) return
       const target = (e.target as HTMLElement).closest?.('[data-sidebar-id]')
       const sidebarId = target?.getAttribute('data-sidebar-id')
-      console.log('handleNavClickCapture sidebar', sidebarId, activeSidebar)
       if (sidebarId && activeSidebar?.id !== sidebarId) {
         e.preventDefault()
         e.stopPropagation()
         openSidebar(sidebarId)
+        setSheetContent(sidebarId)
       }
     },
-    [isSheetOpen, activeSidebar?.id, openSidebar]
+    [activeSidebar?.id, openSidebar, setSheetContent]
   )
 
   const [position, setPosition] = useState<{ x: number; y: number } | null>(null)
@@ -69,7 +69,7 @@ const FloatingBottomNavbar = ({ hideMobileMenu }: { hideMobileMenu?: boolean }) 
   }, [])
 
   useLayoutEffect(() => {
-    if (!isSheetOpen && !mobileMenuOpen) return
+    if (!isSheetOpen) return
     const raf = requestAnimationFrame(() => {
       const el = navRef.current
       if (!el) return
@@ -81,7 +81,7 @@ const FloatingBottomNavbar = ({ hideMobileMenu }: { hideMobileMenu?: boolean }) 
       )
     })
     return () => cancelAnimationFrame(raf)
-  }, [isSheetOpen, mobileMenuOpen])
+  }, [isSheetOpen])
 
   const applyMove = useCallback((clientX: number, clientY: number) => {
     const state = dragStartRef.current
@@ -165,12 +165,12 @@ const FloatingBottomNavbar = ({ hideMobileMenu }: { hideMobileMenu?: boolean }) 
       ? 'transform 0ms, z-index 0s'
       : 'transform 300ms cubic-bezier(0.4, 0, 0.2, 1), z-index 0s'
     const base = {
-      zIndex: isSheetOpen || mobileMenuOpen ? 501 : 41,
+      zIndex: isSheetOpen ? 101 : 41,
       transition,
       touchAction: '',
     }
 
-    const menuSheetOpen = isSheetOpen || mobileMenuOpen
+    const menuSheetOpen = isSheetOpen
     if (position === null) {
       return {
         ...base,
@@ -202,7 +202,8 @@ const FloatingBottomNavbar = ({ hideMobileMenu }: { hideMobileMenu?: boolean }) 
       ref={navRef}
       aria-label="Floating navigation"
       className={cn(
-        'flex pointer-events-auto cursor-grab active:cursor-grabbing flex-row items-center justify-between w-auto rounded-full bg-overlay/80 backdrop-blur-md pl-2 pr-4 py-2 gap-2 border shadow-[0px_3px_6px_-2px_rgba(0,0,0,0.07),0px_10px_30px_0px_rgba(0,0,0,0.10)]',
+        'flex pointer-events-auto cursor-grab active:cursor-grabbing flex-row items-centerw-auto',
+        'gap-2',
         'fixed md:hidden'
       )}
       style={style}
@@ -210,33 +211,63 @@ const FloatingBottomNavbar = ({ hideMobileMenu }: { hideMobileMenu?: boolean }) 
       onPointerDown={handlePointerDown}
       onPointerMove={handlePointerMove}
     >
+      <div
+        className={cn(
+          'flex pointer-events-auto cursor-grab active:cursor-grabbing flex-row items-center justify-between w-auto rounded-full',
+          'bg-overlay/80 backdrop-blur-md pl-2.5 pr-4 py-2 gap-2',
+          'border border-strong shadow-[0px_3px_6px_-2px_rgba(0,0,0,0.07),0px_10px_30px_0px_rgba(0,0,0,0.10)]'
+        )}
+      >
+        <AnimatePresence initial={false}>
+          {!!projectRef && (
+            <>
+              <span data-sidebar-id={SIDEBAR_KEYS.AI_ASSISTANT}>
+                <AssistantButton />
+              </span>
+              <span data-sidebar-id={SIDEBAR_KEYS.EDITOR_PANEL}>
+                <InlineEditorButton />
+              </span>
+            </>
+          )}
+          <span data-sidebar-id={SIDEBAR_KEYS.ADVISOR_PANEL}>
+            <AdvisorButton projectRef={projectRef} />
+          </span>
+          <HelpDropdown />
+          {!hideMobileMenu && (
+            <Button
+              title="Menu dropdown button"
+              type={sheetContent === 'menu' ? 'secondary' : 'default'}
+              className={cn(
+                'flex lg:hidden rounded-md min-w-[30px] w-[30px] h-[30px] data-[state=open]:bg-overlay-hover/30',
+                sheetContent !== 'menu' && '!bg-surface-300'
+              )}
+              icon={<Menu />}
+              onClick={() => {
+                clearActiveSidebar()
+                setSheetContent('menu')
+              }}
+            />
+          )}
+        </AnimatePresence>
+      </div>
       <AnimatePresence initial={false}>
-        {!!projectRef && (
-          <>
-            <span data-sidebar-id={SIDEBAR_KEYS.AI_ASSISTANT}>
-              <AssistantButton />
-            </span>
-            <span data-sidebar-id={SIDEBAR_KEYS.EDITOR_PANEL}>
-              <InlineEditorButton />
-            </span>
-          </>
-        )}
-        <span data-sidebar-id={SIDEBAR_KEYS.ADVISOR_PANEL}>
-          <AdvisorButton projectRef={projectRef} />
-        </span>
-        <HelpDropdown />
-        {!hideMobileMenu && (
-          <Button
-            title="Menu dropdown button"
-            type={mobileMenuOpen ? 'secondary' : 'default'}
-            className={cn(
-              'flex lg:hidden rounded-md min-w-[30px] w-[30px] h-[30px] data-[state=open]:bg-overlay-hover/30',
-              !mobileMenuOpen && '!bg-surface-300'
-            )}
-            icon={mobileMenuOpen ? <X /> : <Menu />}
-            onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-          />
-        )}
+        <Button
+          title="close"
+          type="text"
+          className={cn(
+            'flex flex-row items-center justify-center rounded-full',
+            'bg-overlay/50 backdrop-blur-md my-auto !p-1 gap-2',
+            'border border-strong shadow-[0px_3px_6px_-2px_rgba(0,0,0,0.07),0px_10px_30px_0px_rgba(0,0,0,0.10)]',
+            '!w-10 !h-10 !min-w-10 !min-h-10',
+            'rounded-full',
+            !isSheetOpen && 'hidden'
+          )}
+          icon={<X />}
+          onClick={() => {
+            clearActiveSidebar()
+            setSheetContent(null)
+          }}
+        />
       </AnimatePresence>
     </nav>
   )

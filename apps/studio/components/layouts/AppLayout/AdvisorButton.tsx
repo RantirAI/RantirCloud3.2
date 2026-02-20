@@ -1,19 +1,22 @@
-import { Lightbulb } from 'lucide-react'
+import { useBreakpoint } from 'common'
+import { SIDEBAR_KEYS } from 'components/layouts/ProjectLayout/LayoutSidebar/LayoutSidebarProvider'
 import { ButtonTooltip } from 'components/ui/ButtonTooltip'
 import { useProjectLintsQuery } from 'data/lint/lint-query'
+import { Lightbulb } from 'lucide-react'
 import { useSidebarManagerSnapshot } from 'state/sidebar-manager-state'
-import { SIDEBAR_KEYS } from 'components/layouts/ProjectLayout/LayoutSidebar/LayoutSidebarProvider'
 import { cn } from 'ui'
 
 export const AdvisorButton = ({ projectRef }: { projectRef?: string }) => {
   const { toggleSidebar, activeSidebar } = useSidebarManagerSnapshot()
   const { data: lints } = useProjectLintsQuery({ projectRef })
+  const isMobile = useBreakpoint('md')
 
   const hasCriticalIssues = Array.isArray(lints) && lints.some((lint) => lint.level === 'ERROR')
 
   const isOpen = activeSidebar?.id === SIDEBAR_KEYS.ADVISOR_PANEL
 
   const handleClick = () => {
+    if (isMobile && isOpen) return
     toggleSidebar(SIDEBAR_KEYS.ADVISOR_PANEL)
   }
 

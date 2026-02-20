@@ -1,16 +1,12 @@
 import { useParams } from 'common'
 import { ConnectButton } from 'components/interfaces/ConnectButton/ConnectButton'
-import { SidebarContent } from 'components/interfaces/Sidebar'
 import { UserDropdown } from 'components/interfaces/UserDropdown'
 import { IS_PLATFORM } from 'lib/constants'
 import { Search } from 'lucide-react'
-import { sidebarManagerState, useSidebarManagerSnapshot } from 'state/sidebar-manager-state'
 import { cn } from 'ui'
 import { CommandMenuTrigger } from 'ui-patterns'
-import MobileSheetNav from 'ui-patterns/MobileSheetNav/MobileSheetNav'
 
 import { HomeIcon } from '../LayoutHeader/HomeIcon'
-import { useMobileSidebarSheet } from '../LayoutSidebar/MobileSidebarSheetContext'
 import FloatingBottomNavbar from './FloatingBottomNavbar'
 import { OrgSelector } from './OrgSelector'
 import { ProjectBranchSelector } from './ProjectBranchSelector'
@@ -19,8 +15,6 @@ export const ICON_SIZE = 20
 export const ICON_STROKE_WIDTH = 1.5
 
 const MobileNavigationBar = ({ hideMobileMenu }: { hideMobileMenu?: boolean }) => {
-  const { isOpen: isSheetOpen, setOpen: setIsSheetOpen } = useMobileSidebarSheet()
-  const { activeSidebar } = useSidebarManagerSnapshot()
   const { ref: projectRef } = useParams()
   const isProjectScope = !!projectRef
 
@@ -68,16 +62,6 @@ const MobileNavigationBar = ({ hideMobileMenu }: { hideMobileMenu?: boolean }) =
           <UserDropdown />
         </div>
       </nav>
-      <MobileSheetNav
-        open={isSheetOpen}
-        onOpenChange={(open) => {
-          setIsSheetOpen(open)
-          if (!open) sidebarManagerState.closeActive()
-        }}
-        data-state="expanded"
-      >
-        {activeSidebar?.component?.() ?? <SidebarContent />}
-      </MobileSheetNav>
       <FloatingBottomNavbar hideMobileMenu={hideMobileMenu} />
     </div>
   )
