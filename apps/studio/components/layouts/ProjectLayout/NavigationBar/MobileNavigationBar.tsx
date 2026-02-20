@@ -12,29 +12,41 @@ import { CommandMenuTrigger } from 'ui-patterns'
 import { HomeIcon } from '../LayoutHeader/HomeIcon'
 import FloatingBottomNavbar from './FloatingBottomNavbar'
 import FloatingBottomNavbarBreadcrumb from './FloatingBottomNavbarBreadcrumb'
+import FloatingBottomNavbarMenu from './FloatingBottomNavbarMenu'
 import { OrgSelector } from './OrgSelector'
 import { ProjectBranchSelector } from './ProjectBranchSelector'
+
+const NAVBAR_VARIANTS = ['icons', 'breadcrumb', 'menu'] as const
+type NavbarVariant = (typeof NAVBAR_VARIANTS)[number]
+
+function isValidNavbarVariant(s: string | null): s is NavbarVariant {
+  return s !== null && NAVBAR_VARIANTS.includes(s as NavbarVariant)
+}
 
 export const ICON_SIZE = 20
 export const ICON_STROKE_WIDTH = 1.5
 
 const MobileNavigationBar = ({ hideMobileMenu }: { hideMobileMenu?: boolean }) => {
   const { ref: projectRef } = useParams()
-  const [urlShowNavbarB] = useQueryState('showNavbarB', parseAsString)
-  const [localShowNavbarB, setLocalShowNavbarB] = useLocalStorageQuery(
-    LOCAL_STORAGE_KEYS.SHOW_NAVBAR_B,
-    false
+  const [urlNavbar] = useQueryState('navbar', parseAsString)
+  const [localNavbarVariant, setLocalNavbarVariant] = useLocalStorageQuery(
+    LOCAL_STORAGE_KEYS.NAVBAR_VARIANT,
+    'icons'
   )
 
-  // When the flag is in the URL, use it and persist to localStorage
+  // When navbar is in the URL, use it and persist to localStorage if valid
   useEffect(() => {
-    if (urlShowNavbarB !== null) {
-      const value = urlShowNavbarB === 'true'
-      setLocalShowNavbarB(value)
+    if (urlNavbar !== null && isValidNavbarVariant(urlNavbar)) {
+      setLocalNavbarVariant(urlNavbar)
     }
-  }, [urlShowNavbarB, setLocalShowNavbarB])
+  }, [urlNavbar, setLocalNavbarVariant])
 
-  const showNavbarB = urlShowNavbarB !== null ? urlShowNavbarB === 'true' : localShowNavbarB
+  const navbarVariant: NavbarVariant =
+    urlNavbar !== null && isValidNavbarVariant(urlNavbar)
+      ? urlNavbar
+      : isValidNavbarVariant(localNavbarVariant)
+        ? localNavbarVariant
+        : 'icons'
   const isProjectScope = !!projectRef
 
   return (
@@ -81,7 +93,15 @@ const MobileNavigationBar = ({ hideMobileMenu }: { hideMobileMenu?: boolean }) =
           <UserDropdown />
         </div>
       </nav>
-      {showNavbarB ? <FloatingBottomNavbarBreadcrumb /> : <FloatingBottomNavbar hideMobileMenu={hideMobileMenu} />}
+      {navbarVariant === 'breadcrumb' && (
+        <FloatingBottomNavbarBreadcrumb />
+      )}
+      {navbarVariant === 'menu' && (
+        <FloatingBottomNavbarMenu hideMobileMenu={hideMobileMenu} />
+      )}
+      {navbarVariant === 'icons' && (
+        <FloatingBottomNavbar hideMobileMenu={hideMobileMenu} />
+      )}
     </div>
   )
 }
