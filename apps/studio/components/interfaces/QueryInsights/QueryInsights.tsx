@@ -1,5 +1,6 @@
 import { QueryInsightsHealth } from './QueryInsightsHealth/QueryInsightsHealth'
 import { QueryInsightsChart } from './QueryInsightsChart/QueryInsightsChart'
+import { QueryInsightsTable } from './QueryInsightsTable/QueryInsightsTable'
 
 interface QueryInsightsProps {
   dateRange?: {
@@ -12,10 +13,10 @@ interface QueryInsightsProps {
 
 export const QueryInsights = ({ dateRange, onDateRangeChange }: QueryInsightsProps) => {
   return (
-    <div>
+    <div className="flex flex-col flex-1 min-h-0">
       <QueryInsightsHealth data={[]} isLoading={false} />
       <QueryInsightsChart />
-      {/* Table here */}
+      <QueryInsightsTable />
     </div>
   )
 }
