@@ -2647,6 +2647,27 @@ export interface RlsEventTriggerBannerCreateButtonClickedEvent {
 }
 
 /**
+ * User was exposed to the pricing calculator experiment on the /pricing page.
+ *
+ * @group Events
+ * @source www
+ * @page /pricing
+ */
+export interface PricingCalculatorExperimentExposedEvent {
+  action: 'pricing_calculator_experiment_exposed'
+  properties: {
+    /**
+     * Experiment identifier for tracking
+     */
+    experiment_id: 'pricingCalculatorExperiment'
+    /**
+     * Experiment variant: 'control' (existing compute section) or 'test' (new compute section)
+     */
+    variant: 'control' | 'test'
+  }
+}
+
+/**
  * @hidden
  */
 export type TelemetryEvent =
@@ -2793,3 +2814,4 @@ export type TelemetryEvent =
   | IntegrationInstallFailedEvent
   | IntegrationUninstallCompletedEvent
   | RlsEventTriggerBannerCreateButtonClickedEvent
+  | PricingCalculatorExperimentExposedEvent

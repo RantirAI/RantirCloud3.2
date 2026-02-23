@@ -8,10 +8,14 @@ import { useEffect } from 'react'
 import { Button } from 'ui'
 import { InfoTooltip } from 'ui-patterns/info-tooltip'
 
+import { hasConsented, posthogClient, useFeatureFlags } from 'common'
 import DefaultLayout from '~/components/Layouts/Default'
 import NewPricingComputeSection from '~/components/Pricing/NewPricingComputeSection'
 import PricingPlans from '~/components/Pricing/PricingPlans'
 import { useOrganizations } from '~/data/organizations'
+
+const EXPERIMENT_ID = 'pricingCalculatorExperiment' as const
+type PricingCalculatorVariant = 'control' | 'test'
 
 const PricingComputeSection = dynamic(() => import('~/components/Pricing/PricingComputeSection'))
 const PricingAddons = dynamic(() => import('~/components/Pricing/PricingAddons'))
@@ -46,6 +50,25 @@ export default function PricingContent() {
 
   const { isLoading, organizations } = useOrganizations()
   const hasExistingOrganizations = !isLoading && organizations.length > 0
+
+  // Pricing calculator A/B experiment
+  const featureFlags = useFeatureFlags()
+  const flagValue = featureFlags.posthog[EXPERIMENT_ID] as
+    | PricingCalculatorVariant
+    | false
+    | undefined
+  const isTestVariant = flagValue === 'test'
+  const isInExperiment = flagValue === 'control' || flagValue === 'test'
+
+  useEffect(() => {
+    if (!isInExperiment) return
+
+    posthogClient.captureExperimentExposure(
+      EXPERIMENT_ID,
+      { variant: flagValue },
+      hasConsented()
+    )
+  }, [isInExperiment, flagValue])
 
   return (
     <DefaultLayout>
@@ -90,8 +113,7 @@ export default function PricingContent() {
         id="addon-compute"
         className="container relative mx-auto px-4 lg:px-12 pt-16 md:pt-24 lg:pt-32 lg:pb-16"
       >
-        {/* ADD NEW COMPUTE PRICING SECTION EXPERIMENTAL FLAG */}
-        {1 < 2 ? (
+        {!isTestVariant && (
           <div className="text-center mb-8 lg:mb-16">
             <h2 className="text-foreground text-3xl" id="how-compute-pricing-works">
               How compute pricing works
@@ -109,10 +131,9 @@ export default function PricingContent() {
               </span>
             </div>
           </div>
-        ) : null}
+        )}
 
-        {/* ADD NEW COMPUTE PRICING SECTION EXPERIMENTAL FLAG */}
-        {1 > 2 ? <NewPricingComputeSection /> : <PricingComputeSection />}
+        {isTestVariant ? <NewPricingComputeSection /> : <PricingComputeSection />}
       </div>
 
       <div
