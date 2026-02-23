@@ -1,0 +1,31 @@
+---
+title: Contrast Checker
+description: Check WCAG color contrast ratios between text and background tokens.
+---
+
+Use this tool to verify that text and background color combinations in our design system meet WCAG 2.1 accessibility standards.
+
+## How it works
+
+The checker calculates the [WCAG contrast ratio](https://www.w3.org/WAI/WCAG21/Understanding/contrast-minimum.html) between two colors and rates the result:
+
+| Level | Normal text | Large text |
+| ----- | ----------- | ---------- |
+| **AAA** | 7:1 or higher | 4.5:1 or higher |
+| **AA** | 4.5:1 or higher | 3:1 or higher |
+| **Fail** | Below 4.5:1 | Below 3:1 |
+
+Large text is defined as 18pt (24px) or 14pt (18.66px) bold.
+
+## Checker
+
+Select a text color and background color to see the contrast ratio and WCAG rating. Toggle between light and dark themes to verify both modes.
+
+<ContrastChecker />
+
+## Guidelines
+
+- **Primary content** (`foreground` on `background`) should meet **AA** at minimum, and **AAA** where possible.
+- **Secondary content** (`foreground-light`) should meet **AA** on all surface colors it appears on.
+- **Muted text** (`foreground-muted`) is intended for decorative or non-essential text. Avoid using it for content that users need to read.
+- **Status colors** (brand, destructive, warning) used as backgrounds should pair with `foreground-contrast` for legibility.

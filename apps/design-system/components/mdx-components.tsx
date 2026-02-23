@@ -32,6 +32,7 @@ import { Callout } from '@/components/callout'
 import { CodeBlockWrapper } from '@/components/code-block-wrapper'
 import { CodeFragment } from '@/components/code-fragment'
 import { Colors } from '@/components/colors'
+import { ContrastChecker } from '@/components/contrast-checker'
 import { ComponentExample } from '@/components/component-example'
 import { ComponentPreview } from '@/components/component-preview'
 import { ComponentSource } from '@/components/component-source'
@@ -268,6 +269,7 @@ const components = {
     />
   ),
   Colors,
+  ContrastChecker,
   Icons,
   ThemeSettings,
   CodeFragment,

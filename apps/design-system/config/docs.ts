@@ -29,6 +29,12 @@ export const docsConfig: DocsConfig = {
           items: [],
         },
         {
+          title: 'Contrast Checker',
+          href: '/docs/contrast-checker',
+          items: [],
+          label: 'New',
+        },
+        {
           title: 'Copywriting',
           href: '/docs/copywriting',
           items: [],
