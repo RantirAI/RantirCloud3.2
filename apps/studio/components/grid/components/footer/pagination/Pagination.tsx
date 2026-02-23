@@ -105,6 +105,8 @@ export const Pagination = ({ enableForeignRowsQuery = true }: PaginationProps) =
   const maxPages = Math.ceil(count / tableEditorSnap.rowsPerPage)
   const totalPages = count > 0 ? maxPages : 1
 
+  const preflightCheck = !tableEditorSnap.tablesToIgnorePreflightCheck.includes(id ?? -1)
+
   // [Joshen] This is only applicable for foreign tables, as we use the number of rows on the page to determine
   // if we've reached the last page (and hence disable the next button)
   const { data: rowsData, isPending: isLoadingRows } = useTableRowsQuery(
@@ -114,6 +116,7 @@ export const Pagination = ({ enableForeignRowsQuery = true }: PaginationProps) =
       sorts,
       filters,
       page: snap.page,
+      preflightCheck,
       limit: tableEditorSnap.rowsPerPage,
       roleImpersonationState: roleImpersonationState as RoleImpersonationState,
     },
