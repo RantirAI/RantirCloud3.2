@@ -49,7 +49,7 @@ export const JITAccess = () => {
             <FormLayout
               layout="flex-row-reverse"
               label="JIT access"
-              description="Allow time-limited database access with approval workflows. Add users who can request access."
+              description="Allow time-limited database access to specific project members."
             >
               <div className="flex items-center justify-end mt-2.5">
                 <Switch
@@ -64,9 +64,12 @@ export const JITAccess = () => {
           {enabled && (
             <CardContent className="space-y-4 p-0">
               <div className="flex items-center justify-between pt-6 pb-2 px-4">
-                <p className="text-foreground-light text-sm">
-                  Users listed below can request time-limited access to the database.
-                </p>
+                <div>
+                  <h3 className="text-foreground text-sm">User rules</h3>
+                  <p className="text-foreground-light text-sm">
+                    Users listed below have time-limited access to the database.
+                  </p>
+                </div>
                 <Button type="default" icon={<UserPlus size={14} />}>
                   Add user
                 </Button>
