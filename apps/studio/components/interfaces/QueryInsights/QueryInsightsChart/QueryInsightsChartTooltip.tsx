@@ -1,5 +1,6 @@
 import dayjs from 'dayjs'
 import type { TooltipProps } from 'recharts'
+import { formatDuration } from '../../QueryPerformance/QueryPerformance.utils'
 
 export const QueryInsightsChartTooltip = ({ active, payload }: TooltipProps<any, any>) => {
   if (!active || !payload?.length) return null
@@ -19,7 +20,7 @@ export const QueryInsightsChartTooltip = ({ active, payload }: TooltipProps<any,
             </svg>
             <span className="text-foreground-lighter ml-1 flex-grow">{entry.name}</span>
             <span className="ml-3.5">
-              {typeof entry.value === 'number' ? entry.value.toLocaleString() : entry.value}
+              {typeof entry.value === 'number' ? formatDuration(entry.value) : entry.value}
             </span>
           </div>
         ))}

@@ -4,6 +4,7 @@ import type { QueryPerformanceRow } from '../../QueryPerformance/QueryPerformanc
 import { hasIndexRecommendations } from '../../QueryPerformance/IndexAdvisor/index-advisor.utils'
 import { SLOW_QUERY_THRESHOLD_MS } from '../QueryInsightsHealth/QueryInsightsHealth.constants'
 import type { ClassifiedQuery, IssueType } from '../QueryInsightsHealth/QueryInsightsHealth.types'
+import { getQueryType } from '../QueryInsightsTable/QueryInsightsTable.utils'
 
 function classifyQuery(row: QueryPerformanceRow): { issueType: IssueType; hint: string } {
   // Errors take highest priority
@@ -37,7 +38,7 @@ export function useQueryInsightsIssues(data: QueryPerformanceRow[]) {
   return useMemo(() => {
     const classified: ClassifiedQuery[] = data.map((row) => {
       const { issueType, hint } = classifyQuery(row)
-      return { ...row, issueType, hint }
+      return { ...row, issueType, hint, queryType: getQueryType(row.query) }
     })
 
     const errors = classified.filter((q) => q.issueType === 'error')

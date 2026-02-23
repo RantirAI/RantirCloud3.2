@@ -16,11 +16,11 @@ export const QueryInsightsHealthMetric = ({
   return (
     <div
       className={cn(
-        'font-mono text-xs flex items-center justify-between px-4 py-2 uppercase h-10',
+        'font-mono text-xs flex items-center justify-between px-4 py-2 h-10',
         className
       )}
     >
-      <span className="text-foreground-lighter tracking-wider truncate">{label}</span>
+      <span className="text-foreground-lighter tracking-wider truncate uppercase">{label}</span>
       {isLoading ? (
         <div className="h-3 w-12 rounded bg-surface-300 animate-pulse" />
       ) : (

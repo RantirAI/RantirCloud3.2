@@ -8,7 +8,7 @@ import type { QueryPerformanceRow } from '../../QueryPerformance/QueryPerformanc
 import { useQueryInsightsIssues } from '../hooks/useQueryInsightsIssues'
 import { ISSUE_DOT_COLORS } from './QueryInsightsTable.constants'
 import type { Mode, IssueFilter } from './QueryInsightsTable.types'
-import { formatDuration } from './QueryInsightsTable.utils'
+import { formatDuration, getQueryType } from './QueryInsightsTable.utils'
 
 interface QueryInsightsTableProps {
   data: QueryPerformanceRow[]
@@ -25,9 +25,16 @@ export const QueryInsightsTable = ({ data, isLoading }: QueryInsightsTableProps)
   const triageItems = useMemo(() => classified.filter((q) => q.issueType !== null), [classified])
 
   const filteredTriageItems = useMemo(
-    () => (filter === 'all' ? triageItems : triageItems.filter((q) => q.issueType === filter)),
+    () => {
+      const filtered = filter === 'all' ? triageItems : triageItems.filter((q) => q.issueType === filter)
+      return filtered.map((item) => ({
+        ...item,
+        queryType: getQueryType(item.query),
+      }))
+    },
     [triageItems, filter]
   )
+  console.log(filteredTriageItems)
 
   // Explorer = all queries sorted by calls desc
   const explorerItems = useMemo(
@@ -51,25 +58,25 @@ export const QueryInsightsTable = ({ data, isLoading }: QueryInsightsTableProps)
                   value="all"
                   className="text-xs py-3 border-b-[1px] font-mono uppercase"
                 >
-                  All ({triageItems.length})
+                  All{triageItems.length > 0 && ` (${triageItems.length})`}
                 </TabsTrigger_Shadcn_>
                 <TabsTrigger_Shadcn_
                   value="error"
                   className="text-xs py-3 border-b-[1px] font-mono uppercase"
                 >
-                  Errors ({errorCount})
+                  Errors{errorCount > 0 && ` (${errorCount})`}
                 </TabsTrigger_Shadcn_>
                 <TabsTrigger_Shadcn_
                   value="index"
                   className="text-xs py-3 border-b-[1px] font-mono uppercase"
                 >
-                  Index ({indexCount})
+                  Index{indexCount > 0 && ` (${indexCount})`}
                 </TabsTrigger_Shadcn_>
                 <TabsTrigger_Shadcn_
                   value="slow"
                   className="text-xs py-3 border-b-[1px] font-mono uppercase"
                 >
-                  Slow ({slowCount})
+                  Slow{slowCount > 0 && ` (${slowCount})`}
                 </TabsTrigger_Shadcn_>
               </TabsList_Shadcn_>
             </Tabs_Shadcn_>
@@ -124,15 +131,15 @@ export const QueryInsightsTable = ({ data, isLoading }: QueryInsightsTableProps)
 
                     {/* Query + hint */}
                     <div className="flex-1 min-w-0">
-                      <p className="text-sm font-mono text-foreground truncate">
-                        {item.query.replace(/\s+/g, ' ').trim()}
+                      <p className="text-sm font-mono text-foreground truncate max-w-[40ch]">
+                        {item.queryType ?? '–'} in xxx
                       </p>
                       <p
                         className={cn(
                           'text-xs mt-0.5',
                           item.issueType === 'error' && 'text-destructive-600',
                           item.issueType === 'index' && 'text-warning-600',
-                          item.issueType === 'slow' && 'text-foreground-light'
+                          item.issueType === 'slow' && 'text-foreground-lighter'
                         )}
                       >
                         {item.hint}
@@ -149,7 +156,7 @@ export const QueryInsightsTable = ({ data, isLoading }: QueryInsightsTableProps)
                       >
                         {formatDuration(item.mean_time)}
                       </span>
-                      <span className="text-xs text-foreground-light">
+                      <span className="text-xs text-foreground-lighter">
                         {item.calls} {item.calls === 1 ? 'call' : 'calls'}
                       </span>
                     </div>
@@ -210,7 +217,7 @@ export const QueryInsightsTable = ({ data, isLoading }: QueryInsightsTableProps)
                 >
                   <div className="flex-1 min-w-0">
                     <span className="text-sm font-mono text-foreground truncate block">
-                      {item.query.replace(/\s+/g, ' ').trim()}
+                      {item.queryType ?? '–'} in xxx
                     </span>
                   </div>
                   <div className="w-24 text-right text-sm font-mono tabular-nums text-foreground">
