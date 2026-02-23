@@ -1,5 +1,18 @@
 import type { CustomProvider } from './customProviders.types'
 
+export function getCustomProviderLimit(planId: string | undefined): number {
+  if (planId === 'free') return 3
+  if (planId === 'pro') return 10
+  return Infinity
+}
+
+/** Next plan to upgrade to for more custom providers: Free → Pro, Pro → Team */
+export function getNextPlanForCustomProviders(planId: string | undefined): 'Pro' | 'Team' | null {
+  if (planId === 'free') return 'Pro'
+  if (planId === 'pro') return 'Team'
+  return null
+}
+
 export const CUSTOM_PROVIDER_TYPE_OPTIONS = [
   { name: 'OIDC', value: 'oidc', icon: null },
   { name: 'OAuth2', value: 'oauth2', icon: null },
@@ -30,8 +43,7 @@ export function filterCustomProviders({
     const matchesType = providerTypes.length === 0 || providerTypes.includes(provider.provider_type)
 
     const matchesEnabled =
-      enabledStatuses.length === 0 ||
-      enabledStatuses.includes(provider.enabled ? 'true' : 'false')
+      enabledStatuses.length === 0 || enabledStatuses.includes(provider.enabled ? 'true' : 'false')
 
     return matchesSearch && matchesType && matchesEnabled
   })
@@ -45,7 +57,7 @@ export const MOCK_CUSTOM_PROVIDERS: CustomProvider[] = [
     identifier: 'custom:company-sso',
     name: 'Company SSO',
     client_id: 'client_abc123',
-    scopes: ['openid', 'email', 'profile'],
+    scopes: 'read:user',
     pkce_enabled: true,
     enabled: true,
     email_optional: false,
@@ -61,7 +73,7 @@ export const MOCK_CUSTOM_PROVIDERS: CustomProvider[] = [
     identifier: 'custom:custom-auth',
     name: 'Custom Auth Provider',
     client_id: 'client_xyz789',
-    scopes: ['email', 'profile', 'read:user'],
+    scopes: 'email, profile, read:user',
     pkce_enabled: true,
     enabled: true,
     email_optional: false,
@@ -77,7 +89,7 @@ export const MOCK_CUSTOM_PROVIDERS: CustomProvider[] = [
     identifier: 'custom:partner-login',
     name: 'Partner Login',
     client_id: 'client_partner456',
-    scopes: ['openid', 'email'],
+    scopes: 'read:user, user:email',
     pkce_enabled: false,
     enabled: false,
     email_optional: true,

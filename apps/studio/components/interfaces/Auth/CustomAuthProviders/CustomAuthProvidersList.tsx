@@ -3,7 +3,9 @@ import AlertError from 'components/ui/AlertError'
 import { ButtonTooltip } from 'components/ui/ButtonTooltip'
 import { FilterPopover } from 'components/ui/FilterPopover'
 import { useAuthConfigQuery } from 'data/auth/auth-config-query'
+import { useSelectedOrganizationQuery } from 'hooks/misc/useSelectedOrganization'
 import { Edit, MoreVertical, Plus, Search, Trash, X } from 'lucide-react'
+import Link from 'next/link'
 import { parseAsBoolean, parseAsStringLiteral, useQueryState } from 'nuqs'
 import { useEffect, useMemo, useState } from 'react'
 import { toast } from 'sonner'
@@ -15,6 +17,9 @@ import {
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuTrigger,
+  HoverCard,
+  HoverCardContent,
+  HoverCardTrigger,
   Input,
   Table,
   TableBody,
@@ -26,12 +31,15 @@ import {
 } from 'ui'
 import { GenericSkeletonLoader } from 'ui-patterns/ShimmeringLoader'
 
+import { UpgradePlanButton } from '../../../ui/UpgradePlanButton'
 import { CreateOrUpdateCustomProviderSheet } from './CreateOrUpdateCustomProviderSheet'
 import type { CustomProvider } from './customProviders.types'
 import {
   CUSTOM_PROVIDER_ENABLED_OPTIONS,
   CUSTOM_PROVIDER_TYPE_OPTIONS,
   filterCustomProviders,
+  getCustomProviderLimit,
+  getNextPlanForCustomProviders,
   MOCK_CUSTOM_PROVIDERS,
 } from './customProviders.utils'
 import { DeleteCustomProviderModal } from './DeleteCustomProviderModal'
@@ -58,8 +66,11 @@ type CustomProvidersSortOrder = CustomProvidersSort extends `${string}:${infer O
 
 export const CustomAuthProvidersList = () => {
   const { ref: projectRef } = useParams()
+  const { data: organization } = useSelectedOrganizationQuery()
   const { data: _authConfig, isPending: isAuthConfigLoading } = useAuthConfigQuery({ projectRef })
   const isCustomProvidersEnabled = true
+  const providerLimit = getCustomProviderLimit(organization?.plan?.id)
+  const nextPlan = getNextPlanForCustomProviders(organization?.plan?.id)
   // const isCustomProvidersEnabled = !!authConfig?.OAUTH_CUSTOM_PROVIDERS_ENABLED
   const [newCustomProvider, setNewCustomProvider] = useState<
     (CustomProvider & { client_secret?: string }) | undefined
@@ -71,6 +82,8 @@ export const CustomAuthProvidersList = () => {
 
   // Mock data - in real implementation this would come from API
   const customProviders = useMemo(() => MOCK_CUSTOM_PROVIDERS, [])
+  const providerCount = customProviders.length
+  const atProviderLimit = providerLimit !== Infinity && providerCount >= providerLimit
   const isLoading = false
   const isError = false
   const error = null
@@ -80,12 +93,12 @@ export const CustomAuthProvidersList = () => {
     parseAsBoolean.withDefault(false).withOptions({ history: 'push', clearOnDefault: true })
   )
 
-  // Prevent opening the create sheet if custom providers are disabled
+  // Prevent opening the create sheet if custom providers are disabled or at plan limit
   useEffect(() => {
-    if (!isCustomProvidersEnabled && showCreateSheet) {
+    if (showCreateSheet && (!isCustomProvidersEnabled || atProviderLimit)) {
       setShowCreateSheet(false)
     }
-  }, [showCreateSheet, setShowCreateSheet])
+  }, [showCreateSheet, atProviderLimit, setShowCreateSheet])
 
   const [filterString, setFilterString] = useState<string>('')
 
@@ -176,6 +189,7 @@ export const CustomAuthProvidersList = () => {
   const isCreateMode = showCreateSheet && isCustomProvidersEnabled
   const isEditMode = !!providerToEdit
   const isCreateOrUpdateSheetVisible = isCreateMode || isEditMode
+  const canCreateProvider = isCustomProvidersEnabled && !atProviderLimit
 
   if (isAuthConfigLoading || (isCustomProvidersEnabled && isLoading)) {
     return <GenericSkeletonLoader />
@@ -239,22 +253,36 @@ export const CustomAuthProvidersList = () => {
             )}
           </div>
           <div className="flex items-center gap-x-2">
-            <ButtonTooltip
-              disabled={!isCustomProvidersEnabled}
-              icon={<Plus />}
-              onClick={() => setShowCreateSheet(true)}
-              className="flex-grow"
-              tooltip={{
-                content: {
-                  side: 'bottom',
-                  text: !isCustomProvidersEnabled
-                    ? 'Custom providers must be enabled in settings'
-                    : undefined,
-                },
-              }}
-            >
-              New Provider
-            </ButtonTooltip>
+            <HoverCard openDelay={0}>
+              <HoverCardTrigger>
+                <Button
+                  type="primary"
+                  disabled={!canCreateProvider}
+                  icon={<Plus />}
+                  onClick={() => setShowCreateSheet(true)}
+                  className="flex-grow"
+                >
+                  New Provider
+                </Button>
+              </HoverCardTrigger>
+              <HoverCardContent
+                side="bottom"
+                align="end"
+                className="text-xs flex flex-col gap-y-2 bg-alternative items-start"
+              >
+                {!isCustomProvidersEnabled ? (
+                  'Custom providers must be enabled in settings'
+                ) : (
+                  <>
+                    <p>You've reached the limit of {providerLimit} providers for your plan.</p>
+                    <UpgradePlanButton
+                      source={`customAuthProviders-${organization?.plan.id}`}
+                      plan={nextPlan ?? 'Pro'}
+                    />
+                  </>
+                )}
+              </HoverCardContent>
+            </HoverCard>
           </div>
         </div>
 
