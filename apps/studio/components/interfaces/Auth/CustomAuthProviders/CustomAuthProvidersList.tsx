@@ -20,22 +20,22 @@ import {
   TableBody,
   TableCell,
   TableHead,
-  TableHeadSort,
   TableHeader,
+  TableHeadSort,
   TableRow,
 } from 'ui'
 import { GenericSkeletonLoader } from 'ui-patterns/ShimmeringLoader'
 
 import { CreateOrUpdateCustomProviderSheet } from './CreateOrUpdateCustomProviderSheet'
-import { DeleteCustomProviderModal } from './DeleteCustomProviderModal'
-import { NewCustomProviderBanner } from './NewCustomProviderBanner'
 import type { CustomProvider } from './customProviders.types'
 import {
   CUSTOM_PROVIDER_ENABLED_OPTIONS,
   CUSTOM_PROVIDER_TYPE_OPTIONS,
-  MOCK_CUSTOM_PROVIDERS,
   filterCustomProviders,
+  MOCK_CUSTOM_PROVIDERS,
 } from './customProviders.utils'
+import { DeleteCustomProviderModal } from './DeleteCustomProviderModal'
+import { NewCustomProviderBanner } from './NewCustomProviderBanner'
 
 const CUSTOM_PROVIDERS_SORT_VALUES = [
   'name:asc',
@@ -303,7 +303,7 @@ export const CustomAuthProvidersList = () => {
                 {filteredAndSortedCustomProviders.length > 0 &&
                   filteredAndSortedCustomProviders.map((provider) => (
                     <TableRow key={provider.id} className="w-full">
-                      <TableCell className="w-48 max-w-48 flex" title={provider.name}>
+                      <TableCell className="flex" title={provider.name}>
                         <Button
                           type="text"
                           className="text-link-table-cell text-sm p-0 hover:bg-transparent title [&>span]:!w-full"

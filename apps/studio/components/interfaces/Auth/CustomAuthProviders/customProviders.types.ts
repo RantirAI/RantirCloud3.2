@@ -5,7 +5,7 @@ export interface CustomProvider {
   name: string
   client_id: string
   acceptable_client_ids?: string[]
-  scopes?: string[]
+  scopes?: string
   pkce_enabled: boolean
   attribute_mapping?: Record<string, any>
   authorization_params?: Record<string, any>
