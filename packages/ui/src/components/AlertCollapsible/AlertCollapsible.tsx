@@ -11,17 +11,23 @@ import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '../shadcn/u
 
 export interface AlertCollapsibleProps
   extends Omit<React.HTMLAttributes<HTMLDivElement>, 'title'>,
-  VariantProps<typeof alertVariants> {
+    VariantProps<typeof alertVariants> {
   trigger: React.ReactNode
   defaultOpen?: boolean
 }
 
 const AlertCollapsible = React.forwardRef<HTMLDivElement, AlertCollapsibleProps>(
   ({ className, variant = 'default', trigger, defaultOpen, children, ...props }, ref) => (
-    <div ref={ref} className={cn(alertVariants({ variant }),
-      // Override default padding to be tighter
-      'p-3',
-      className)} {...props}>
+    <div
+      ref={ref}
+      className={cn(
+        alertVariants({ variant }),
+        // Override default padding to be tighter
+        'p-3',
+        className
+      )}
+      {...props}
+    >
       <Collapsible defaultOpen={defaultOpen}>
         <div className="flex items-center justify-between gap-2">
           <span className="font-medium">{trigger}</span>

@@ -56,13 +56,12 @@ export const SessionTimeoutModal = ({
           <AlertDialogTitle>Session expired</AlertDialogTitle>
           <AlertDialogDescription asChild>
             <div className="space-y-3">
-              <p>
-                Your session has expired. Sign in again to continue.
-              </p>
+              <p>Your session has expired. Sign in again to continue.</p>
               <AlertCollapsible trigger="Having trouble?">
                 <div className="space-y-3 text-foreground-light">
                   <p>
-                    Try a different browser or disable extensions that block network requests. If the problem persists:
+                    Try a different browser or disable extensions that block network requests. If
+                    the problem persists:
                   </p>
                   <Button type="default" size="tiny" onClick={handleClearStorage}>
                     Clear site data and reload
@@ -74,13 +73,11 @@ export const SessionTimeoutModal = ({
                       queryParams={{ subject: 'Session expired' }}
                     >
                       Contact support
-                    </SupportLink>
-                    {' '}
+                    </SupportLink>{' '}
                     or{' '}
                     <InlineLink href="https://github.com/orgs/supabase/discussions/36540">
                       generate a HAR file
-                    </InlineLink>
-                    {' '}
+                    </InlineLink>{' '}
                     from your session to help us debug.
                   </p>
                 </div>
@@ -90,9 +87,7 @@ export const SessionTimeoutModal = ({
         </AlertDialogHeader>
         <AlertDialogFooter>
           <AlertDialogCancel>Close</AlertDialogCancel>
-          <AlertDialogAction onClick={redirectToSignIn}>
-            Sign in again
-          </AlertDialogAction>
+          <AlertDialogAction onClick={redirectToSignIn}>Sign in again</AlertDialogAction>
         </AlertDialogFooter>
       </AlertDialogContent>
     </AlertDialog>
