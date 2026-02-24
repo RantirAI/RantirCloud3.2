@@ -2,12 +2,13 @@
 
 import { components } from 'api-types'
 import { FlagValues } from 'flags/react'
-import { createContext, PropsWithChildren, useContext, useEffect, useRef, useState } from 'react'
+import { createContext, PropsWithChildren, useContext, useEffect, useState } from 'react'
 
 import { useAuth } from './auth'
 import { getFlags as getDefaultConfigCatFlags } from './configcat'
 import { hasConsented } from './consent-state'
 import { get, post } from './fetchWrappers'
+import { hasGroupContextBeenSent, markGroupContextSent } from './groupIdentifyDedupe'
 import { ensurePlatformSuffix } from './helpers'
 import { useParams } from './hooks'
 
@@ -95,7 +96,6 @@ export const FeatureFlagProvider = ({
   const params = useParams()
   const resolvedOrganizationSlug = organizationSlug ?? params.slug
   const resolvedProjectRef = projectRef ?? params.ref
-  const lastSentGroupContextRef = useRef<string | null>(null)
 
   const [store, setStore] = useState<FeatureFlagContextType>({
     API_URL,
@@ -119,7 +119,7 @@ export const FeatureFlagProvider = ({
       const contextKey = [userId, resolvedOrganizationSlug ?? '', resolvedProjectRef ?? ''].join(
         '|'
       )
-      if (lastSentGroupContextRef.current === contextKey) return
+      if (hasGroupContextBeenSent(contextKey)) return
 
       try {
         await post(
@@ -132,7 +132,7 @@ export const FeatureFlagProvider = ({
           { headers: { Version: '2' } }
         )
 
-        lastSentGroupContextRef.current = contextKey
+        markGroupContextSent(contextKey)
       } catch {}
     }
 
