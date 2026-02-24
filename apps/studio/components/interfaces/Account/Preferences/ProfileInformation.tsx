@@ -174,7 +174,7 @@ export const ProfileInformation = () => {
                       description={
                         profile?.is_sso_user
                           ? 'Managed by your SSO provider and cannot be changed here'
-                          : 'Appears as a display name throughout Supabase'
+                          : 'Display name used across dashboard'
                       }
                       layout="flex-row-reverse"
                     >
