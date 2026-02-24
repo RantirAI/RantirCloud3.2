@@ -1,4 +1,5 @@
 import * as Sentry from '@sentry/nextjs'
+import { ChevronDown } from 'lucide-react'
 import { useEffect } from 'react'
 import { toast } from 'sonner'
 
@@ -12,6 +13,11 @@ import {
   AlertDialogFooter,
   AlertDialogHeader,
   AlertDialogTitle,
+  Button,
+  cn,
+  Collapsible_Shadcn_,
+  CollapsibleContent_Shadcn_,
+  CollapsibleTrigger_Shadcn_,
 } from 'ui'
 import { SupportLink } from '../Support/SupportLink'
 
@@ -57,39 +63,48 @@ export const SessionTimeoutModal = ({
               <p>
                 Your session has expired. Sign in again to continue.
               </p>
-              <p className="text-foreground-light">
-                If you can't sign in, try:
-              </p>
-              <ul className="list-disc pl-5 space-y-1 text-foreground-light">
-                <li>Use a different browser</li>
-                <li>Disable extensions that block network requests</li>
-                <li>
-                  <button
-                    type="button"
-                    title="Clear site data and reload"
-                    className="underline hover:no-underline"
-                    onClick={handleClearStorage}
+              <div
+                className={cn(
+                  'relative w-full rounded-lg border p-4 text-sm',
+                  'bg-surface-200/25 border-default text-foreground'
+                )}
+              >
+                <Collapsible_Shadcn_>
+                  <CollapsibleTrigger_Shadcn_
+                    className={cn(
+                      'flex w-full items-center justify-between gap-2 text-left font-medium',
+                      '[&[data-state=open]>svg]:rotate-180'
+                    )}
                   >
-                    Clear site data and reload
-                  </button>
-                </li>
-              </ul>
-              <p className="text-foreground-light">
-                Still having trouble?{' '}
-                <SupportLink
-                  className={InlineLinkClassName}
-                  queryParams={{ subject: 'Session expired' }}
-                >
-                  Contact support
-                </SupportLink>
-                {' '}
-                or{' '}
-                <InlineLink href="https://github.com/orgs/supabase/discussions/36540">
-                  generate a HAR file
-                </InlineLink>
-                {' '}
-                from your session to help us debug.
-              </p>
+                    Having trouble?
+                    <ChevronDown className="h-4 w-4 shrink-0 text-foreground-light transition-transform duration-200" />
+                  </CollapsibleTrigger_Shadcn_>
+                  <CollapsibleContent_Shadcn_ className="space-y-3 pt-3">
+                    <p className="text-foreground-light">
+                      Try a different browser or disable extensions that block network requests. If the problem persists:
+                    </p>
+                    <Button type="default" size="tiny" onClick={handleClearStorage}>
+                      Clear site data and reload
+                    </Button>
+                    <p className="text-foreground-light">
+                      Still stuck?{' '}
+                      <SupportLink
+                        className={InlineLinkClassName}
+                        queryParams={{ subject: 'Session expired' }}
+                      >
+                        Contact support
+                      </SupportLink>
+                      {' '}
+                      or{' '}
+                      <InlineLink href="https://github.com/orgs/supabase/discussions/36540">
+                        generate a HAR file
+                      </InlineLink>
+                      {' '}
+                      from your session to help us debug.
+                    </p>
+                  </CollapsibleContent_Shadcn_>
+                </Collapsible_Shadcn_>
+              </div>
             </div>
           </AlertDialogDescription>
         </AlertDialogHeader>
