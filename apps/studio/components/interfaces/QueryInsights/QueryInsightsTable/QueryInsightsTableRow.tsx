@@ -2,7 +2,7 @@ import { ArrowUpRight, Plus } from 'lucide-react'
 import { Badge, Button, cn } from 'ui'
 import type { ClassifiedQuery } from '../QueryInsightsHealth/QueryInsightsHealth.types'
 import { ISSUE_DOT_COLORS } from './QueryInsightsTable.constants'
-import { formatDuration } from './QueryInsightsTable.utils'
+import { formatDuration, getTableName, getColumnName } from './QueryInsightsTable.utils'
 
 interface QueryInsightsTableRowProps {
   item: ClassifiedQuery
@@ -15,7 +15,7 @@ export const QueryInsightsTableRow = ({ item, type }: QueryInsightsTableRowProps
       <div className="flex items-center px-6 py-3 border-b hover:bg-surface-100 group">
         <div className="flex-1 min-w-0">
           <span className="text-sm font-mono text-foreground truncate block">
-            {item.queryType ?? '–'} in table_name, column_name
+            {item.queryType ?? '–'} in {getTableName(item.query)}, {getColumnName(item.query)}
           </span>
         </div>
         <div className="w-24 text-right text-sm font-mono tabular-nums text-foreground">
@@ -78,7 +78,7 @@ export const QueryInsightsTableRow = ({ item, type }: QueryInsightsTableRowProps
       {/* Query + hint */}
       <div className="flex-1 min-w-0">
         <p className="text-sm font-mono text-foreground truncate max-w-[40ch]">
-          {item.queryType ?? '–'} <span className="text-foreground-lighter">in</span> table_name, column_name
+          {item.queryType ?? '–'} <span className="text-foreground-lighter">in</span> {getTableName(item.query)}, {getColumnName(item.query)}
         </p>
         <p
           className={cn(

@@ -57,7 +57,7 @@ export const QueryInsightsChart = ({ chartData, isLoading }: QueryInsightsChartP
   const isSeriesVisible = (dataKey: string) => !hiddenSeries.has(dataKey)
 
   return (
-    <div className="bg-surface-200 border-b min-h-[320px]">
+    <div className="bg-surface-100 border-b min-h-[320px]">
       <Tabs_Shadcn_
         value={selectedMetric}
         onValueChange={(value) => setSelectedMetric(value)}
@@ -75,9 +75,7 @@ export const QueryInsightsChart = ({ chartData, isLoading }: QueryInsightsChartP
           ))}
         </TabsList_Shadcn_>
 
-
-
-        <TabsContent_Shadcn_ value={selectedMetric} className="bg-surface-200 mt-0">
+        <TabsContent_Shadcn_ value={selectedMetric} className="bg-surface-100 mt-0">
           <div className="w-full gap-4 mt-4 px-6 flex items-center justify-end">
             {LEGEND_ITEMS[selectedMetric]?.map(
               (item: { dataKey: string; label: string; color: string }) => (

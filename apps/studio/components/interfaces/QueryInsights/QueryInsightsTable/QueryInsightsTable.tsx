@@ -1,12 +1,14 @@
 import { useMemo, useState } from 'react'
-import { Tabs_Shadcn_, TabsList_Shadcn_, TabsTrigger_Shadcn_ } from 'ui'
+import { Search, X } from 'lucide-react'
+import { Button } from 'ui'
+import { Input } from 'ui-patterns/DataInputs/Input'
 import { GenericSkeletonLoader } from 'ui-patterns/ShimmeringLoader'
 import TwoOptionToggle from 'components/ui/TwoOptionToggle'
 
 import type { QueryPerformanceRow } from '../../QueryPerformance/QueryPerformance.types'
 import { useQueryInsightsIssues } from '../hooks/useQueryInsightsIssues'
 import type { Mode, IssueFilter } from './QueryInsightsTable.types'
-import { getQueryType } from './QueryInsightsTable.utils'
+import { getQueryType, getTableName, getColumnName } from './QueryInsightsTable.utils'
 import { QueryInsightsTableRow } from './QueryInsightsTableRow'
 
 interface QueryInsightsTableProps {
@@ -18,23 +20,70 @@ export const QueryInsightsTable = ({ data, isLoading }: QueryInsightsTableProps)
   const { classified, errors, indexIssues, slowQueries } = useQueryInsightsIssues(data)
   const [mode, setMode] = useState<Mode>('triage')
   const [filter, setFilter] = useState<IssueFilter>('all')
+  const [searchQuery, setSearchQuery] = useState('')
   const triageItems = useMemo(() => classified.filter((q) => q.issueType !== null), [classified])
 
   const filteredTriageItems = useMemo(
     () => {
-      const filtered = filter === 'all' ? triageItems : triageItems.filter((q) => q.issueType === filter)
+      let filtered = filter === 'all' ? triageItems : triageItems.filter((q) => q.issueType === filter)
+
+      // Apply search filter
+      if (searchQuery.trim()) {
+        const searchLower = searchQuery.toLowerCase()
+        filtered = filtered.filter((item) => {
+          const queryType = getQueryType(item.query) ?? ''
+          const tableName = getTableName(item.query) ?? ''
+          const columnName = getColumnName(item.query) ?? ''
+          const appName = item.application_name ?? ''
+          const hint = item.hint ?? ''
+          const query = item.query ?? ''
+
+          return (
+            queryType.toLowerCase().includes(searchLower) ||
+            tableName.toLowerCase().includes(searchLower) ||
+            columnName.toLowerCase().includes(searchLower) ||
+            appName.toLowerCase().includes(searchLower) ||
+            hint.toLowerCase().includes(searchLower) ||
+            query.toLowerCase().includes(searchLower)
+          )
+        })
+      }
+
       return filtered.map((item) => ({
         ...item,
         queryType: getQueryType(item.query),
       }))
     },
-    [triageItems, filter]
+    [triageItems, filter, searchQuery]
   )
-  console.log(filteredTriageItems)
 
   const explorerItems = useMemo(
-    () => [...classified].sort((a, b) => b.calls - a.calls),
-    [classified]
+    () => {
+      let items = [...classified].sort((a, b) => b.calls - a.calls)
+
+      // Apply search filter
+      if (searchQuery.trim()) {
+        const searchLower = searchQuery.toLowerCase()
+        items = items.filter((item) => {
+          const queryType = getQueryType(item.query) ?? ''
+          const tableName = getTableName(item.query) ?? ''
+          const columnName = getColumnName(item.query) ?? ''
+          const appName = item.application_name ?? ''
+          const query = item.query ?? ''
+
+          return (
+            queryType.toLowerCase().includes(searchLower) ||
+            tableName.toLowerCase().includes(searchLower) ||
+            columnName.toLowerCase().includes(searchLower) ||
+            appName.toLowerCase().includes(searchLower) ||
+            query.toLowerCase().includes(searchLower)
+          )
+        })
+      }
+
+      return items
+    },
+    [classified, searchQuery]
   )
 
   const errorCount = errors.length
@@ -43,42 +92,31 @@ export const QueryInsightsTable = ({ data, isLoading }: QueryInsightsTableProps)
 
   return (
     <div className="flex flex-col flex-1 min-h-0">
-      <div className="flex items-center justify-between px-6 border-b flex-shrink-0 h-10">
-        <div className="flex items-center">
-          {mode === 'triage' ? (
-            <Tabs_Shadcn_ value={filter} onValueChange={(v) => setFilter(v as IssueFilter)}>
-              <TabsList_Shadcn_ className="flex gap-x-4 rounded-none !mt-0 pt-0 !border-none">
-                <TabsTrigger_Shadcn_
-                  value="all"
-                  className="text-xs py-3 border-b-[1px] font-mono uppercase"
-                >
-                  All{triageItems.length > 0 && ` (${triageItems.length})`}
-                </TabsTrigger_Shadcn_>
-                <TabsTrigger_Shadcn_
-                  value="error"
-                  className="text-xs py-3 border-b-[1px] font-mono uppercase"
-                >
-                  Errors{errorCount > 0 && ` (${errorCount})`}
-                </TabsTrigger_Shadcn_>
-                <TabsTrigger_Shadcn_
-                  value="index"
-                  className="text-xs py-3 border-b-[1px] font-mono uppercase"
-                >
-                  Index{indexCount > 0 && ` (${indexCount})`}
-                </TabsTrigger_Shadcn_>
-                <TabsTrigger_Shadcn_
-                  value="slow"
-                  className="text-xs py-3 border-b-[1px] font-mono uppercase"
-                >
-                  Slow{slowCount > 0 && ` (${slowCount})`}
-                </TabsTrigger_Shadcn_>
-              </TabsList_Shadcn_>
-            </Tabs_Shadcn_>
-          ) : (
-            <span className="text-xs font-mono uppercase text-foreground-lighter py-3">
-              All Queries
-            </span>
-          )}
+      <div className="flex items-center justify-between px-6 border-b flex-shrink-0 h-10 bg-surface-100">
+        <div className="flex items-center flex-1">
+          <Input
+            size="tiny"
+            autoComplete="off"
+            icon={<Search className="h-4 w-4" />}
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            name="search"
+            id="search"
+            placeholder={mode === 'triage' ? 'Search issues...' : 'Search queries...'}
+            className="w-64 border-0 bg-transparent shadow-none focus-visible:ring-0 focus-visible:ring-offset-0"
+            actions={[
+              searchQuery && (
+                <Button
+                  key="clear"
+                  size="tiny"
+                  type="text"
+                  icon={<X className="h-4 w-4" />}
+                  onClick={() => setSearchQuery('')}
+                  className="p-0 h-5 w-5"
+                />
+              ),
+            ]}
+          />
         </div>
 
         <TwoOptionToggle
@@ -102,7 +140,9 @@ export const QueryInsightsTable = ({ data, isLoading }: QueryInsightsTableProps)
                 <p className="text-sm text-foreground-lighter">
                   {data.length === 0
                     ? 'No query data available yet'
-                    : 'No issues found!'}
+                    : searchQuery.trim()
+                      ? 'No issues found matching your search'
+                      : 'No issues found!'}
                 </p>
               </div>
             ) : (
@@ -139,7 +179,11 @@ export const QueryInsightsTable = ({ data, isLoading }: QueryInsightsTableProps)
 
             {explorerItems.length === 0 ? (
               <div className="py-8 text-center">
-                <p className="text-sm text-foreground-lighter">No query data available yet</p>
+                <p className="text-sm text-foreground-lighter">
+                  {searchQuery.trim()
+                    ? 'No queries found matching your search'
+                    : 'No query data available yet'}
+                </p>
               </div>
             ) : (
               explorerItems.map((item, idx) => (
