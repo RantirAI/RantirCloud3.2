@@ -111,7 +111,7 @@ export const QueryInsightsTable = ({ data, isLoading }: QueryInsightsTableProps)
                 <p className="text-sm text-foreground-lighter">
                   {data.length === 0
                     ? 'No query data available yet'
-                    : 'No issues found — your queries look healthy!'}
+                    : 'No issues found!'}
                 </p>
               </div>
             ) : (

@@ -1,3 +1,5 @@
+import { CHART_COLORS } from 'components/ui/Charts/Charts.constants'
+
 export const CHART_TABS = [
   { id: 'query_latency', label: 'Query latency' },
   { id: 'rows_read', label: 'Rows read' },
@@ -7,11 +9,11 @@ export const CHART_TABS = [
 
 export const LEGEND_ITEMS: Record<string, { label: string; color: string; dataKey: string }[]> = {
   query_latency: [
-    { label: 'P50', color: '#8B5CF6', dataKey: 'p50' },
-    { label: 'P95', color: '#65BCD9', dataKey: 'p95' },
+    { label: 'P50', color: 'hsl(var(--chart-4))', dataKey: 'p50' },
+    { label: 'P95', color: CHART_COLORS.GREEN_1, dataKey: 'p95' },
   ],
-  rows_read: [{ label: 'Rows Read', color: '#3ECF8E', dataKey: 'rows_read' }],
-  calls: [{ label: 'Calls', color: '#3ECF8E', dataKey: 'calls' }],
+  rows_read: [{ label: 'Rows Read', color: CHART_COLORS.GREEN_1, dataKey: 'rows_read' }],
+  calls: [{ label: 'Calls', color: CHART_COLORS.GREEN_1, dataKey: 'calls' }],
   cache_hits: [{ label: 'Cache Hits', color: '#10B981', dataKey: 'cache_hits' }],
 }
 

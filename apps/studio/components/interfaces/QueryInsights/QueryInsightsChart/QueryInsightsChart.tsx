@@ -7,6 +7,7 @@ import { useTheme } from 'next-themes'
 import { QueryInsightsChartTooltip } from './QueryInsightsChartTooltip'
 import { CHART_TABS, LEGEND_ITEMS, CHART_TYPE } from './QueryInsightsChart.constants'
 import { formatTime } from './QueryInsightsChart.utils'
+import { CHART_COLORS } from 'components/ui/Charts/Charts.constants'
 
 interface QueryInsightsChartProps {
   chartData: ChartDataPoint[]
@@ -121,10 +122,12 @@ export const QueryInsightsChart = ({ chartData, isLoading }: QueryInsightsChartP
                       margin={{ top: 4, left: 0, right: 0, bottom: 4 }}
                     >
                       <defs>
-                        <linearGradient id="gradientP95" x1="0" y1="0" x2="0" y2="1">
-                          <stop offset="0%" stopColor="#65BCD9" stopOpacity={0.15} />
-                          <stop offset="100%" stopColor="#65BCD9" stopOpacity={0} />
-                        </linearGradient>
+                        {LEGEND_ITEMS.query_latency?.map((item) => (
+                          <linearGradient key={`gradient-${item.dataKey}`} id={`gradient-${item.dataKey}`} x1="0" y1="0" x2="0" y2="1">
+                            <stop offset="0%" stopColor={item.color} stopOpacity={0.15} />
+                            <stop offset="100%" stopColor={item.color} stopOpacity={0} />
+                          </linearGradient>
+                        ))}
                       </defs>
                       <XAxis
                         dataKey="time"
@@ -156,28 +159,20 @@ export const QueryInsightsChart = ({ chartData, isLoading }: QueryInsightsChartP
                         stroke="hsl(var(--border-default))"
                         strokeOpacity={0.5}
                       />
-                      <Area
-                        type={CHART_TYPE}
-                        dataKey="p95"
-                        stroke="#65BCD9"
-                        strokeWidth={1}
-                        fill="url(#gradientP95)"
-                        dot={false}
-                        name="P95"
-                        strokeOpacity={isSeriesVisible('p95') ? 1 : 0}
-                        fillOpacity={isSeriesVisible('p95') ? 1 : 0}
-                      />
-                      <Area
-                        type={CHART_TYPE}
-                        dataKey="p50"
-                        stroke="#8B5CF6"
-                        strokeWidth={1}
-                        fill="none"
-                        dot={false}
-                        name="P50"
-                        strokeOpacity={isSeriesVisible('p50') ? 1 : 0}
-                        fillOpacity={isSeriesVisible('p50') ? 1 : 0}
-                      />
+                      {LEGEND_ITEMS.query_latency?.map((item) => (
+                        <Area
+                          key={item.dataKey}
+                          type={CHART_TYPE}
+                          dataKey={item.dataKey}
+                          stroke={item.color}
+                          strokeWidth={1}
+                          fill={`url(#gradient-${item.dataKey})`}
+                          dot={false}
+                          name={item.label}
+                          strokeOpacity={isSeriesVisible(item.dataKey) ? 1 : 0}
+                          fillOpacity={isSeriesVisible(item.dataKey) ? 1 : 0}
+                        />
+                      ))}
                     </AreaChart>
                   ) : (
                     <AreaChart
@@ -185,18 +180,19 @@ export const QueryInsightsChart = ({ chartData, isLoading }: QueryInsightsChartP
                       margin={{ top: 4, left: 0, right: 0, bottom: 4 }}
                     >
                       <defs>
-                        <linearGradient id="gradientMetric" x1="0" y1="0" x2="0" y2="1">
-                          <stop
-                            offset="0%"
-                            stopColor={LEGEND_ITEMS[selectedMetric]?.[0]?.color ?? '#3ECF8E'}
-                            stopOpacity={0.15}
-                          />
-                          <stop
-                            offset="100%"
-                            stopColor={LEGEND_ITEMS[selectedMetric]?.[0]?.color ?? '#3ECF8E'}
-                            stopOpacity={0}
-                          />
-                        </linearGradient>
+                        {LEGEND_ITEMS[selectedMetric]?.map((item) => (
+                          <linearGradient
+                            key={`gradient-${item.dataKey}`}
+                            id={`gradient-${item.dataKey}`}
+                            x1="0"
+                            y1="0"
+                            x2="0"
+                            y2="1"
+                          >
+                            <stop offset="0%" stopColor={item.color} stopOpacity={0.15} />
+                            <stop offset="100%" stopColor={item.color} stopOpacity={0} />
+                          </linearGradient>
+                        ))}
                       </defs>
                       <Tooltip
                         content={<QueryInsightsChartTooltip />}
@@ -228,17 +224,20 @@ export const QueryInsightsChart = ({ chartData, isLoading }: QueryInsightsChartP
                         stroke="hsl(var(--border-default))"
                         strokeOpacity={0.5}
                       />
-                      <Area
-                        type={CHART_TYPE}
-                        dataKey={selectedMetric}
-                        stroke={LEGEND_ITEMS[selectedMetric]?.[0]?.color ?? '#3ECF8E'}
-                        strokeWidth={1}
-                        fill="url(#gradientMetric)"
-                        dot={false}
-                        name={LEGEND_ITEMS[selectedMetric]?.[0]?.label ?? ''}
-                        strokeOpacity={isSeriesVisible(selectedMetric) ? 1 : 0}
-                        fillOpacity={isSeriesVisible(selectedMetric) ? 1 : 0}
-                      />
+                      {LEGEND_ITEMS[selectedMetric]?.map((item) => (
+                        <Area
+                          key={item.dataKey}
+                          type={CHART_TYPE}
+                          dataKey={item.dataKey}
+                          stroke={item.color}
+                          strokeWidth={1}
+                          fill={`url(#gradient-${item.dataKey})`}
+                          dot={false}
+                          name={item.label}
+                          strokeOpacity={isSeriesVisible(item.dataKey) ? 1 : 0}
+                          fillOpacity={isSeriesVisible(item.dataKey) ? 1 : 0}
+                        />
+                      ))}
                     </AreaChart>
                   )}
                 </ResponsiveContainer>
