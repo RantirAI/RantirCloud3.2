@@ -51,7 +51,12 @@ import { Admonition } from 'ui-patterns/admonition'
 import { FormItemLayout } from 'ui-patterns/form/FormItemLayout/FormItemLayout'
 import { FormLayout } from 'ui-patterns/form/Layout/FormLayout'
 
-type JitStatus = { active: number; expired: number; ipRestricted?: boolean }
+type JitStatus = {
+  active: number
+  expired: number
+  activeIp: number
+  expiredIp: number
+}
 
 type JITMember = { id: string; email: string; name?: string }
 
@@ -191,45 +196,46 @@ function withGrantOverrides(
 
 function computeStatusFromGrants(grants: JITRoleGrantDraft[]): JitStatus {
   const enabled = grants.filter((grant) => grant.enabled)
-
   let active = 0
   let expired = 0
+  let activeIp = 0
+  let expiredIp = 0
 
   enabled.forEach((grant) => {
+    const hasIp = grant.hasIpRestriction && grant.ipRanges.trim().length > 0
     if (!grant.hasExpiry || !grant.expiry) {
       active += 1
+      if (hasIp) activeIp += 1
       return
     }
-
     const expiryMs = new Date(grant.expiry).getTime()
-    if (Number.isNaN(expiryMs) || expiryMs >= Date.now()) active += 1
-    else expired += 1
+    if (Number.isNaN(expiryMs) || expiryMs >= Date.now()) {
+      active += 1
+      if (hasIp) activeIp += 1
+    } else {
+      expired += 1
+      if (hasIp) expiredIp += 1
+    }
   })
 
-  const ipRestricted = enabled.some(
-    (grant) => grant.hasIpRestriction && grant.ipRanges.trim().length > 0
-  )
-
-  return { active, expired, ipRestricted }
+  return { active, expired, activeIp, expiredIp }
 }
 
-function getJitStatusDisplay(status: JitStatus): {
-  label: string
-  variant: 'default' | 'success' | 'warning'
-} {
-  const { active, expired, ipRestricted } = status
-  const parts: string[] = []
+type JitStatusBadge = { label: string; variant: 'default' | 'success' | 'warning' }
 
-  if (active > 0) parts.push(expired > 0 ? `${active} active, ${expired} expired` : 'Active')
-  else if (expired > 0) parts.push('Expired')
+function getJitStatusDisplay(status: JitStatus): { badges: JitStatusBadge[] } {
+  const { active, expired, activeIp } = status
+  const badges: JitStatusBadge[] = []
 
-  if (ipRestricted) parts.push('IP restricted')
-
-  const label = parts.length ? parts.join(' · ') : 'No sessions'
-
-  if (active > 0 && expired === 0 && !ipRestricted) return { label, variant: 'success' }
-  if (active === 0 && expired > 0) return { label, variant: 'warning' }
-  return { label, variant: 'default' }
+  if (active > 0) {
+    const label = activeIp > 0 ? `${active} active · ${activeIp} IP` : `${active} active`
+    badges.push({ label, variant: 'success' })
+  }
+  if (expired > 0) {
+    badges.push({ label: `${expired} expired`, variant: 'default' })
+  }
+  // 0 active + 0 expired is defensive only (e.g. role deleted elsewhere); don't show a badge
+  return { badges }
 }
 
 function createRuleFromMember(
@@ -273,7 +279,13 @@ const MOCK_USERS: JITUserRule[] = [
     'rule-1',
     'member-1',
     withGrantOverrides([
-      { roleId: 'supabase_read_only_user', enabled: true, expiryMode: '30d' },
+      {
+        roleId: 'supabase_read_only_user',
+        enabled: true,
+        expiryMode: '30d',
+        hasIpRestriction: true,
+        ipRanges: '192.0.2.0/24',
+      },
       {
         roleId: 'postgres',
         enabled: true,
@@ -333,6 +345,7 @@ const MOCK_USERS: JITUserRule[] = [
     ]),
     MOCK_MEMBERS
   ),
+  createRuleFromMember('rule-5', 'member-5', createEmptyGrants(), MOCK_MEMBERS),
 ]
 
 function RoleRuleEditor({
@@ -699,7 +712,15 @@ export const JITAccess = () => {
                             {enabledGrants.length} role{enabledGrants.length === 1 ? '' : 's'}
                           </TableCell>
                           <TableCell className="text-foreground-light text-sm">
-                            <Badge variant={statusDisplay.variant}>{statusDisplay.label}</Badge>
+                            {statusDisplay.badges.length > 0 ? (
+                              <span className="flex flex-wrap gap-1.5">
+                                {statusDisplay.badges.map((badge) => (
+                                  <Badge key={badge.label} variant={badge.variant}>
+                                    {badge.label}
+                                  </Badge>
+                                ))}
+                              </span>
+                            ) : null}
                           </TableCell>
                           <TableCell className="text-right">
                             <DropdownMenu>
@@ -720,7 +741,7 @@ export const JITAccess = () => {
                                   <Pencil size={14} className="text-foreground-lighter" />
                                   Edit
                                 </DropdownMenuItem>
-                                <DropdownMenuItem className="gap-x-2" onClick={() => {}}>
+                                <DropdownMenuItem className="gap-x-2" onClick={() => { }}>
                                   <Trash2 size={14} className="text-foreground-lighter" />
                                   Delete
                                 </DropdownMenuItem>
