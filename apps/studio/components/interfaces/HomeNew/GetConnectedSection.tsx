@@ -1,9 +1,8 @@
+import { useSelectedProjectQuery } from 'hooks/misc/useSelectedProject'
+import { BASE_PATH, PROJECT_STATUS } from 'lib/constants'
 import { Box, Cable, Database, Sparkles } from 'lucide-react'
 import { parseAsBoolean, parseAsString, useQueryState } from 'nuqs'
 import type { ReactNode } from 'react'
-
-import { useSelectedProjectQuery } from 'hooks/misc/useSelectedProject'
-import { BASE_PATH, PROJECT_STATUS } from 'lib/constants'
 import { Card, CardContent, cn } from 'ui'
 
 import type { ConnectMode } from '../ConnectSheet/Connect.types'
@@ -89,7 +88,9 @@ export const GetConnectedSection = () => {
                   !isActiveHealthy && 'cursor-not-allowed opacity-50'
                 )}
               >
-                <span className="text-foreground-light group-hover:text-foreground">{action.icon}</span>
+                <span className="text-foreground-light group-hover:text-foreground">
+                  {action.icon}
+                </span>
                 <div className="flex flex-col gap-1">
                   <p className="text-sm">{action.heading}</p>
                   <p className="text-sm text-foreground-lighter">{action.subheading}</p>
