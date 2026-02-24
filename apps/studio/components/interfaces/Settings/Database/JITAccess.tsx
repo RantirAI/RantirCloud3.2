@@ -42,25 +42,33 @@ import { InlineLink } from 'components/ui/InlineLink'
 import { Admonition } from 'ui-patterns/admonition'
 import { FormLayout } from 'ui-patterns/form/Layout/FormLayout'
 
-// Prototype: mock user type and initial list
-type JITUser = { id: string; email: string; name?: string; roles: number; status: string }
+// Prototype: structured JIT status (single source of truth for label + badge)
+type JitStatus = { active: number; expired: number; ipRestricted?: boolean }
+
+function getJitStatusDisplay(status: JitStatus): {
+  label: string
+  variant: 'default' | 'success' | 'warning'
+} {
+  const { active, expired, ipRestricted } = status
+  const parts: string[] = []
+  if (active > 0) parts.push(expired > 0 ? `${active} active, ${expired} expired` : 'Active')
+  else if (expired > 0) parts.push('Expired')
+  if (ipRestricted) parts.push('IP restricted')
+  const label = parts.length ? parts.join(' · ') : 'No sessions'
+
+  if (active > 0 && expired === 0 && !ipRestricted) return { label, variant: 'success' }
+  if (active === 0 && expired > 0) return { label, variant: 'warning' }
+  return { label, variant: 'default' }
+}
+
+type JITUser = { id: string; email: string; name?: string; roles: number; status: JitStatus }
 const MOCK_USERS: JITUser[] = [
-  { id: '1', email: 'alice@example.com', name: 'Alice', roles: 2, status: '1 active, 1 expired' },
-  { id: '2', email: 'bob@example.com', roles: 1, status: 'Expired' },
+  { id: '1', email: 'alice@example.com', name: 'Alice', roles: 2, status: { active: 1, expired: 1 } },
+  { id: '2', email: 'bob@example.com', roles: 1, status: { active: 0, expired: 1 } },
+  { id: '3', email: 'carol@example.com', name: 'Carol', roles: 1, status: { active: 1, expired: 0, ipRestricted: true } },
 ]
 // Prototype: mock Postgres version
 const isPostgresVersionOutdated = false
-
-const JIT_STATUS_VARIANT: Record<string, React.ComponentProps<typeof Badge>['variant']> = {
-  expired: 'warning',
-  active: 'default',
-}
-function getJitStatusVariant(status: string): React.ComponentProps<typeof Badge>['variant'] {
-  const normalized = status.toLowerCase()
-  if (normalized.includes('expired')) return JIT_STATUS_VARIANT.expired
-  if (normalized.includes('active')) return JIT_STATUS_VARIANT.active
-  return 'default'
-}
 
 
 export const JITAccess = () => {
@@ -69,6 +77,7 @@ export const JITAccess = () => {
   const [selectedUser, setSelectedUser] = useState<JITUser | null>(null)
   // const [users, setUsers] = useState<JITUser[]>([])
   const [users, setUsers] = useState<JITUser[]>(MOCK_USERS)
+  const selectedStatusDisplay = selectedUser ? getJitStatusDisplay(selectedUser.status) : null
 
   return (
     <PageSection id="jit-access">
@@ -153,6 +162,7 @@ export const JITAccess = () => {
                   </TableRow>
                 </TableHeader>
                 <TableBody>
+
                   {/* Empty state */}
                   {users.length === 0 ? (
                     <TableRow className="[&>td]:hover:bg-inherit">
@@ -164,7 +174,9 @@ export const JITAccess = () => {
                       </TableCell>
                     </TableRow>
                   ) : (
-                    users.map((user) => (
+                    users.map((user) => {
+                      const statusDisplay = getJitStatusDisplay(user.status)
+                      return (
                       <TableRow
                         key={user.id}
                         className="relative cursor-pointer inset-focus"
@@ -191,9 +203,7 @@ export const JITAccess = () => {
                           {user.roles} role{user.roles > 1 ? 's' : ''}
                         </TableCell>
                         <TableCell className="text-foreground-light text-sm">
-                          <Badge variant={getJitStatusVariant(user.status)}>
-                            {user.status}
-                          </Badge>
+                          <Badge variant={statusDisplay.variant}>{statusDisplay.label}</Badge>
                         </TableCell>
                         <TableCell className="text-right">
                           <DropdownMenu>
@@ -223,7 +233,7 @@ export const JITAccess = () => {
                           </DropdownMenu>
                         </TableCell>
                       </TableRow>
-                    ))
+                    )})
                   )}
                 </TableBody>
               </Table>
@@ -266,9 +276,11 @@ export const JITAccess = () => {
                       <div className="grid grid-cols-4 items-center gap-4">
                         <span className="text-sm text-foreground-light">Status</span>
                         <span className="col-span-3">
-                          <Badge variant={getJitStatusVariant(selectedUser.status)}>
-                            {selectedUser.status}
-                          </Badge>
+                          {selectedStatusDisplay && (
+                            <Badge variant={selectedStatusDisplay.variant}>
+                              {selectedStatusDisplay.label}
+                            </Badge>
+                          )}
                         </span>
                       </div>
                     </>
