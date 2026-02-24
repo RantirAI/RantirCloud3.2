@@ -110,7 +110,11 @@ export function generateDynamicColumns(data: ColumnSchema[]): {
       header: '',
       cell: ({ row }) => {
         const value = row.getValue<ColumnSchema['status']>('status')
-        const label = value != null ? STATUS_CODE_LABELS[String(value)] ?? 'Unknown status' : null
+        const label =
+          value != null
+            ? STATUS_CODE_LABELS[String(value) as keyof typeof STATUS_CODE_LABELS] ??
+              'Unknown status'
+            : null
         return (
           <div className="flex items-center gap-1">
             {/* {row.original.auth_user && (
