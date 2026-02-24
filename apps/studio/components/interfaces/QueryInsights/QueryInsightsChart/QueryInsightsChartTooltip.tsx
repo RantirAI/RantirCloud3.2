@@ -1,12 +1,14 @@
 import dayjs from 'dayjs'
 import type { TooltipProps } from 'recharts'
-import { formatDuration } from '../../QueryPerformance/QueryPerformance.utils'
+import { formatDuration } from '../QueryInsightsTable/QueryInsightsTable.utils'
 
 export const QueryInsightsChartTooltip = ({ active, payload }: TooltipProps<any, any>) => {
   if (!active || !payload?.length) return null
 
   const time = payload[0]?.payload?.time
   const localTimeZone = dayjs.tz.guess()
+
+  const isTimeMetric = (dataKey: string) => dataKey === 'p50' || dataKey === 'p95'
 
   return (
     <div className="grid min-w-[8rem] items-start gap-1.5 rounded-lg border border-border/50 bg px-2.5 py-1.5 text-xs shadow-xl">
@@ -20,7 +22,11 @@ export const QueryInsightsChartTooltip = ({ active, payload }: TooltipProps<any,
             </svg>
             <span className="text-foreground-lighter ml-1 flex-grow">{entry.name}</span>
             <span className="ml-3.5">
-              {typeof entry.value === 'number' ? formatDuration(entry.value) : entry.value}
+              {typeof entry.value === 'number'
+                ? isTimeMetric(entry.dataKey)
+                  ? formatDuration(entry.value)
+                  : entry.value.toLocaleString()
+                : entry.value}
             </span>
           </div>
         ))}

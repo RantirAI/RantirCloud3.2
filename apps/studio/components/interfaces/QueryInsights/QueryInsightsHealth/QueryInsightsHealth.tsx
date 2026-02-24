@@ -36,7 +36,7 @@ export const QueryInsightsHealth = ({ data, isLoading }: QueryInsightsHealthProp
 
   return (
     <div className="w-full border-b flex items-center">
-      <div className="px-6 py-3 flex items-center gap-3 min-w-1/4">
+      <div className="px-6 py-3 flex items-center gap-3 md:min-w-1/4">
         {isLoading ? (
           <>
             <div className="h-12 w-12 rounded-full bg-surface-300 animate-pulse" />

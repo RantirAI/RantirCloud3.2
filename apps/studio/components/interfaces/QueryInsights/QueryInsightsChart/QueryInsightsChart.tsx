@@ -1,5 +1,5 @@
 import { useMemo, useState } from 'react'
-import { Area, AreaChart, CartesianGrid, ResponsiveContainer, Tooltip, XAxis } from 'recharts'
+import { Area, AreaChart, CartesianGrid, ResponsiveContainer, Tooltip, XAxis, YAxis } from 'recharts'
 import { Tabs_Shadcn_, TabsContent_Shadcn_, TabsList_Shadcn_, TabsTrigger_Shadcn_, cn } from 'ui'
 import { Loader2 } from 'lucide-react'
 import type { ChartDataPoint } from '../../QueryPerformance/QueryPerformance.types'
@@ -35,7 +35,7 @@ export const QueryInsightsChart = ({ chartData, isLoading }: QueryInsightsChartP
     return data.map((point) => {
       const filtered = { ...point }
       hiddenSeries.forEach((key) => {
-        ;(filtered as any)[key] = undefined
+        ; (filtered as any)[key] = undefined
       })
       return filtered
     })
@@ -74,35 +74,36 @@ export const QueryInsightsChart = ({ chartData, isLoading }: QueryInsightsChartP
           ))}
         </TabsList_Shadcn_>
 
-        <TabsContent_Shadcn_ value={selectedMetric} className="bg-surface-200 mt-0">
-          <div className="w-full py-4 flex flex-col">
-            <div className="w-full gap-4 mb-4 px-6 flex items-center justify-start">
-              {LEGEND_ITEMS[selectedMetric]?.map(
-                (item: { dataKey: string; label: string; color: string }) => (
-                  <button
-                    key={item.dataKey}
-                    type="button"
-                    onClick={() => toggleSeries(item.dataKey)}
-                    className={cn(
-                      'flex items-center gap-1.5 text-[11px] transition-colors cursor-pointer uppercase font-mono',
-                      isSeriesVisible(item.dataKey)
-                        ? 'text-foreground hover:text-foreground-light'
-                        : 'text-foreground-muted'
-                    )}
-                  >
-                    <span
-                      className={cn(
-                        'h-1.5 w-1.5 rounded-full transition-opacity',
-                        !isSeriesVisible(item.dataKey) && 'opacity-30'
-                      )}
-                      style={{ backgroundColor: item.color }}
-                    />
-                    {item.label}
-                  </button>
-                )
-              )}
-            </div>
 
+
+        <TabsContent_Shadcn_ value={selectedMetric} className="bg-surface-200 mt-0">
+          <div className="w-full gap-4 mt-4 px-6 flex items-center justify-end">
+            {LEGEND_ITEMS[selectedMetric]?.map(
+              (item: { dataKey: string; label: string; color: string }) => (
+                <button
+                  key={item.dataKey}
+                  type="button"
+                  onClick={() => toggleSeries(item.dataKey)}
+                  className={cn(
+                    'flex items-center gap-1.5 text-[11px] transition-colors cursor-pointer',
+                    isSeriesVisible(item.dataKey)
+                      ? 'text-foreground hover:text-foreground-light'
+                      : 'text-foreground-muted'
+                  )}
+                >
+                  <span
+                    className={cn(
+                      'h-1.5 w-1.5 rounded-full transition-opacity',
+                      !isSeriesVisible(item.dataKey) && 'opacity-30'
+                    )}
+                    style={{ backgroundColor: item.color }}
+                  />
+                  {item.label}
+                </button>
+              )
+            )}
+          </div>
+          <div className="w-full py-4 flex flex-col">
             <div className="w-full h-[180px] px-0">
               {isLoading ? (
                 <div className="flex items-center justify-center h-full">
@@ -131,6 +132,16 @@ export const QueryInsightsChart = ({ chartData, isLoading }: QueryInsightsChartP
                         tickLine={false}
                         axisLine={{ stroke: 'hsl(var(--border-default))' }}
                         height={1}
+                      />
+                      <YAxis
+                        axisLine={false}
+                        tickLine={false}
+                        tick={{ fontSize: 10, fill: 'hsl(var(--foreground-muted))' }}
+                        tickCount={3}
+                        width={40}
+                        orientation="left"
+                        tickFormatter={(v) => `${Math.round(v)}ms`}
+                        mirror={true}
                       />
                       <Tooltip
                         content={<QueryInsightsChartTooltip />}
@@ -201,6 +212,16 @@ export const QueryInsightsChart = ({ chartData, isLoading }: QueryInsightsChartP
                         axisLine={{ stroke: 'hsl(var(--border-default))' }}
                         height={1}
                       />
+                      <YAxis
+                        axisLine={false}
+                        tickLine={false}
+                        tick={{ fontSize: 10, fill: 'hsl(var(--foreground-muted))' }}
+                        tickCount={3}
+                        width={40}
+                        orientation="left"
+                        tickFormatter={(v) => `${Math.round(v)}`}
+                        mirror={true}
+                      />
                       <CartesianGrid
                         horizontal={true}
                         vertical={false}
@@ -230,6 +251,8 @@ export const QueryInsightsChart = ({ chartData, isLoading }: QueryInsightsChartP
                 <span>{formatTime(data[data.length - 1].time)}</span>
               </div>
             )}
+
+
           </div>
         </TabsContent_Shadcn_>
       </Tabs_Shadcn_>
