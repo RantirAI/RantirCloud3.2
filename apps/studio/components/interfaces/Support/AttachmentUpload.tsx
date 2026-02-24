@@ -1,5 +1,10 @@
+// End of third-party imports
+
+import { useGenerateAttachmentURLsMutation } from 'data/support/generate-attachment-urls-mutation'
+import { uuidv4 } from 'lib/helpers'
+import { useProfile } from 'lib/profile'
 import { compact } from 'lodash'
-import { Plus, X } from 'lucide-react'
+import { File, Plus, X } from 'lucide-react'
 import {
   useCallback,
   useEffect,
@@ -10,12 +15,8 @@ import {
   type RefObject,
 } from 'react'
 import { toast } from 'sonner'
-// End of third-party imports
+import { cn, Tooltip, TooltipContent, TooltipTrigger } from 'ui'
 
-import { useGenerateAttachmentURLsMutation } from 'data/support/generate-attachment-urls-mutation'
-import { uuidv4 } from 'lib/helpers'
-import { useProfile } from 'lib/profile'
-import { cn } from 'ui'
 import { createSupportStorageClient } from './support-storage-client'
 
 const MAX_ATTACHMENTS = 5
@@ -26,7 +27,7 @@ const uploadAttachments = async ({ userId, files }: { userId: string; files: Fil
   const filesToUpload = Array.from(files)
   const uploadedFiles = await Promise.all(
     filesToUpload.map(async (file) => {
-      const suffix = file.type.split('/')[1]
+      const suffix = file.name.endsWith('.har') ? 'har' : file.type.split('/')[1]
       const prefix = `${userId}/${uuidv4()}.${suffix}`
       const options = { cacheControl: '3600' }
 
@@ -87,7 +88,13 @@ export function useAttachmentUpload() {
 
   useEffect(() => {
     if (!uploadedFiles) return
-    const objectUrls = uploadedFiles.map((file) => URL.createObjectURL(file))
+    const objectUrls = uploadedFiles.map((file) => {
+      if (file.name.endsWith('.har')) {
+        return file.name
+      } else {
+        return URL.createObjectURL(file)
+      }
+    })
     setUploadedDataUrls(objectUrls)
 
     return () => {
@@ -160,8 +167,8 @@ export function AttachmentUploadDisplay({
       <div className="flex flex-col gap-y-1">
         <p className="text-sm text-foreground-light">Attachments</p>
         <p className="text-sm text-foreground-lighter">
-          Upload up to {MAX_ATTACHMENTS} screenshots that might be relevant to the issue that you're
-          facing
+          Upload up to {MAX_ATTACHMENTS} images or HAR files that might be relevant to the issue
+          that you're facing
         </p>
       </div>
       <input
@@ -169,29 +176,62 @@ export function AttachmentUploadDisplay({
         type="file"
         ref={uploadButtonRef}
         className="hidden"
-        accept="image/png, image/jpeg"
+        accept="image/png, image/jpeg, .har"
         onChange={handleFileUpload}
       />
       <div className="flex items-center gap-x-2">
-        {uploadedDataUrls.map((url, idx) => (
-          <div
-            key={url}
-            style={{ backgroundImage: `url("${url}")` }}
-            className="relative h-14 w-14 rounded bg-cover bg-center bg-no-repeat"
-          >
-            <button
-              type="button"
-              aria-label="Remove attachment"
-              className={cn(
-                'flex h-4 w-4 items-center justify-center rounded-full bg-red-900',
-                'absolute -top-1 -right-1 cursor-pointer'
-              )}
-              onClick={() => removeFileUpload(idx)}
-            >
-              <X aria-hidden="true" size={12} strokeWidth={2} />
-            </button>
-          </div>
-        ))}
+        {uploadedDataUrls.map((url, idx) => {
+          if (url.endsWith('.har')) {
+            return (
+              <div
+                key={url}
+                className="border relative h-14 w-14 rounded flex items-center justify-center"
+              >
+                <Tooltip>
+                  <TooltipTrigger className="cursor-default" onClick={(e) => e.preventDefault()}>
+                    <div className="flex flex-col items-center justify-center gap-y-0.5">
+                      <File className="text-foreground-light" size={16} />
+                      <p className="text-xs font-mono">HAR</p>
+                    </div>
+                  </TooltipTrigger>
+                  <TooltipContent side="bottom">{url}</TooltipContent>
+                </Tooltip>
+
+                <button
+                  type="button"
+                  aria-label="Remove attachment"
+                  className={cn(
+                    'flex h-4 w-4 items-center justify-center rounded-full bg-red-900',
+                    'absolute -top-1 -right-1 cursor-pointer'
+                  )}
+                  onClick={() => removeFileUpload(idx)}
+                >
+                  <X aria-hidden="true" size={12} strokeWidth={2} />
+                </button>
+              </div>
+            )
+          } else {
+            return (
+              <div
+                key={url}
+                style={{ backgroundImage: `url("${url}")` }}
+                className="relative h-14 w-14 rounded bg-cover bg-center bg-no-repeat"
+              >
+                <button
+                  type="button"
+                  aria-label="Remove attachment"
+                  className={cn(
+                    'flex h-4 w-4 items-center justify-center rounded-full bg-red-900',
+                    'absolute -top-1 -right-1 cursor-pointer'
+                  )}
+                  onClick={() => removeFileUpload(idx)}
+                >
+                  <X aria-hidden="true" size={12} strokeWidth={2} />
+                </button>
+              </div>
+            )
+          }
+        })}
         {!isFull && (
           <button
             type="button"
