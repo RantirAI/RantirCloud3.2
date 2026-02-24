@@ -384,23 +384,27 @@ function RoleRuleEditor({
       {grant.enabled && (
         <div className="space-y-4 pl-7 pt-3">
           {isSuperuserRole && (
-            <div className="rounded-md border border-warning/40 bg-warning/10 px-4 py-4">
-              <p className="text-sm font-medium text-foreground">
-                Superuser access grants full database control
-              </p>
-              <p className="text-sm text-foreground-light mt-1 leading-relaxed">
-                <code className="text-code-inline">postgres</code> has full administrative access
-                and bypasses row-level security. Even temporary access can modify or delete any
-                data. Consider using a custom Postgres role with only the permissions required.
-              </p>
-              <div className="mt-3">
+            <Admonition
+              type="warning"
+              showIcon={false}
+              layout="responsive"
+              title="Superuser access grants full database control"
+              description={
+                <>
+                  <code className="text-code-inline">postgres</code> has full administrative access
+                  and bypasses row-level security. Even temporary access can modify or delete any
+                  data. Consider using a custom Postgres role with only the permissions required.
+                </>
+              }
+              actions={
                 <Button type="default" size="tiny" asChild>
                   <Link href={`${DOCS_URL}/guides/platform/jit-access`} target="_blank">
                     Learn more
                   </Link>
                 </Button>
-              </div>
-            </div>
+              }
+              className="rounded-md"
+            />
           )}
 
           <div className="space-y-2">
