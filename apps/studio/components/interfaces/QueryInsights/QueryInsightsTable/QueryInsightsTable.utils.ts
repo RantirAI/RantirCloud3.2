@@ -98,7 +98,6 @@ export const getTableName = (query: string | undefined | null): string | null =>
   return null
 }
 
-// temp function
 export const getColumnName = (query: string | undefined | null): string | null => {
   if (!query) return null
   const trimmed = query.trim()
@@ -140,4 +139,11 @@ export const getColumnName = (query: string | undefined | null): string | null =
   }
 
   return null
+}
+
+export const formatQueryDisplay = (queryType: string | null, tableName: string | null, columnName: string | null): string => {
+  const type = queryType ?? '–'
+  const table = tableName ?? '–'
+  const column = columnName ?? '–'
+  return `${type} in ${table}, ${column}`
 }
