@@ -169,7 +169,7 @@ export const generateOtherRoutes = (
       key: 'integrations',
       label: 'Integrations',
       icon: <Blocks size={ICON_SIZE} strokeWidth={ICON_STROKE_WIDTH} />,
-      link: ref && (isProjectBuilding ? buildingUrl : `/project/${ref}/integrations`),
+      link: ref && (isProjectBuilding ? buildingUrl : `/project/${ref}/integrations-marketplace`),
     },
   ]
 }

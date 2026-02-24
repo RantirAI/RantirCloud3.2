@@ -846,6 +846,23 @@ export interface paths {
     patch?: never
     trace?: never
   }
+  '/platform/oauth/apps/catalog': {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    /** List all published OAuth apps across all organizations */
+    get: operations['PlatformOAuthAppsController_listAllOAuthApps']
+    put?: never
+    post?: never
+    delete?: never
+    options?: never
+    head?: never
+    patch?: never
+    trace?: never
+  }
   '/platform/oauth/apps/register': {
     parameters: {
       query?: never
@@ -5071,6 +5088,40 @@ export interface components {
       last_used_at: string | null
       /** Format: uuid */
       oauth_app_id: string
+    }
+    CatalogOAuthAppResponse: {
+      created_at?: string
+      icon?: string
+      id: string
+      install_count: number
+      name: string
+      /** @enum {string} */
+      registration_type: 'manual' | 'dynamic'
+      scopes?: (
+        | 'analytics:read'
+        | 'analytics:write'
+        | 'auth:read'
+        | 'auth:write'
+        | 'database:read'
+        | 'database:write'
+        | 'domains:read'
+        | 'domains:write'
+        | 'edge_functions:read'
+        | 'edge_functions:write'
+        | 'environment:read'
+        | 'environment:write'
+        | 'organizations:read'
+        | 'organizations:write'
+        | 'projects:read'
+        | 'projects:write'
+        | 'rest:read'
+        | 'rest:write'
+        | 'secrets:read'
+        | 'secrets:write'
+        | 'storage:read'
+        | 'storage:write'
+      )[]
+      website: string
     }
     CreateOAuthAppResponse: {
       client_id: string
@@ -13044,6 +13095,25 @@ export interface operations {
         }
         content: {
           'application/json': components['schemas']['NotificationsSummary']
+        }
+      }
+    }
+  }
+  PlatformOAuthAppsController_listAllOAuthApps: {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    requestBody?: never
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['CatalogOAuthAppResponse'][]
         }
       }
     }
