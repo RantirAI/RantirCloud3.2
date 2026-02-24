@@ -3,7 +3,6 @@ import Link from 'next/link'
 import { useParams } from 'common'
 import { DOCS_URL } from 'lib/constants'
 import { Button } from 'ui'
-import { Admonition } from 'ui-patterns/admonition'
 import {
   PageSection,
   PageSectionContent,
@@ -12,6 +11,7 @@ import {
   PageSectionTitle,
 } from 'ui-patterns'
 import { DocsButton } from '../../ui/DocsButton'
+import { Admonition } from 'ui-patterns/admonition'
 
 // [Joshen] Only used for non AWS projects
 export function DiskManagementPanelForm() {
@@ -28,8 +28,9 @@ export function DiskManagementPanelForm() {
       <PageSectionContent>
         <Admonition
           type="default"
-          title="Disk management has moved"
-          description="Disk management is now handled alongside Project Compute on the Compute and Disk page."
+          layout="responsive"
+          title="Disk Management has moved"
+          description="Disk configuration is now managed alongside Project Compute on the new Compute and Disk page."
           actions={
             <Button type="default" asChild>
               <Link href={`/project/${projectRef}/settings/compute-and-disk`}>
