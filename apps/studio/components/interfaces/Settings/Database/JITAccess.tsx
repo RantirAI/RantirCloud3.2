@@ -365,8 +365,9 @@ function RoleRuleEditor({
     <div className={`${grant.enabled ? 'bg-surface-100' : 'bg-background'}`}>
       <label
         htmlFor={checkboxId}
-        className={`flex w-full items-start gap-3 px-4 py-3 cursor-pointer select-none ${!grant.enabled && 'transition-colors duration-100 hover:bg-surface-100/50'
-          }`}
+        className={`grid w-full grid-cols-[16px_minmax(0,1fr)] items-start gap-x-3 px-4 py-3 cursor-pointer select-none transition-colors duration-100 ${
+          grant.enabled ? 'hover:bg-surface-200/40' : 'hover:bg-surface-100/50'
+        }`}
       >
         <Checkbox_Shadcn_
           id={checkboxId}
@@ -386,174 +387,177 @@ function RoleRuleEditor({
       </label>
 
       {grant.enabled && (
-        <div className="space-y-4 px-4 pb-3 pl-[46px]">
-          {isSuperuserRole && (
-            <Admonition
-              type="warning"
-              showIcon={false}
-              layout="responsive"
-              title="Grants full database control"
-              description="The selected role has unrestricted access and bypasses row-level security. Consider using a custom Postgres role with only the permissions required."
-              actions={
-                <Button type="default" size="tiny" asChild>
-                  <Link href={`${DOCS_URL}/guides/database/postgres/roles`} target="_blank">
-                    Learn more
-                  </Link>
-                </Button>
-              }
-            />
-          )}
+        <div className="grid grid-cols-[16px_minmax(0,1fr)] gap-x-3 px-4 pb-3">
+          <div aria-hidden />
+          <div className="space-y-4">
+            {isSuperuserRole && (
+              <Admonition
+                type="warning"
+                showIcon={false}
+                layout="responsive"
+                title="Grants full database control"
+                description="The selected role has unrestricted access and bypasses row-level security. Consider using a custom Postgres role with only the permissions required."
+                actions={
+                  <Button type="default" size="tiny" asChild>
+                    <Link href={`${DOCS_URL}/guides/database/postgres/roles`} target="_blank">
+                      Learn more
+                    </Link>
+                  </Button>
+                }
+              />
+            )}
 
-          {isReadOnlyRole && (
-            <Admonition
-              type="warning"
-              showIcon={false}
-              layout="responsive"
-              title="Grants read-only access to all schemas"
-              description="The selected role has read-only access to all schemas. Consider using a custom Postgres role with only the permissions required."
-              actions={
-                <Button type="default" size="tiny" asChild>
-                  <Link href={`${DOCS_URL}/guides/database/postgres/roles`} target="_blank">
-                    Learn more
-                  </Link>
-                </Button>
-              }
-              className="rounded-md"
-            />
-          )}
+            {isReadOnlyRole && (
+              <Admonition
+                type="warning"
+                showIcon={false}
+                layout="responsive"
+                title="Grants read-only access to all schemas"
+                description="The selected role has read-only access to all schemas. Consider using a custom Postgres role with only the permissions required."
+                actions={
+                  <Button type="default" size="tiny" asChild>
+                    <Link href={`${DOCS_URL}/guides/database/postgres/roles`} target="_blank">
+                      Learn more
+                    </Link>
+                  </Button>
+                }
+                className="rounded-md"
+              />
+            )}
 
-          <div className="space-y-2">
-            <p className="text-sm text-foreground">Expires in</p>
-            <div className="flex gap-2">
-              <div className="flex-1">
-                <Select_Shadcn_
-                  value={grant.expiryMode}
-                  onValueChange={(value) => {
-                    const nextMode = value as JITRoleGrantDraft['expiryMode']
+            <div className="space-y-2">
+              <p className="text-sm text-foreground">Expires in</p>
+              <div className="flex gap-2">
+                <div className="flex-1">
+                  <Select_Shadcn_
+                    value={grant.expiryMode}
+                    onValueChange={(value) => {
+                      const nextMode = value as JITRoleGrantDraft['expiryMode']
 
-                    if (nextMode === 'never') {
-                      onChange({
-                        ...grant,
-                        expiryMode: nextMode,
-                        hasExpiry: false,
-                        expiry: '',
-                      })
-                      return
-                    }
+                      if (nextMode === 'never') {
+                        onChange({
+                          ...grant,
+                          expiryMode: nextMode,
+                          hasExpiry: false,
+                          expiry: '',
+                        })
+                        return
+                      }
 
-                    if (nextMode === 'custom') {
+                      if (nextMode === 'custom') {
+                        onChange({
+                          ...grant,
+                          expiryMode: nextMode,
+                          hasExpiry: true,
+                          expiry: grant.expiry || relativeDatetimeLocal(24),
+                        })
+                        return
+                      }
+
                       onChange({
                         ...grant,
                         expiryMode: nextMode,
                         hasExpiry: true,
-                        expiry: grant.expiry || relativeDatetimeLocal(24),
+                        expiry: getRelativeDatetimeByMode(nextMode),
                       })
-                      return
-                    }
+                    }}
+                  >
+                    <SelectTrigger_Shadcn_>
+                      <SelectValue_Shadcn_ placeholder="Expires in" />
+                    </SelectTrigger_Shadcn_>
+                    <SelectContent_Shadcn_>
+                      <SelectItem_Shadcn_ value="1h">1 hour</SelectItem_Shadcn_>
+                      <SelectItem_Shadcn_ value="1d">1 day</SelectItem_Shadcn_>
+                      <SelectItem_Shadcn_ value="7d">7 days</SelectItem_Shadcn_>
+                      <SelectItem_Shadcn_ value="30d">30 days</SelectItem_Shadcn_>
+                      <SelectItem_Shadcn_ value="custom">Custom</SelectItem_Shadcn_>
+                      <SelectItem_Shadcn_ value="never">Never</SelectItem_Shadcn_>
+                    </SelectContent_Shadcn_>
+                  </Select_Shadcn_>
+                </div>
 
-                    onChange({
-                      ...grant,
-                      expiryMode: nextMode,
-                      hasExpiry: true,
-                      expiry: getRelativeDatetimeByMode(nextMode),
-                    })
-                  }}
-                >
-                  <SelectTrigger_Shadcn_>
-                    <SelectValue_Shadcn_ placeholder="Expires in" />
-                  </SelectTrigger_Shadcn_>
-                  <SelectContent_Shadcn_>
-                    <SelectItem_Shadcn_ value="1h">1 hour</SelectItem_Shadcn_>
-                    <SelectItem_Shadcn_ value="1d">1 day</SelectItem_Shadcn_>
-                    <SelectItem_Shadcn_ value="7d">7 days</SelectItem_Shadcn_>
-                    <SelectItem_Shadcn_ value="30d">30 days</SelectItem_Shadcn_>
-                    <SelectItem_Shadcn_ value="custom">Custom</SelectItem_Shadcn_>
-                    <SelectItem_Shadcn_ value="never">Never</SelectItem_Shadcn_>
-                  </SelectContent_Shadcn_>
-                </Select_Shadcn_>
+                {grant.expiryMode === 'custom' && (
+                  <DatePicker
+                    selectsRange={false}
+                    triggerButtonSize="small"
+                    contentSide="top"
+                    minDate={new Date()}
+                    onChange={(date) => {
+                      const selectedDate = date.to || date.from
+                      onChange({
+                        ...grant,
+                        hasExpiry: true,
+                        expiry: selectedDate ? toDatetimeLocalValue(new Date(selectedDate)) : '',
+                      })
+                    }}
+                  >
+                    <span className="inline-flex items-center gap-2">
+                      <Calendar size={14} />
+                      Select date
+                    </span>
+                  </DatePicker>
+                )}
               </div>
 
-              {grant.expiryMode === 'custom' && (
-                <DatePicker
-                  selectsRange={false}
-                  triggerButtonSize="small"
-                  contentSide="top"
-                  minDate={new Date()}
-                  onChange={(date) => {
-                    const selectedDate = date.to || date.from
-                    onChange({
-                      ...grant,
-                      hasExpiry: true,
-                      expiry: selectedDate ? toDatetimeLocalValue(new Date(selectedDate)) : '',
-                    })
-                  }}
-                >
-                  <span className="inline-flex items-center gap-2">
-                    <Calendar size={14} />
-                    Select date
+              {grant.expiryMode === 'never' && (
+                <div className="w-full flex gap-x-2 items-center mt-3 mx-0.5">
+                  <WarningIcon />
+                  <span className="text-xs text-left text-foreground-lighter">
+                    No expiry means ongoing database access until manually revoked.
                   </span>
-                </DatePicker>
+                </div>
               )}
             </div>
 
-            {grant.expiryMode === 'never' && (
-              <div className="w-full flex gap-x-2 items-center mt-3 mx-0.5">
-                <WarningIcon />
-                <span className="text-xs text-left text-foreground-lighter">
-                  No expiry means ongoing database access until manually revoked.
-                </span>
-              </div>
-            )}
-          </div>
+            <div className="space-y-2">
+              <p className="text-sm text-foreground">
+                Restricted IP addresses{' '}
+                <span className="text-foreground-lighter font-normal">(optional)</span>
+              </p>
 
-          <div className="space-y-2">
-            <p className="text-sm text-foreground">
-              Restricted IP addresses{' '}
-              <span className="text-foreground-lighter font-normal">(optional)</span>
-            </p>
-
-            {showIpEditor ? (
-              <div className="flex gap-2">
-                <Input_Shadcn_
-                  className="flex-1"
-                  value={grant.ipRanges}
-                  onChange={(event) =>
-                    onChange({
-                      ...grant,
-                      hasIpRestriction: event.target.value.trim().length > 0,
-                      ipRanges: event.target.value,
-                    })
-                  }
-                  placeholder="e.g 192.168.0.0/24"
-                />
-                <Button
-                  type="default"
-                  icon={<Plus size={14} />}
-                  onClick={() =>
-                    onChange({
-                      ...grant,
-                      hasIpRestriction: true,
-                      ipRanges:
-                        grant.ipRanges.trim().length === 0 || grant.ipRanges.trim().endsWith(',')
-                          ? grant.ipRanges
-                          : `${grant.ipRanges}, `,
-                    })
-                  }
-                >
-                  Add another
-                </Button>
-              </div>
-            ) : (
-              <div className="rounded border bg-background/80 p-4 flex justify-center">
-                <Button
-                  type="default"
-                  icon={<Plus size={14} />}
-                  onClick={() => onChange({ ...grant, hasIpRestriction: true })}
-                >
-                  Add IP range
-                </Button>
-              </div>
-            )}
+              {showIpEditor ? (
+                <div className="flex gap-2">
+                  <Input_Shadcn_
+                    className="flex-1"
+                    value={grant.ipRanges}
+                    onChange={(event) =>
+                      onChange({
+                        ...grant,
+                        hasIpRestriction: event.target.value.trim().length > 0,
+                        ipRanges: event.target.value,
+                      })
+                    }
+                    placeholder="e.g 192.168.0.0/24"
+                  />
+                  <Button
+                    type="default"
+                    icon={<Plus size={14} />}
+                    onClick={() =>
+                      onChange({
+                        ...grant,
+                        hasIpRestriction: true,
+                        ipRanges:
+                          grant.ipRanges.trim().length === 0 || grant.ipRanges.trim().endsWith(',')
+                            ? grant.ipRanges
+                            : `${grant.ipRanges}, `,
+                      })
+                    }
+                  >
+                    Add another
+                  </Button>
+                </div>
+              ) : (
+                <div className="rounded border bg-background/80 p-4 flex justify-center">
+                  <Button
+                    type="default"
+                    icon={<Plus size={14} />}
+                    onClick={() => onChange({ ...grant, hasIpRestriction: true })}
+                  >
+                    Add IP range
+                  </Button>
+                </div>
+              )}
+            </div>
           </div>
         </div>
       )}
@@ -780,7 +784,7 @@ export const JITAccess = () => {
                                   <Pencil size={14} className="text-foreground-lighter" />
                                   Edit
                                 </DropdownMenuItem>
-                                <DropdownMenuItem className="gap-x-2" onClick={() => { }}>
+                                <DropdownMenuItem className="gap-x-2" onClick={() => {}}>
                                   <Trash2 size={14} className="text-foreground-lighter" />
                                   Delete
                                 </DropdownMenuItem>
