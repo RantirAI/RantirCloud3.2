@@ -41,6 +41,7 @@ import {
   useProjectCreateMutation,
 } from 'data/projects/project-create-mutation'
 import { useAsyncCheckPermissions } from 'hooks/misc/useCheckPermissions'
+import { useCustomContent } from 'hooks/custom-content/useCustomContent'
 import { useIsFeatureEnabled } from 'hooks/misc/useIsFeatureEnabled'
 import { useLocalStorageQuery } from 'hooks/misc/useLocalStorage'
 import { useSelectedOrganizationQuery } from 'hooks/misc/useSelectedOrganization'
@@ -48,9 +49,11 @@ import { useTrackExperimentExposure } from 'hooks/misc/useTrackExperimentExposur
 import { withAuth } from 'hooks/misc/withAuth'
 import { usePHFlag } from 'hooks/ui/useFlag'
 import { DOCS_URL, PROJECT_STATUS, PROVIDERS, useDefaultProvider } from 'lib/constants'
+import { buildStudioPageTitle } from 'lib/page-title'
 import { useProfile } from 'lib/profile'
 import { useTrack } from 'lib/telemetry/track'
 import Link from 'next/link'
+import Head from 'next/head'
 import { useRouter } from 'next/router'
 import { PropsWithChildren, useEffect, useMemo, useState } from 'react'
 import { useForm } from 'react-hook-form'
@@ -68,8 +71,13 @@ const Wizard: NextPageWithLayout = () => {
   const track = useTrack()
   const router = useRouter()
   const { slug, projectName } = useParams()
+  const { appTitle } = useCustomContent(['app:title'])
   const defaultProvider = useDefaultProvider()
   const { profile } = useProfile()
+  const pageTitle = buildStudioPageTitle({
+    section: 'New Project',
+    brand: appTitle || 'Supabase',
+  })
 
   const { data: currentOrg } = useSelectedOrganizationQuery()
   const rlsExperimentVariant = usePHFlag<'control' | 'test' | false | undefined>(
@@ -399,9 +407,15 @@ const Wizard: NextPageWithLayout = () => {
   )
 
   return (
-    <Form_Shadcn_ {...form}>
-      <form onSubmit={form.handleSubmit(onSubmitWithComputeCostsConfirmation)}>
-        <Panel
+    <>
+      {/* Wizard layouts set the visual header but not the browser tab title. */}
+      <Head>
+        <title>{pageTitle}</title>
+        <meta name="description" content="Supabase Studio" />
+      </Head>
+      <Form_Shadcn_ {...form}>
+        <form onSubmit={form.handleSubmit(onSubmitWithComputeCostsConfirmation)}>
+          <Panel
           loading={!isOrganizationsSuccess}
           title={
             <div key="panel-title">
@@ -553,8 +567,9 @@ const Wizard: NextPageWithLayout = () => {
             </p>
           </div>
         </ConfirmationModal>
-      </form>
-    </Form_Shadcn_>
+        </form>
+      </Form_Shadcn_>
+    </>
   )
 }
 
