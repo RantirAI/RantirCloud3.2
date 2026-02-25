@@ -84,7 +84,7 @@ export const StripeSyncInstallationPage = () => {
   const installError = hasInstallError(installationStatus)
   const uninstallError = hasUninstallError(installationStatus)
   const installInProgress = isInstalling(installationStatus)
-  const uninsallInProgress = isUninstalling(installationStatus)
+  const uninstallInProgress = isUninstalling(installationStatus)
   const installDone = isInstallDone(installationStatus)
   const uninstallDone = isUninstallDone(installationStatus)
 
@@ -113,7 +113,7 @@ export const StripeSyncInstallationPage = () => {
 
   // Combine schema status with mutation/initiated states for UI
   const installing = installInProgress || isInstallRequested || isInstallInitiated
-  const uninstalling = uninsallInProgress || isUninstallRequested || isUninstallInitiated
+  const uninstalling = uninstallInProgress || isUninstallRequested || isUninstallInitiated
   const canInstall = checkCanInstall(installationStatus) && !installed && !installing
 
   // Poll for schema changes during transitions
@@ -272,14 +272,15 @@ export const StripeSyncInstallationPage = () => {
         alert={alert}
         status={statusDisplay}
         actions={
-          !installed && !installing && !installError ? (
+          !installed && !uninstalling && !uninstallError ? (
             <>
-              <StripeSyncChangesCard />
+              <StripeSyncChangesCard installationStatus={installationStatus} />
               <div className="flex justify-end mt-4">
                 <ButtonTooltip
                   type="primary"
                   onClick={() => setShouldShowInstallSheet(true)}
                   disabled={!canInstall || !canManageSecrets}
+                  loading={installing}
                   tooltip={{
                     content: {
                       text: !canInstall
@@ -294,23 +295,27 @@ export const StripeSyncInstallationPage = () => {
                 </ButtonTooltip>
               </div>
             </>
-          ) : installed && !uninstalling ? (
-            <div className="flex justify-end mt-4">
-              <ButtonTooltip
-                type="default"
-                onClick={() => setShowUninstallModal(true)}
-                disabled={!canManageSecrets}
-                tooltip={{
-                  content: {
-                    text: !canManageSecrets
-                      ? 'You need additional permissions to uninstall the Stripe Sync Engine.'
-                      : undefined,
-                  },
-                }}
-              >
-                Uninstall integration
-              </ButtonTooltip>
-            </div>
+          ) : installed || uninstalling || uninstallError ? (
+            <>
+              <StripeSyncChangesCard installationStatus={installationStatus} />
+              <div className="flex justify-end mt-4">
+                <ButtonTooltip
+                  type="default"
+                  onClick={() => setShowUninstallModal(true)}
+                  disabled={!canManageSecrets}
+                  loading={uninstalling}
+                  tooltip={{
+                    content: {
+                      text: !canManageSecrets
+                        ? 'You need additional permissions to uninstall the Stripe Sync Engine.'
+                        : undefined,
+                    },
+                  }}
+                >
+                  Uninstall integration
+                </ButtonTooltip>
+              </div>
+            </>
           ) : null
         }
       >
@@ -329,7 +334,7 @@ export const StripeSyncInstallationPage = () => {
                   <SheetTitle>Install Stripe Sync Engine</SheetTitle>
                 </SheetHeader>
                 <SheetSection className="flex-1 flex flex-col gap-y-6">
-                  <StripeSyncChangesCard />
+                  <StripeSyncChangesCard installationStatus={installationStatus} />
 
                   <Admonition type="warning">
                     <h5 className="mb-0.5">
