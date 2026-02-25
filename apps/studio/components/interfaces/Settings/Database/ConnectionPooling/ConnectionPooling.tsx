@@ -221,9 +221,14 @@ export const ConnectionPooling = () => {
               <>
                 <div className="flex flex-row gap-2 justify-between w-full">
                   <p className="text-foreground text-sm">Applies to</p>
-                  <Badge>
-                    {disablePoolModeSelection ? 'Shared Pooler' : 'Shared/Dedicated Pooler'}
-                  </Badge>
+                  {disablePoolModeSelection ? (
+                    <Badge>Shared Pooler</Badge>
+                  ) : (
+                    <div className="flex flex-row gap-1">
+                      <Badge>Shared Pooler</Badge>
+                      <Badge>Dedicated Pooler</Badge>
+                    </div>
+                  )}
                 </div>
                 <Separator className="bg-border -mx-6 w-[calc(100%+3rem)] my-4" />
                 <Form_Shadcn_ {...form}>
