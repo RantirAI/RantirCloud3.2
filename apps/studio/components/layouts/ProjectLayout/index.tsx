@@ -136,10 +136,6 @@ export const ProjectLayout = forwardRef<HTMLDivElement, PropsWithChildren<Projec
       router.pathname.includes('/project/[ref]/logs')
     const showPausedState = isPaused && !ignorePausedState
 
-    const sidebarMinSizePercentage = 1
-    const sidebarDefaultSizePercentage = 15
-    const sidebarMaxSizePercentage = 33
-
     useLayoutEffect(() => {
       setMenuContent(
         <MobileMenuContent

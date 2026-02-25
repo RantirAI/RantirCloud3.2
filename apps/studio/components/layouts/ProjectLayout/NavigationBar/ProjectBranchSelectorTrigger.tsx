@@ -26,36 +26,8 @@ export function ProjectBranchSelectorTrigger({
       className="group py-1 gap-1.5 w-full flex h-auto text-left data-[state=open]:bg-sidebar-accent data-[state=open]:text-sidebar-accent-foreground touch-manipulation"
       onClick={onClick}
     >
-      <div
-        className={cn(
-          'relative flex h-8 aspect-square shrink-0 items-center bg-background-muted hover:bg-selection hover:border-foreground-lighter/60 justify-center rounded border border-strong text-xs'
-        )}
-      >
-        <span className="group-hover:hidden">{selectedOrgInitial}</span>
-        <button
-          className={cn(
-            'hidden group-hover:flex h-full w-full items-center justify-center cursor-pointer',
-            isProductionBranch
-              ? 'text-foreground hover:text-foreground/90'
-              : 'text-foreground hover:text-foreground-light'
-          )}
-          type="button"
-          tabIndex={-1}
-          aria-label="Go to organization"
-          onClick={(event) => {
-            event.preventDefault()
-            event.stopPropagation()
-            onGoToOrganization()
-          }}
-          onKeyDown={(event) => {
-            if (event.key !== 'Enter' && event.key !== ' ') return
-            event.preventDefault()
-            event.stopPropagation()
-            onGoToOrganization()
-          }}
-        >
-          <ChevronLeft size={14} strokeWidth={1.5} />
-        </button>
+      <div className="relative flex h-8 aspect-square shrink-0 items-center bg-background-muted group-hover:border-stronger justify-center rounded border border-strong text-xs">
+        {selectedOrgInitial}
       </div>
       <div className="text-left flex-grow min-w-0">
         <div className="w-full truncate text-foreground leading-tight max-w-[250px]">
