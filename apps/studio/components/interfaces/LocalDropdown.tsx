@@ -29,7 +29,7 @@ export const LocalDropdown = ({
 }) => {
   const { theme, setTheme } = useTheme()
   const setCommandMenuOpen = useSetCommandMenuOpen()
-  const { openFeaturePreviewModal } = useFeaturePreviewModal()
+  const { toggleFeaturePreviewModal } = useFeaturePreviewModal()
 
   return (
     <DropdownMenu>
@@ -44,8 +44,8 @@ export const LocalDropdown = ({
       <DropdownMenuContent side="bottom" align="end" className={cn('w-44', contentClassName)}>
         <DropdownMenuItem
           className="flex gap-2"
-          onClick={openFeaturePreviewModal}
-          onSelect={openFeaturePreviewModal}
+          onClick={() => toggleFeaturePreviewModal(true)}
+          onSelect={() => toggleFeaturePreviewModal(true)}
         >
           <FlaskConical size={14} strokeWidth={1.5} className="text-foreground-lighter" />
           Feature previews

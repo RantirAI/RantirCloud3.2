@@ -22,7 +22,6 @@ import {
   singleThemes,
   Theme,
 } from 'ui'
-import { useCommandMenuOpenedTelemetry, useSetCommandMenuOpen } from 'ui-patterns/CommandMenu'
 
 import { useFeaturePreviewModal } from './App/FeaturePreview/FeaturePreviewContext'
 
@@ -39,14 +38,7 @@ export function UserDropdown({
   const profileShowEmailEnabled = useIsFeatureEnabled('profile:show_email')
   const { username, avatarUrl, primaryEmail, isLoading } = useProfileNameAndPicture()
 
-  const setCommandMenuOpen = useSetCommandMenuOpen()
-  const sendTelemetry = useCommandMenuOpenedTelemetry()
-  const { openFeaturePreviewModal } = useFeaturePreviewModal()
-
-  const handleCommandMenuOpen = () => {
-    setCommandMenuOpen(true)
-    sendTelemetry()
-  }
+  const { toggleFeaturePreviewModal } = useFeaturePreviewModal()
 
   return (
     <DropdownMenu>
@@ -69,7 +61,7 @@ export function UserDropdown({
         {IS_PLATFORM && (
           <>
             <div className="px-2 py-1 flex flex-col gap-0 text-sm">
-              {!!username && (
+              {!!username ? (
                 <>
                   <span title={username} className="w-full text-left text-foreground truncate">
                     {username}
@@ -83,6 +75,10 @@ export function UserDropdown({
                     </span>
                   )}
                 </>
+              ) : (
+                <span title={primaryEmail} className="w-full text-left text-foreground truncate">
+                  {primaryEmail}
+                </span>
               )}
             </div>
             <DropdownMenuSeparator />
@@ -102,8 +98,8 @@ export function UserDropdown({
               </DropdownMenuItem>
               <DropdownMenuItem
                 className="flex gap-2"
-                onClick={openFeaturePreviewModal}
-                onSelect={openFeaturePreviewModal}
+                onClick={() => toggleFeaturePreviewModal(true)}
+                // onSelect={() => toggleFeaturePreviewModal(true)}
               >
                 <FlaskConical size={14} strokeWidth={1.5} className="text-foreground-lighter" />
                 Feature previews

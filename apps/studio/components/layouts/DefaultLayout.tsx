@@ -4,16 +4,21 @@ import { Sidebar } from 'components/interfaces/Sidebar'
 import { useLocalStorageQuery } from 'hooks/misc/useLocalStorage'
 import { useCheckLatestDeploy } from 'hooks/use-check-latest-deploy'
 import { useRouter } from 'next/router'
-import type { PropsWithChildren } from 'react'
+import { useEffect, useState, type PropsWithChildren } from 'react'
 import { useAppStateSnapshot } from 'state/app-state'
 import { sidebarManagerState, useSidebarManagerSnapshot } from 'state/sidebar-manager-state'
 import { ResizablePanel, ResizablePanelGroup, SidebarProvider } from 'ui'
 import MobileSheetNav from 'ui-patterns/MobileSheetNav/MobileSheetNav'
 
+import { BannerStack } from '../ui/BannerStack/BannerStack'
+import { BannerStackProvider } from '../ui/BannerStack/BannerStackProvider'
 import { LayoutHeader } from './ProjectLayout/LayoutHeader/LayoutHeader'
 import { LayoutSidebar } from './ProjectLayout/LayoutSidebar'
 import { LayoutSidebarProvider } from './ProjectLayout/LayoutSidebar/LayoutSidebarProvider'
-import { MobileSidebarSheetProvider, useMobileSidebarSheet } from './ProjectLayout/LayoutSidebar/MobileSidebarSheetContext'
+import {
+  MobileSidebarSheetProvider,
+  useMobileSidebarSheet,
+} from './ProjectLayout/LayoutSidebar/MobileSidebarSheetContext'
 import MobileNavigationBar from './ProjectLayout/NavigationBar/MobileNavigationBar'
 import { ProjectContextProvider } from './ProjectLayout/ProjectContext'
 
@@ -59,109 +64,88 @@ export const DefaultLayout = ({
   const contentMinSizePercentage = 50
   const contentMaxSizePercentage = 70
 
+  const [isMounted, setIsMounted] = useState(false)
+
+  const {
+    content: mobileSheetContent,
+    setContent: setMobileSheetContent,
+    menuContent,
+  } = useMobileSidebarSheet()
+  const { activeSidebar } = useSidebarManagerSnapshot()
+
+  useEffect(() => {
+    setIsMounted(true)
+  }, [])
+
+  // This is required to prevent layout shift when rendering resizable panels (they initially render at 50%, then shift
+  // to whatever is specified).
+  if (!isMounted) {
+    return null
+  }
+
   return (
     <SidebarProvider defaultOpen={false}>
       <LayoutSidebarProvider>
         <MobileSidebarSheetProvider>
           <ProjectContextProvider projectRef={ref}>
-            <DefaultLayoutContent
-              contentMinSizePercentage={contentMinSizePercentage}
-              contentMaxSizePercentage={contentMaxSizePercentage}
-              headerTitle={headerTitle}
-              hideMobileMenu={hideMobileMenu}
-              showProductMenu={showProductMenu}
-              backToDashboardURL={
-                router.pathname.startsWith('/account') ? backToDashboardURL : undefined
-              }
-              router={router}
-            >
-              {children}
-            </DefaultLayoutContent>
+            <BannerStackProvider>
+              <div className="flex flex-col h-screen w-screen">
+                {/* Top Banner */}
+                <AppBannerWrapper />
+                <div className="flex-shrink-0">
+                  <MobileNavigationBar hideMobileMenu={hideMobileMenu} />
+                  <LayoutHeader
+                    showProductMenu={showProductMenu}
+                    headerTitle={headerTitle}
+                    backToDashboardURL={
+                      router.pathname.startsWith('/account') ? backToDashboardURL : undefined
+                    }
+                  />
+                </div>
+                {/* Main Content Area */}
+                <div className="flex flex-1 w-full overflow-y-hidden">
+                  {/* Sidebar - Only show for project pages, not account pages */}
+                  {!router.pathname.startsWith('/account') && <Sidebar />}
+                  {/* Main Content with Layout Sidebar */}
+                  <ResizablePanelGroup
+                    orientation="horizontal"
+                    className="h-full w-full overflow-x-hidden flex-1 flex flex-row gap-0"
+                    autoSaveId="default-layout-content"
+                  >
+                    <ResizablePanel
+                      id="panel-content"
+                      className="w-full"
+                      minSize={`${contentMinSizePercentage}`}
+                      maxSize={`${contentMaxSizePercentage}`}
+                      defaultSize={`${contentMaxSizePercentage}`}
+                    >
+                      <div className="h-full overflow-y-auto">{children}</div>
+                    </ResizablePanel>
+                    <LayoutSidebar
+                      minSize={`${100 - contentMaxSizePercentage}`}
+                      maxSize={`${100 - contentMinSizePercentage}`}
+                      defaultSize={`${100 - contentMaxSizePercentage}`}
+                    />
+                  </ResizablePanelGroup>
+                </div>
+              </div>
+              <MobileSheetNav
+                open={mobileSheetContent !== null}
+                onOpenChange={(open) => {
+                  if (!open) {
+                    setMobileSheetContent(null)
+                    sidebarManagerState.closeActive()
+                  }
+                }}
+              >
+                {mobileSheetContent === 'menu' ? menuContent : activeSidebar?.component?.() ?? null}
+              </MobileSheetNav>
+              <BannerStack />
+            </BannerStackProvider>
           </ProjectContextProvider>
         </MobileSidebarSheetProvider>
       </LayoutSidebarProvider>
     </SidebarProvider>
-  )
-}
-
-interface DefaultLayoutContentProps extends PropsWithChildren {
-  contentMinSizePercentage: number
-  contentMaxSizePercentage: number
-  headerTitle?: string
-  hideMobileMenu?: boolean
-  showProductMenu: boolean
-  backToDashboardURL?: string
-  router: ReturnType<typeof useRouter>
-}
-
-function DefaultLayoutContent({
-  children,
-  contentMinSizePercentage,
-  contentMaxSizePercentage,
-  headerTitle,
-  hideMobileMenu,
-  showProductMenu,
-  backToDashboardURL,
-  router,
-}: DefaultLayoutContentProps) {
-  const { content: mobileSheetContent, setContent: setMobileSheetContent, menuContent } =
-    useMobileSidebarSheet()
-  const { activeSidebar } = useSidebarManagerSnapshot()
-
-  return (
-    <>
-      <div className="flex flex-col h-screen w-screen">
-        {/* Top Banner */}
-        <AppBannerWrapper />
-        <div className="flex-shrink-0">
-          <MobileNavigationBar hideMobileMenu={hideMobileMenu} />
-          <LayoutHeader
-            showProductMenu={showProductMenu}
-            headerTitle={headerTitle}
-            backToDashboardURL={backToDashboardURL}
-          />
-        </div>
-        {/* Main Content Area */}
-        <div className="flex flex-1 w-full overflow-y-hidden">
-          {/* Sidebar - Only show for project pages, not account pages */}
-          {!router.pathname.startsWith('/account') && <Sidebar />}
-          {/* Main Content with Layout Sidebar */}
-          <ResizablePanelGroup
-            direction="horizontal"
-            className="h-full w-full overflow-x-hidden flex-1 flex flex-row gap-0"
-            autoSaveId="default-layout-content"
-          >
-            <ResizablePanel
-              id="panel-content"
-              order={1}
-              className="w-full"
-              minSize={contentMinSizePercentage}
-              maxSize={contentMaxSizePercentage}
-              defaultSize={contentMaxSizePercentage}
-            >
-              <div className="h-full overflow-y-auto">{children}</div>
-            </ResizablePanel>
-            <LayoutSidebar
-              order={2}
-              minSize={100 - contentMaxSizePercentage}
-              maxSize={100 - contentMinSizePercentage}
-              defaultSize={100 - contentMaxSizePercentage}
-            />
-          </ResizablePanelGroup>
-        </div>
-      </div>
-      <MobileSheetNav
-        open={mobileSheetContent !== null}
-        onOpenChange={(open) => {
-          if (!open) {
-            setMobileSheetContent(null)
-            sidebarManagerState.closeActive()
-          }
-        }}
-      >
-        {mobileSheetContent === 'menu' ? menuContent : activeSidebar?.component?.() ?? null}
-      </MobileSheetNav>
-    </>
   )
 }
 
