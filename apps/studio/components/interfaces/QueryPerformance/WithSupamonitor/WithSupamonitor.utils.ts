@@ -1,4 +1,32 @@
 import { QueryPerformanceRow, ChartDataPoint, ParsedLogEntry } from '../QueryPerformance.types'
+import {
+  SUPAMONITOR_EXCLUDED_ROLES,
+  SUPAMONITOR_EXCLUDED_APP_NAMES,
+  TRANSACTION_CONTROL_REGEX,
+  SCHEMA_INTROSPECTION_REGEX,
+} from '../QueryPerformance.constants'
+
+export function filterSystemLogs(
+  logs: ParsedLogEntry[],
+  { includeIntrospection = false }: { includeIntrospection?: boolean } = {}
+): ParsedLogEntry[] {
+  return logs.filter((log) => {
+    if (
+      log.user_name &&
+      (SUPAMONITOR_EXCLUDED_ROLES as readonly string[]).includes(log.user_name)
+    )
+      return false
+    if (
+      log.application_name &&
+      (SUPAMONITOR_EXCLUDED_APP_NAMES as readonly string[]).includes(log.application_name)
+    )
+      return false
+    if (log.query && TRANSACTION_CONTROL_REGEX.test(log.query)) return false
+    if (!includeIntrospection && log.query && SCHEMA_INTROSPECTION_REGEX.test(log.query))
+      return false
+    return true
+  })
+}
 
 export function parseSupamonitorLogs(logData: any[]): ParsedLogEntry[] {
   if (!logData || logData.length === 0) return []

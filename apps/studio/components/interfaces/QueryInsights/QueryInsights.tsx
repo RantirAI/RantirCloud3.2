@@ -8,6 +8,7 @@ import { useSelectedProjectQuery } from 'hooks/misc/useSelectedProject'
 import { getSupamonitorLogsQuery } from '../QueryPerformance/QueryPerformance.constants'
 import {
   parseSupamonitorLogs,
+  filterSystemLogs,
   transformLogsToChartData,
   aggregateLogsByQuery,
 } from '../QueryPerformance/WithSupamonitor/WithSupamonitor.utils'
@@ -61,19 +62,24 @@ export const QueryInsights = ({ dateRange, onDateRangeChange }: QueryInsightsPro
   })
 
   const [selectedQuery, setSelectedQuery] = useState<string | null>(null)
+  const [showIntrospection, setShowIntrospection] = useState(false)
 
   const parsedLogs = useMemo(() => parseSupamonitorLogs(logData || []), [logData])
-  const chartData = useMemo(() => transformLogsToChartData(parsedLogs), [parsedLogs])
+  const filteredLogs = useMemo(
+    () => filterSystemLogs(parsedLogs, { includeIntrospection: showIntrospection }),
+    [parsedLogs, showIntrospection]
+  )
+  const chartData = useMemo(() => transformLogsToChartData(filteredLogs), [filteredLogs])
   const selectedChartData = useMemo(
     () =>
       selectedQuery
         ? transformLogsToChartData(
-            parsedLogs.filter((log) => log.query?.replace(/\s+/g, ' ').trim() === selectedQuery)
+            filteredLogs.filter((log) => log.query?.replace(/\s+/g, ' ').trim() === selectedQuery)
           )
         : undefined,
-    [parsedLogs, selectedQuery]
+    [filteredLogs, selectedQuery]
   )
-  const aggregatedData = useMemo(() => aggregateLogsByQuery(parsedLogs), [parsedLogs])
+  const aggregatedData = useMemo(() => aggregateLogsByQuery(filteredLogs), [filteredLogs])
 
   return (
     <div className="flex flex-col flex-1 min-h-0">
@@ -84,6 +90,8 @@ export const QueryInsights = ({ dateRange, onDateRangeChange }: QueryInsightsPro
         isLoading={isLoading}
         currentSelectedQuery={selectedQuery}
         onCurrentSelectQuery={setSelectedQuery}
+        showIntrospection={showIntrospection}
+        onToggleIntrospection={() => setShowIntrospection((v) => !v)}
       />
     </div>
   )

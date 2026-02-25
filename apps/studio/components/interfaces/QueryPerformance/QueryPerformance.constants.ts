@@ -1,3 +1,24 @@
+// Roles whose queries are always internal Supabase infrastructure
+export const SUPAMONITOR_EXCLUDED_ROLES = [
+  'supabase_admin',
+  'supabase_auth_admin',
+  'supabase_storage_admin',
+  'supabase_realtime_admin',
+  'pgbouncer',
+  'dashboard_user',
+] as const
+
+// application_name values that identify Supabase-internal connections
+export const SUPAMONITOR_EXCLUDED_APP_NAMES = ['supabase-dashboard', 'mgmt-api'] as const
+
+// Transaction/session control statements — never actionable for users
+export const TRANSACTION_CONTROL_REGEX =
+  /^\s*(BEGIN|COMMIT|ROLLBACK|SET\s|RESET\s|DISCARD|DEALLOCATE|SHOW\s)/i
+
+// Queries whose primary target is a system catalog (soft filter)
+export const SCHEMA_INTROSPECTION_REGEX =
+  /\bFROM\s+(?:pg_catalog\.|information_schema\.|pg_class\b|pg_attribute\b|pg_type\b|pg_namespace\b)/i
+
 export enum QUERY_PERFORMANCE_REPORT_TYPES {
   MOST_TIME_CONSUMING = 'most_time_consuming',
   MOST_FREQUENT = 'most_frequent',

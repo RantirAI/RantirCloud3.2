@@ -1,8 +1,11 @@
 import { useMemo, useState, useRef, useCallback, useEffect } from 'react'
-import { Search, X, ArrowDown, ArrowUp, ChevronDown, TextSearch, ArrowRight, Loader2 } from 'lucide-react'
+import { Search, X, ArrowDown, ArrowUp, ChevronDown, TextSearch, ArrowRight, Loader2, Eye, EyeOff } from 'lucide-react'
+import { useRouter } from 'next/router'
+import { useParams } from 'common'
 import DataGrid, { Column, DataGridHandle, Row } from 'react-data-grid'
 import {
   Button,
+  CodeBlock,
   Sheet,
   SheetContent,
   SheetDescription,
@@ -12,19 +15,21 @@ import {
   TabsTrigger_Shadcn_,
   TabsContent_Shadcn_,
   cn,
-  copyToClipboard,
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from 'ui'
+import { InfoTooltip } from 'ui-patterns/info-tooltip'
+import { SIDEBAR_KEYS } from 'components/layouts/ProjectLayout/LayoutSidebar/LayoutSidebarProvider'
+import { useAiAssistantStateSnapshot } from 'state/ai-assistant-state'
+import { useSidebarManagerSnapshot } from 'state/sidebar-manager-state'
 import { Input } from 'ui-patterns/DataInputs/Input'
 import { GenericSkeletonLoader } from 'ui-patterns/ShimmeringLoader'
 import TwoOptionToggle from 'components/ui/TwoOptionToggle'
 import { ButtonTooltip } from 'components/ui/ButtonTooltip'
 import { ExplainVisualizer } from 'components/interfaces/ExplainVisualizer/ExplainVisualizer'
 import { parseAsString, useQueryStates } from 'nuqs'
-import { toast } from 'sonner'
 
 import type { QueryPerformanceRow } from '../../QueryPerformance/QueryPerformance.types'
 import { useQueryInsightsIssues } from '../hooks/useQueryInsightsIssues'
@@ -35,6 +40,7 @@ import { ISSUE_DOT_COLORS, ISSUE_ICONS, QUERY_INSIGHTS_EXPLORER_COLUMNS, NON_SOR
 import { QueryDetail } from '../../QueryPerformance/QueryDetail'
 import { QueryIndexes } from '../../QueryPerformance/QueryIndexes'
 import { buildQueryExplanationPrompt } from '../../QueryPerformance/QueryPerformance.ai'
+import { QUERY_PERFORMANCE_ROLE_DESCRIPTION } from '../../QueryPerformance/QueryPerformance.constants'
 import { useExecuteSqlMutation } from 'data/sql/execute-sql-mutation'
 import { useSelectedProjectQuery } from 'hooks/misc/useSelectedProject'
 import { wrapWithRollback } from 'data/sql/utils/transaction'
@@ -46,6 +52,8 @@ interface QueryInsightsTableProps {
   isLoading: boolean
   currentSelectedQuery?: string | null
   onCurrentSelectQuery?: (query: string | null) => void
+  showIntrospection?: boolean
+  onToggleIntrospection?: () => void
 }
 
 export const QueryInsightsTable = ({
@@ -53,6 +61,8 @@ export const QueryInsightsTable = ({
   isLoading,
   currentSelectedQuery,
   onCurrentSelectQuery,
+  showIntrospection = false,
+  onToggleIntrospection,
 }: QueryInsightsTableProps) => {
   const { classified, errors, indexIssues, slowQueries } = useQueryInsightsIssues(data)
   const [mode, setMode] = useState<Mode>('triage')
@@ -63,17 +73,21 @@ export const QueryInsightsTable = ({
   const [searchQuery, setSearchQuery] = useState(urlSearch || '')
   const [selectedRow, setSelectedRow] = useState<number>()
   const [selectedTriageRow, setSelectedTriageRow] = useState<number | undefined>()
-  const [sheetView, setSheetView] = useState<'details' | 'indexes'>('details')
+  const [sheetView, setSheetView] = useState<'details' | 'indexes' | 'explain'>('details')
   const gridRef = useRef<DataGridHandle>(null)
   const dataGridContainerRef = useRef<HTMLDivElement>(null)
   const triageContainerRef = useRef<HTMLDivElement>(null)
   const [sort, setSort] = useState<{ column: string; order: 'asc' | 'desc' } | null>(null)
 
-  // Inline explain state
-  const [explainOpenQuery, setExplainOpenQuery] = useState<string | null>(null)
+  // Explain state
   const [explainResults, setExplainResults] = useState<Record<string, QueryPlanRow[]>>({})
   const [explainLoadingQuery, setExplainLoadingQuery] = useState<string | null>(null)
   const explainQueryRef = useRef<string | null>(null)
+
+  const { ref } = useParams()
+  const router = useRouter()
+  const { openSidebar } = useSidebarManagerSnapshot()
+  const aiSnap = useAiAssistantStateSnapshot()
 
   const { data: project } = useSelectedProjectQuery()
 
@@ -157,28 +171,56 @@ export const QueryInsightsTable = ({
     return selectedRow !== undefined ? (explorerItems[selectedRow] as ClassifiedQuery) : undefined
   }, [mode, selectedTriageRow, selectedRow, filteredTriageItems, explorerItems])
 
-  const handleCopyMarkdown = (item: ClassifiedQuery) => {
-    const { query, prompt } = buildQueryExplanationPrompt(item)
-    const markdown = `${prompt}\n\nSQL Query:\n\`\`\`sql\n${query}\n\`\`\``
-    copyToClipboard(markdown, () => toast.success('Copied to clipboard'))
-  }
+  const runExplain = useCallback(
+    (query: string) => {
+      if (explainResults[query]) return // already cached
+      explainQueryRef.current = query
+      setExplainLoadingQuery(query)
+      executeExplain({
+        projectRef: project?.ref,
+        connectionString: project?.connectionString,
+        sql: wrapWithRollback(`EXPLAIN ANALYZE ${query}`),
+      })
+    },
+    [explainResults, executeExplain, project]
+  )
 
-  const handleExplain = (query: string) => {
-    const isOpen = explainOpenQuery === query
-    if (isOpen) {
-      setExplainOpenQuery(null)
-      return
+  const handleGoToLogs = useCallback(() => {
+    router.push(`/project/${ref}/logs?log_type=postgres`)
+  }, [router, ref])
+
+  const handleAiSuggestedFix = useCallback(
+    (item: ClassifiedQuery) => {
+      const { query, prompt } = buildQueryExplanationPrompt(item)
+      openSidebar(SIDEBAR_KEYS.AI_ASSISTANT)
+      aiSnap.newChat({
+        sqlSnippets: [{ label: 'Query', content: query }],
+        initialMessage: prompt,
+      })
+    },
+    [openSidebar, aiSnap]
+  )
+
+  // Auto-run EXPLAIN ANALYZE when the explain tab becomes active
+  useEffect(() => {
+    if (sheetView === 'explain' && activeSheetRow?.query) {
+      runExplain(activeSheetRow.query)
     }
-    setExplainOpenQuery(query)
-    if (explainResults[query]) return // already cached
-    explainQueryRef.current = query
-    setExplainLoadingQuery(query)
-    executeExplain({
-      projectRef: project?.ref,
-      connectionString: project?.connectionString,
-      sql: wrapWithRollback(`EXPLAIN ANALYZE ${query}`),
+  }, [sheetView, activeSheetRow?.query])
+
+  const timeConsumedWidth = useMemo(() => {
+    if (!explorerItems.length) return 150
+    let maxWidth = 150
+    explorerItems.forEach((row) => {
+      const pct = row.prop_total_time || 0
+      const total = row.total_time || 0
+      if (pct && total) {
+        const text = `${pct.toFixed(1)}% / ${formatDuration(total)}`
+        maxWidth = Math.max(maxWidth, text.length * 8 + 40)
+      }
     })
-  }
+    return Math.min(maxWidth, 300)
+  }, [explorerItems])
 
   const columns = useMemo(() => {
     return QUERY_INSIGHTS_EXPLORER_COLUMNS.map((col) => {
@@ -189,7 +231,7 @@ export const QueryInsightsTable = ({
         name: col.name,
         cellClass: `column-${col.id}`,
         resizable: true,
-        minWidth: col.minWidth ?? 120,
+        minWidth: col.id === 'prop_total_time' ? timeConsumedWidth : (col.minWidth ?? 120),
         sortable: isSortable,
         headerCellClass: 'first:pl-6 cursor-pointer',
         renderHeaderCell: () => {
@@ -215,9 +257,7 @@ export const QueryInsightsTable = ({
                   </DropdownMenuTrigger>
                   <DropdownMenuContent align="end" className="w-48">
                     <DropdownMenuItem
-                      onClick={() => {
-                        setSort({ column: col.id, order: 'asc' })
-                      }}
+                      onClick={() => setSort({ column: col.id, order: 'asc' })}
                       className={cn(
                         'flex gap-2',
                         sort?.column === col.id && sort?.order === 'asc' && 'text-foreground'
@@ -227,9 +267,7 @@ export const QueryInsightsTable = ({
                       Sort Ascending
                     </DropdownMenuItem>
                     <DropdownMenuItem
-                      onClick={() => {
-                        setSort({ column: col.id, order: 'desc' })
-                      }}
+                      onClick={() => setSort({ column: col.id, order: 'desc' })}
                       className={cn(
                         'flex gap-2',
                         sort?.column === col.id && sort?.order === 'desc' && 'text-foreground'
@@ -246,25 +284,34 @@ export const QueryInsightsTable = ({
         },
         renderCell: (props) => {
           const row = props.row
+          const value = row[col.id]
 
           if (col.id === 'query') {
             const IssueIcon = row.issueType ? ISSUE_ICONS[row.issueType] : null
             return (
-              <div className="w-full flex items-center gap-x-3 px-6 group">
-                {row.issueType && IssueIcon && (
-                  <div
-                    className={cn(
-                      'h-6 w-6 rounded-full flex-shrink-0 border flex items-center justify-center',
-                      ISSUE_DOT_COLORS[row.issueType]?.border,
-                      ISSUE_DOT_COLORS[row.issueType]?.background
-                    )}
-                  >
-                    <IssueIcon size={14} className={ISSUE_DOT_COLORS[row.issueType].color} />
-                  </div>
-                )}
-                <span className="text-xs font-mono text-foreground truncate flex-1">
-                  {row.queryType ?? '–'} <span className="text-foreground-lighter">in</span> {getTableName(row.query)}, {getColumnName(row.query)}
-                </span>
+              <div className="w-full flex items-center gap-x-3 group">
+                <div className="flex-shrink-0 w-6">
+                  {row.issueType && IssueIcon && (
+                    <div
+                      className={cn(
+                        'h-6 w-6 rounded-full border flex items-center justify-center',
+                        ISSUE_DOT_COLORS[row.issueType]?.border,
+                        ISSUE_DOT_COLORS[row.issueType]?.background
+                      )}
+                    >
+                      <IssueIcon size={14} className={ISSUE_DOT_COLORS[row.issueType].color} />
+                    </div>
+                  )}
+                </div>
+                <CodeBlock
+                  language="pgsql"
+                  className="!bg-transparent !p-0 !m-0 !border-none !whitespace-nowrap [&>code]:!whitespace-nowrap [&>code]:break-words !overflow-visible !truncate !w-full !pr-20 pointer-events-none"
+                  wrapperClassName="!max-w-full flex-1"
+                  hideLineNumbers
+                  hideCopy
+                  value={typeof value === 'string' ? value.replace(/\s+/g, ' ').trim() : ''}
+                  wrapLines={false}
+                />
                 <ButtonTooltip
                   tooltip={{ content: { text: 'Query details' } }}
                   icon={<ArrowRight size={14} />}
@@ -276,18 +323,57 @@ export const QueryInsightsTable = ({
                     setSheetView('details')
                     gridRef.current?.scrollToCell({ idx: 0, rowIdx: props.rowIdx })
                   }}
-                  className="p-1 flex-shrink-0 group-hover:flex hidden"
+                  className="p-1 flex-shrink-0 -translate-x-2 group-hover:flex hidden"
                 />
+              </div>
+            )
+          }
+
+          if (col.id === 'prop_total_time') {
+            const percentage = row.prop_total_time || 0
+            const totalTime = row.total_time || 0
+            const fillWidth = Math.min(percentage, 100)
+            return (
+              <div className="w-full flex flex-col justify-center text-xs text-right tabular-nums font-mono">
+                <div
+                  className="absolute inset-0 bg-foreground transition-all duration-200 z-0"
+                  style={{ width: `${fillWidth}%`, opacity: 0.04 }}
+                />
+                {percentage && totalTime ? (
+                  <span className="flex items-center justify-end gap-x-1.5">
+                    <span className={cn(percentage.toFixed(1) === '0.0' && 'text-foreground-lighter')}>
+                      {percentage.toFixed(1)}%
+                    </span>
+                    <span className="text-muted">/</span>
+                    <span className={cn(formatDuration(totalTime) === '0ms' && 'text-foreground-lighter')}>
+                      {formatDuration(totalTime)}
+                    </span>
+                  </span>
+                ) : (
+                  <p className="text-muted">&ndash;</p>
+                )}
               </div>
             )
           }
 
           if (col.id === 'calls') {
             return (
-              <div className="w-full flex flex-col justify-center text-xs text-right tabular-nums font-mono px-6">
-                {typeof row.calls === 'number' && !isNaN(row.calls) && isFinite(row.calls) ? (
-                  <p className={cn(row.calls === 0 && 'text-foreground-lighter')}>
-                    {row.calls.toLocaleString()}
+              <div className="w-full flex flex-col justify-center text-xs text-right tabular-nums font-mono">
+                {typeof value === 'number' && !isNaN(value) && isFinite(value) ? (
+                  <p className={cn(value === 0 && 'text-foreground-lighter')}>{value.toLocaleString()}</p>
+                ) : (
+                  <p className="text-muted">&ndash;</p>
+                )}
+              </div>
+            )
+          }
+
+          if (col.id === 'max_time' || col.id === 'mean_time' || col.id === 'min_time') {
+            return (
+              <div className="w-full flex flex-col justify-center text-xs text-right tabular-nums font-mono">
+                {typeof value === 'number' && !isNaN(value) && isFinite(value) ? (
+                  <p className={cn(value.toFixed(0) === '0' && 'text-foreground-lighter')}>
+                    {Math.round(value).toLocaleString()}ms
                   </p>
                 ) : (
                   <p className="text-muted">&ndash;</p>
@@ -296,16 +382,43 @@ export const QueryInsightsTable = ({
             )
           }
 
-          if (col.id === 'mean_time') {
+          if (col.id === 'rows_read') {
             return (
-              <div className="w-full flex flex-col justify-center text-xs text-right tabular-nums font-mono px-6">
-                {typeof row.mean_time === 'number' && !isNaN(row.mean_time) && isFinite(row.mean_time) ? (
-                  <p className={cn(
-                    row.mean_time >= 1000 ? 'text-destructive-600' : '',
-                    row.mean_time === 0 && 'text-foreground-lighter'
-                  )}>
-                    {formatDuration(row.mean_time)}
+              <div className="w-full flex flex-col justify-center text-xs text-right tabular-nums font-mono">
+                {typeof value === 'number' && !isNaN(value) && isFinite(value) ? (
+                  <p className={cn(value === 0 && 'text-foreground-lighter')}>{value.toLocaleString()}</p>
+                ) : (
+                  <p className="text-muted">&ndash;</p>
+                )}
+              </div>
+            )
+          }
+
+          if (col.id === 'cache_hit_rate') {
+            const num = typeof value === 'number' ? value : parseFloat(value)
+            return (
+              <div className="w-full flex flex-col justify-center text-xs text-right tabular-nums font-mono">
+                {typeof num === 'number' && !isNaN(num) && isFinite(num) ? (
+                  <p className={cn(num.toFixed(2) === '0.00' && 'text-foreground-lighter')}>
+                    {num.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}%
                   </p>
+                ) : (
+                  <p className="text-muted">&ndash;</p>
+                )}
+              </div>
+            )
+          }
+
+          if (col.id === 'rolname') {
+            return (
+              <div className="w-full flex flex-col justify-center">
+                {value ? (
+                  <span className="flex items-center gap-x-1">
+                    <p className="font-mono text-xs">{value}</p>
+                    <InfoTooltip align="end" alignOffset={-12} className="w-56">
+                      {QUERY_PERFORMANCE_ROLE_DESCRIPTION.find((r) => r.name === value)?.description}
+                    </InfoTooltip>
+                  </span>
                 ) : (
                   <p className="text-muted">&ndash;</p>
                 )}
@@ -315,9 +428,9 @@ export const QueryInsightsTable = ({
 
           if (col.id === 'application_name') {
             return (
-              <div className="w-full flex flex-col justify-center px-6">
-                {row.application_name ? (
-                  <p className="font-mono text-xs">{row.application_name}</p>
+              <div className="w-full flex flex-col justify-center">
+                {value ? (
+                  <p className="font-mono text-xs">{value}</p>
                 ) : (
                   <p className="text-muted">&ndash;</p>
                 )}
@@ -330,7 +443,7 @@ export const QueryInsightsTable = ({
       }
       return result
     })
-  }, [sort])
+  }, [sort, timeConsumedWidth])
 
   const handleKeyDown = useCallback(
     (event: KeyboardEvent) => {
@@ -378,7 +491,8 @@ export const QueryInsightsTable = ({
 
   return (
     <div className="flex flex-col flex-1 min-h-0">
-      <div className={cn('flex items-center justify-between px-6 flex-shrink-0 h-10 bg-surface-100', mode === 'triage' && 'border-b')}>
+      <div className={cn('overflow-x-auto flex-shrink-0 bg-surface-100', mode === 'triage' && 'border-b')}>
+      <div className="flex items-center justify-between px-6 h-10 min-w-max">
         <div className="flex items-center">
           {mode === 'triage' ? (
             <Tabs_Shadcn_ value={filter} onValueChange={(v) => setFilter(v as IssueFilter)}>
@@ -436,13 +550,24 @@ export const QueryInsightsTable = ({
           )}
         </div>
 
-        <TwoOptionToggle
-          width={75}
-          options={['explorer', 'triage']}
-          activeOption={mode}
-          borderOverride="border"
-          onClickOption={setMode}
-        />
+        <div className="flex items-center gap-x-1.5">
+          <ButtonTooltip
+            tooltip={{ content: { text: showIntrospection ? 'Hide system queries' : 'Show system queries' } }}
+            type={showIntrospection ? 'default' : 'outline'}
+            size="tiny"
+            className={cn('w-[26px] h-[26px] !p-0', showIntrospection ? 'bg-surface-300' : 'border-dashed')}
+            icon={showIntrospection ? <Eye size={14} /> : <EyeOff size={14} />}
+            onClick={onToggleIntrospection}
+          />
+          <TwoOptionToggle
+            width={75}
+            options={['explorer', 'triage']}
+            activeOption={mode}
+            borderOverride="border"
+            onClickOption={setMode}
+          />
+        </div>
+      </div>
       </div>
 
       <div className="flex-1 min-h-0 overflow-y-auto">
@@ -466,17 +591,20 @@ export const QueryInsightsTable = ({
                   <QueryInsightsTableRow
                     key={idx}
                     item={item}
-                    type="triage"
                     onRowClick={() => {
                       setSelectedTriageRow(idx)
                       setSheetView('details')
                     }}
-                    onCopyMarkdown={() => handleCopyMarkdown(item)}
+                    onGoToLogs={handleGoToLogs}
                     onCreateIndex={() => {
                       setSelectedTriageRow(idx)
                       setSheetView('indexes')
                     }}
-                    onExplain={() => handleExplain(item.query)}
+                    onExplain={() => {
+                      setSelectedTriageRow(idx)
+                      setSheetView('explain')
+                    }}
+                    onAiSuggestedFix={() => handleAiSuggestedFix(item)}
                     isExplainLoading={explainLoadingQuery === item.query}
                   />
                 ))}
@@ -509,6 +637,7 @@ export const QueryInsightsTable = ({
                   `${isSelected ? 'bg-surface-300 dark:bg-surface-300' : isCharted ? 'bg-surface-200 dark:bg-surface-200' : 'bg-200 hover:bg-surface-200'} cursor-pointer`,
                   `${isSelected ? '[&>div:first-child]:border-l-4 border-l-secondary [&>div]:!border-l-foreground' : isCharted ? '[&>div:first-child]:border-l-4 [&>div]:border-l-brand' : ''}`,
                   '[&>.rdg-cell]:box-border [&>.rdg-cell]:outline-none [&>.rdg-cell]:shadow-none',
+                  '[&>.rdg-cell.column-prop_total_time]:relative',
                 ].join(' ')
               }}
               renderers={{
@@ -576,7 +705,7 @@ export const QueryInsightsTable = ({
           <Tabs_Shadcn_
             value={sheetView}
             className="flex flex-col h-full"
-            onValueChange={(v: any) => setSheetView(v)}
+            onValueChange={(v) => setSheetView(v as 'details' | 'indexes' | 'explain')}
           >
             <div className="px-5 border-b">
               <TabsList_Shadcn_ className="px-0 flex gap-x-4 min-h-[46px] border-b-0 [&>button]:h-[47px]">
@@ -592,6 +721,14 @@ export const QueryInsightsTable = ({
                 >
                   Indexes
                 </TabsTrigger_Shadcn_>
+                {activeSheetRow?.issueType !== 'error' && (
+                  <TabsTrigger_Shadcn_
+                    value="explain"
+                    className="px-0 pb-0 data-[state=active]:bg-transparent !shadow-none"
+                  >
+                    Explain
+                  </TabsTrigger_Shadcn_>
+                )}
               </TabsList_Shadcn_>
             </div>
             <TabsContent_Shadcn_ value="details" className="mt-0 flex-grow min-h-0 overflow-y-auto">
@@ -609,42 +746,20 @@ export const QueryInsightsTable = ({
             <TabsContent_Shadcn_ value="indexes" className="mt-0 flex-grow min-h-0 overflow-y-auto">
               {activeSheetRow && <QueryIndexes selectedRow={activeSheetRow} />}
             </TabsContent_Shadcn_>
+            <TabsContent_Shadcn_ value="explain" className="mt-0 flex-grow min-h-0 overflow-y-auto">
+              {explainLoadingQuery ? (
+                <div className="px-6 py-4 flex items-center gap-2 text-sm text-foreground-light">
+                  <Loader2 size={14} className="animate-spin" /> Running EXPLAIN ANALYZE...
+                </div>
+              ) : activeSheetRow && explainResults[activeSheetRow.query]?.length > 0 ? (
+                <ExplainVisualizer rows={explainResults[activeSheetRow.query]} />
+              ) : (
+                <div className="px-6 py-4 text-sm text-foreground-lighter">
+                  No explain results available.
+                </div>
+              )}
+            </TabsContent_Shadcn_>
           </Tabs_Shadcn_>
-        </SheetContent>
-      </Sheet>
-
-      <Sheet
-        open={explainOpenQuery !== null}
-        onOpenChange={(open) => {
-          if (!open) setExplainOpenQuery(null)
-        }}
-        modal={false}
-      >
-        <SheetTitle className="sr-only">EXPLAIN ANALYZE</SheetTitle>
-        <SheetDescription className="sr-only">Explain Analyze Output</SheetDescription>
-        <SheetContent
-          side="bottom"
-          className="bg-studio border-t max-h-[60vh] flex flex-col"
-          hasOverlay={false}
-        >
-          <div className="flex items-center justify-between px-6 py-3 border-b flex-shrink-0">
-            <p className="text-sm font-medium">EXPLAIN ANALYZE</p>
-            <Button
-              type="text"
-              size="tiny"
-              icon={<X size={14} />}
-              onClick={() => setExplainOpenQuery(null)}
-            />
-          </div>
-          <div className="flex-1 min-h-0 overflow-y-auto">
-            {explainLoadingQuery ? (
-              <div className="px-6 py-4 flex items-center gap-2 text-sm text-foreground-light">
-                <Loader2 size={14} className="animate-spin" /> Running EXPLAIN ANALYZE...
-              </div>
-            ) : explainOpenQuery && explainResults[explainOpenQuery]?.length > 0 ? (
-              <ExplainVisualizer rows={explainResults[explainOpenQuery]} />
-            ) : null}
-          </div>
         </SheetContent>
       </Sheet>
     </div>
