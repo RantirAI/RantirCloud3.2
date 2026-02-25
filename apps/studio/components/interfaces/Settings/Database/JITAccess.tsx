@@ -3,7 +3,7 @@ import { DatePicker } from 'components/ui/DatePicker'
 import { DocsButton } from 'components/ui/DocsButton'
 import { InlineLink } from 'components/ui/InlineLink'
 import { DOCS_URL } from 'lib/constants'
-import { Calendar, EllipsisVertical, Pencil, Plus, Trash2, UserPlus } from 'lucide-react'
+import { Calendar, EllipsisVertical, Pencil, Trash2, UserPlus } from 'lucide-react'
 import Link from 'next/link'
 import { useMemo, useState } from 'react'
 import {
@@ -358,15 +358,15 @@ function RoleRuleEditor({
 }) {
   const isSuperuserRole = role.id === 'postgres'
   const isReadOnlyRole = role.id === 'supabase_read_only_user'
-  const showIpEditor = grant.hasIpRestriction || grant.ipRanges.trim().length > 0
   const checkboxId = `jit-role-${role.id}`
 
   return (
     <div className={`${grant.enabled ? 'bg-surface-100' : 'bg-background'}`}>
       <label
         htmlFor={checkboxId}
-        className={`grid w-full grid-cols-[16px_minmax(0,1fr)] items-start gap-x-3 px-4 py-3 cursor-pointer select-none transition-colors duration-100 ${grant.enabled ? 'hover:bg-surface-200/40' : 'hover:bg-surface-100/50'
-          }`}
+        className={`grid w-full grid-cols-[16px_minmax(0,1fr)] items-start gap-x-3 px-4 py-3 cursor-pointer select-none transition-colors duration-100 ${
+          grant.enabled ? 'hover:bg-surface-200/40' : 'hover:bg-surface-100/50'
+        }`}
       >
         <Checkbox_Shadcn_
           id={checkboxId}
@@ -398,7 +398,11 @@ function RoleRuleEditor({
                 description={
                   <>
                     The selected role has unrestricted access and bypasses row-level security.
-                    Consider using a <InlineLink href={`${DOCS_URL}/guides/database/postgres/roles`}>custom Postgres role</InlineLink> with only the permissions required.
+                    Consider using a{' '}
+                    <InlineLink href={`${DOCS_URL}/guides/database/postgres/roles`}>
+                      custom Postgres role
+                    </InlineLink>{' '}
+                    with only the permissions required.
                   </>
                 }
               />
@@ -412,7 +416,11 @@ function RoleRuleEditor({
                 title="Grants read-only access to all schemas"
                 description={
                   <>
-                    The selected role has read-only access to all schemas. Consider using a <InlineLink href={`${DOCS_URL}/guides/database/postgres/roles`}>custom Postgres role</InlineLink> with only the permissions required.
+                    The selected role has read-only access to all schemas. Consider using a{' '}
+                    <InlineLink href={`${DOCS_URL}/guides/database/postgres/roles`}>
+                      custom Postgres role
+                    </InlineLink>{' '}
+                    with only the permissions required.
                   </>
                 }
                 className="rounded-md"
@@ -508,49 +516,18 @@ function RoleRuleEditor({
                 Restricted IP addresses{' '}
                 <span className="text-foreground-lighter font-normal">(optional)</span>
               </p>
-
-              {showIpEditor ? (
-                <div className="flex gap-2">
-                  <Input_Shadcn_
-                    className="flex-1"
-                    value={grant.ipRanges}
-                    onChange={(event) =>
-                      onChange({
-                        ...grant,
-                        hasIpRestriction: event.target.value.trim().length > 0,
-                        ipRanges: event.target.value,
-                      })
-                    }
-                    placeholder="e.g 192.168.0.0/24"
-                  />
-                  <Button
-                    type="default"
-                    icon={<Plus size={14} />}
-                    onClick={() =>
-                      onChange({
-                        ...grant,
-                        hasIpRestriction: true,
-                        ipRanges:
-                          grant.ipRanges.trim().length === 0 || grant.ipRanges.trim().endsWith(',')
-                            ? grant.ipRanges
-                            : `${grant.ipRanges}, `,
-                      })
-                    }
-                  >
-                    Add another
-                  </Button>
-                </div>
-              ) : (
-                <div className="rounded border bg-background/80 p-4 flex justify-center">
-                  <Button
-                    type="default"
-                    icon={<Plus size={14} />}
-                    onClick={() => onChange({ ...grant, hasIpRestriction: true })}
-                  >
-                    Add IP range
-                  </Button>
-                </div>
-              )}
+              <Input_Shadcn_
+                value={grant.ipRanges}
+                onChange={(event) =>
+                  onChange({
+                    ...grant,
+                    hasIpRestriction: event.target.value.trim().length > 0,
+                    ipRanges: event.target.value,
+                  })
+                }
+                placeholder="e.g. 192.168.0.0/24, 203.0.113.4/32"
+              />
+              <p className="text-xs text-foreground-lighter">Comma-separated CIDR ranges</p>
             </div>
           </div>
         </div>
@@ -778,7 +755,7 @@ export const JITAccess = () => {
                                   <Pencil size={14} className="text-foreground-lighter" />
                                   Edit
                                 </DropdownMenuItem>
-                                <DropdownMenuItem className="gap-x-2" onClick={() => { }}>
+                                <DropdownMenuItem className="gap-x-2" onClick={() => {}}>
                                   <Trash2 size={14} className="text-foreground-lighter" />
                                   Delete
                                 </DropdownMenuItem>
