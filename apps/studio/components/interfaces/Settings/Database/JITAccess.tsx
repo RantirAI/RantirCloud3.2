@@ -2,7 +2,6 @@ import { useParams } from 'common'
 import { DatePicker } from 'components/ui/DatePicker'
 import { DocsButton } from 'components/ui/DocsButton'
 import { InlineLink } from 'components/ui/InlineLink'
-import { WarningIcon } from 'ui'
 import { DOCS_URL } from 'lib/constants'
 import { Calendar, EllipsisVertical, Pencil, Plus, Trash2, UserPlus } from 'lucide-react'
 import Link from 'next/link'
@@ -40,6 +39,7 @@ import {
   Tooltip,
   TooltipContent,
   TooltipTrigger,
+  WarningIcon,
 } from 'ui'
 import {
   PageSection,
@@ -97,12 +97,10 @@ const AVAILABLE_ROLES: JITRoleOption[] = [
   {
     id: 'supabase_read_only_user',
     label: 'supabase_read_only_user',
-    description: 'Read-only access to all schemas',
   },
   {
     id: 'postgres',
     label: 'postgres',
-    description: 'Full database superuser access',
   },
   {
     id: 'custom_role_a',
@@ -359,37 +357,56 @@ function RoleRuleEditor({
   onChange: (next: JITRoleGrantDraft) => void
 }) {
   const isSuperuserRole = role.id === 'postgres'
+  const isReadOnlyRole = role.id === 'supabase_read_only_user'
   const showIpEditor = grant.hasIpRestriction || grant.ipRanges.trim().length > 0
+  const checkboxId = `jit-role-${role.id}`
 
   return (
     <div className={`px-4 py-3 ${grant.enabled ? 'bg-surface-100' : 'bg-background'}`}>
-      <div className="flex items-start gap-3">
+      <label htmlFor={checkboxId} className="flex items-start gap-3 cursor-pointer select-none">
         <Checkbox_Shadcn_
+          id={checkboxId}
           checked={grant.enabled}
           onCheckedChange={(value) => onChange({ ...grant, enabled: value === true })}
           aria-label={`Enable ${role.label}`}
           className="mt-0.5"
         />
         <div className="min-w-0 flex-1">
-          <div className="inline-flex items-center rounded border px-2 py-0.5 text-xs font-mono text-foreground-light bg-surface-200">
-            {role.label}
-          </div>
+          <code className="text-code-inline">{role.label}</code>
           {role.description && (
             <p className="text-xs text-foreground-lighter mt-1 leading-normal">
               {role.description}
             </p>
           )}
         </div>
-      </div>
+      </label>
 
       {grant.enabled && (
         <div className="space-y-4 pl-7 pt-3">
           {isSuperuserRole && (
             <Admonition
               type="warning"
+              showIcon={false}
               layout="responsive"
-              title="Superuser access grants full database control"
+              title="Grants full database control"
               description="The selected role has unrestricted access and bypasses row-level security. Consider using a custom Postgres role with only the permissions required."
+              actions={
+                <Button type="default" size="tiny" asChild>
+                  <Link href={`${DOCS_URL}/guides/database/postgres/roles`} target="_blank">
+                    Learn more
+                  </Link>
+                </Button>
+              }
+            />
+          )}
+
+          {isReadOnlyRole && (
+            <Admonition
+              type="warning"
+              showIcon={false}
+              layout="responsive"
+              title="Grants read-only access to all schemas"
+              description="The selected role has read-only access to all schemas. Consider using a custom Postgres role with only the permissions required."
               actions={
                 <Button type="default" size="tiny" asChild>
                   <Link href={`${DOCS_URL}/guides/database/postgres/roles`} target="_blank">
@@ -767,7 +784,10 @@ export const JITAccess = () => {
         </Card>
 
         <Sheet open={sheetOpen} onOpenChange={(open) => !open && closeSheet()}>
-          <SheetContent size="default" className="!min-w-[560px] flex flex-col h-full gap-0">
+          <SheetContent
+            size="default"
+            className="w-full max-w-full sm:!w-[560px] sm:max-w-[560px] flex flex-col h-full gap-0"
+          >
             <SheetHeader>
               <SheetTitle>
                 {sheetMode === 'edit' ? 'Edit JIT access' : 'Grant JIT access'}
@@ -792,7 +812,8 @@ export const JITAccess = () => {
                         <SelectItem_Shadcn_ key={member.id} value={member.id}>
                           {member.name ? (
                             <>
-                              {member.name} <span className="text-foreground-lighter">({member.email})</span>
+                              {member.name}{' '}
+                              <span className="text-foreground-lighter">({member.email})</span>
                             </>
                           ) : (
                             member.email
@@ -823,9 +844,14 @@ export const JITAccess = () => {
                   </div>
 
                   <p className="text-xs text-foreground-lighter mt-2 leading-normal">
-                    Create <InlineLink href={`${DOCS_URL}/guides/database/postgres/roles`}>
+                    Define scoped permissions with{' '}
+                    <InlineLink
+                      href={`${DOCS_URL}/guides/database/postgres/roles`}
+                      className="decoration-foreground-muted"
+                    >
                       custom Postgres roles
-                    </InlineLink> to control exactly what temporary access allows.
+                    </InlineLink>{' '}
+                    before granting JIT access. Narrow roles limit the impact of temporary access.
                   </p>
                 </FormItemLayout>
               </div>
