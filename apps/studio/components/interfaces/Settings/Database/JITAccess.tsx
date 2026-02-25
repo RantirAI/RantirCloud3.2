@@ -365,9 +365,8 @@ function RoleRuleEditor({
     <div className={`${grant.enabled ? 'bg-surface-100' : 'bg-background'}`}>
       <label
         htmlFor={checkboxId}
-        className={`grid w-full grid-cols-[16px_minmax(0,1fr)] items-start gap-x-3 px-4 py-3 cursor-pointer select-none transition-colors duration-100 ${
-          grant.enabled ? 'hover:bg-surface-200/40' : 'hover:bg-surface-100/50'
-        }`}
+        className={`grid w-full grid-cols-[16px_minmax(0,1fr)] items-start gap-x-3 px-4 py-3 cursor-pointer select-none transition-colors duration-100 ${grant.enabled ? 'hover:bg-surface-200/40' : 'hover:bg-surface-100/50'
+          }`}
       >
         <Checkbox_Shadcn_
           id={checkboxId}
@@ -396,13 +395,11 @@ function RoleRuleEditor({
                 showIcon={false}
                 layout="responsive"
                 title="Grants full database control"
-                description="The selected role has unrestricted access and bypasses row-level security. Consider using a custom Postgres role with only the permissions required."
-                actions={
-                  <Button type="default" size="tiny" asChild>
-                    <Link href={`${DOCS_URL}/guides/database/postgres/roles`} target="_blank">
-                      Learn more
-                    </Link>
-                  </Button>
+                description={
+                  <>
+                    The selected role has unrestricted access and bypasses row-level security.
+                    Consider using a <InlineLink href={`${DOCS_URL}/guides/database/postgres/roles`}>custom Postgres role</InlineLink> with only the permissions required.
+                  </>
                 }
               />
             )}
@@ -413,13 +410,10 @@ function RoleRuleEditor({
                 showIcon={false}
                 layout="responsive"
                 title="Grants read-only access to all schemas"
-                description="The selected role has read-only access to all schemas. Consider using a custom Postgres role with only the permissions required."
-                actions={
-                  <Button type="default" size="tiny" asChild>
-                    <Link href={`${DOCS_URL}/guides/database/postgres/roles`} target="_blank">
-                      Learn more
-                    </Link>
-                  </Button>
+                description={
+                  <>
+                    The selected role has read-only access to all schemas. Consider using a <InlineLink href={`${DOCS_URL}/guides/database/postgres/roles`}>custom Postgres role</InlineLink> with only the permissions required.
+                  </>
                 }
                 className="rounded-md"
               />
@@ -784,7 +778,7 @@ export const JITAccess = () => {
                                   <Pencil size={14} className="text-foreground-lighter" />
                                   Edit
                                 </DropdownMenuItem>
-                                <DropdownMenuItem className="gap-x-2" onClick={() => {}}>
+                                <DropdownMenuItem className="gap-x-2" onClick={() => { }}>
                                   <Trash2 size={14} className="text-foreground-lighter" />
                                   Delete
                                 </DropdownMenuItem>
