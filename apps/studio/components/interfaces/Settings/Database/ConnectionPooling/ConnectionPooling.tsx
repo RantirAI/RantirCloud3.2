@@ -220,7 +220,7 @@ export const ConnectionPooling = () => {
             {isSuccessPgbouncerConfig && (
               <>
                 <div className="flex flex-row gap-2 justify-between w-full">
-                  <p className="text-foreground text-sm">Pooler type</p>
+                  <p className="text-foreground text-sm">Applies to</p>
                   <Badge>
                     {disablePoolModeSelection ? 'Shared Pooler' : 'Shared/Dedicated Pooler'}
                   </Badge>
@@ -238,7 +238,7 @@ export const ConnectionPooling = () => {
                       render={({ field }) => (
                         <FormItemLayout
                           layout="flex-row-reverse"
-                          label="Pool Size"
+                          label="Pool size"
                           description={
                             <p>
                               The maximum number of connections made to the underlying Postgres
@@ -287,7 +287,7 @@ export const ConnectionPooling = () => {
                       render={({ field }) => (
                         <FormItemLayout
                           layout="flex-row-reverse"
-                          label="Max Client Connections"
+                          label="Max client connections"
                           className="[&>div]:md:w-1/2 [&>div]:xl:w-2/5 [&>div>div]:w-full [&>div>div>div]:min-w-100"
                           description={
                             <>
