@@ -21,6 +21,18 @@ import { useConfigureOrganizationCommand, useProjectSwitchCommand } from './OrgP
 import { useSupportCommands } from './Support'
 import { useConnectCommands } from '@/components/interfaces/ConnectButton/Connect.Commands'
 
+/** Inner content of the command menu (header + list). Reused in Dialog and in MobileSheetNav. */
+export function CommandMenuInnerContent() {
+  return (
+    <>
+      <CommandHeader>
+        <CommandInput />
+      </CommandHeader>
+      <CommandList />
+    </>
+  )
+}
+
 export default function StudioCommandMenu() {
   useCreateCommands()
   useApiKeysCommands()
@@ -46,10 +58,7 @@ export default function StudioCommandMenu() {
 
   return (
     <CommandMenu>
-      <CommandHeader>
-        <CommandInput />
-      </CommandHeader>
-      <CommandList />
+      <CommandMenuInnerContent />
     </CommandMenu>
   )
 }

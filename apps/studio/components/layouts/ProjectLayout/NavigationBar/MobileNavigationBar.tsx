@@ -13,10 +13,11 @@ import { HomeIcon } from '../LayoutHeader/HomeIcon'
 import FloatingBottomNavbar from './FloatingBottomNavbar'
 import FloatingBottomNavbarBreadcrumb from './FloatingBottomNavbarBreadcrumb'
 import FloatingBottomNavbarMenu from './FloatingBottomNavbarMenu'
+import FloatingBottomNavbarSearch from './FloatingBottomNavbarSearch'
 import { OrgSelector } from './OrgSelector'
 import { ProjectBranchSelector } from './ProjectBranchSelector'
 
-const NAVBAR_VARIANTS = ['icons', 'breadcrumb', 'menu'] as const
+const NAVBAR_VARIANTS = ['icons', 'breadcrumb', 'menu', 'search'] as const
 type NavbarVariant = (typeof NAVBAR_VARIANTS)[number]
 
 function isValidNavbarVariant(s: string | null): s is NavbarVariant {
@@ -71,37 +72,34 @@ const MobileNavigationBar = ({ hideMobileMenu }: { hideMobileMenu?: boolean }) =
           ) : null}
         </div>
         <div className="flex flex-shrink-0 gap-2">
-          <CommandMenuTrigger>
-            <button
-              type="button"
-              className={cn(
-                'group',
-                'flex-grow h-[30px] rounded-md',
-                'p-2',
-                'flex items-center justify-between',
-                'bg-transparent border-none text-foreground-lighter',
-                'hover:bg-opacity-100 hover:border-strong hover:text-foreground-light',
-                'focus-visible:!outline-4 focus-visible:outline-offset-1 focus-visible:outline-brand-600',
-                'transition'
-              )}
-            >
-              <div className="flex items-center space-x-2">
-                <Search size={18} strokeWidth={2} />
-              </div>
-            </button>
-          </CommandMenuTrigger>
+          {navbarVariant !== 'search' && (
+            <CommandMenuTrigger>
+              <button
+                type="button"
+                className={cn(
+                  'group',
+                  'flex-grow h-[30px] rounded-md',
+                  'p-2',
+                  'flex items-center justify-between',
+                  'bg-transparent border-none text-foreground-lighter',
+                  'hover:bg-opacity-100 hover:border-strong hover:text-foreground-light',
+                  'focus-visible:!outline-4 focus-visible:outline-offset-1 focus-visible:outline-brand-600',
+                  'transition'
+                )}
+              >
+                <div className="flex items-center space-x-2">
+                  <Search size={18} strokeWidth={2} />
+                </div>
+              </button>
+            </CommandMenuTrigger>
+          )}
           <UserDropdown />
         </div>
       </nav>
-      {navbarVariant === 'breadcrumb' && (
-        <FloatingBottomNavbarBreadcrumb />
-      )}
-      {navbarVariant === 'menu' && (
-        <FloatingBottomNavbarMenu hideMobileMenu={hideMobileMenu} />
-      )}
-      {navbarVariant === 'icons' && (
-        <FloatingBottomNavbar hideMobileMenu={hideMobileMenu} />
-      )}
+      {navbarVariant === 'breadcrumb' && <FloatingBottomNavbarBreadcrumb />}
+      {navbarVariant === 'menu' && <FloatingBottomNavbarMenu hideMobileMenu={hideMobileMenu} />}
+      {navbarVariant === 'icons' && <FloatingBottomNavbar hideMobileMenu={hideMobileMenu} />}
+      {navbarVariant === 'search' && <FloatingBottomNavbarSearch hideMobileMenu={hideMobileMenu} />}
     </div>
   )
 }
