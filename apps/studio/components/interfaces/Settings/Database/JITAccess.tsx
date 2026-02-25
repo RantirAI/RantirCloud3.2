@@ -2,8 +2,9 @@ import { useParams } from 'common'
 import { DatePicker } from 'components/ui/DatePicker'
 import { DocsButton } from 'components/ui/DocsButton'
 import { InlineLink } from 'components/ui/InlineLink'
+import dayjs from 'dayjs'
 import { DOCS_URL } from 'lib/constants'
-import { Calendar, EllipsisVertical, Pencil, Trash2, UserPlus } from 'lucide-react'
+import { EllipsisVertical, Pencil, Trash2, UserPlus } from 'lucide-react'
 import Link from 'next/link'
 import { useMemo, useState } from 'react'
 import {
@@ -64,7 +65,6 @@ type JITMember = { id: string; email: string; name?: string }
 type JITRoleOption = {
   id: string
   label: string
-  description?: string
 }
 
 type JITRoleGrantDraft = {
@@ -364,9 +364,8 @@ function RoleRuleEditor({
     <div className={`${grant.enabled ? 'bg-surface-100' : 'bg-background'}`}>
       <label
         htmlFor={checkboxId}
-        className={`grid w-full grid-cols-[16px_minmax(0,1fr)] items-start gap-x-3 px-4 py-3 cursor-pointer select-none transition-colors duration-100 ${
-          grant.enabled ? 'hover:bg-surface-200/40' : 'hover:bg-surface-100/50'
-        }`}
+        className={`grid w-full grid-cols-[16px_minmax(0,1fr)] items-start gap-x-3 px-4 py-3 cursor-pointer select-none transition-colors duration-100 ${grant.enabled ? 'hover:bg-surface-200/40' : 'hover:bg-surface-100/50'
+          }`}
       >
         <Checkbox_Shadcn_
           id={checkboxId}
@@ -376,12 +375,7 @@ function RoleRuleEditor({
           className="mt-0.5"
         />
         <div className="min-w-0 flex-1">
-          <code className="text-code-inline">{role.label}</code>
-          {role.description && (
-            <p className="text-xs text-foreground-lighter mt-1 leading-normal">
-              {role.description}
-            </p>
-          )}
+          <code className="text-code-inline !bg-surface-300 !border-control !tracking-normal">{role.label}</code>
         </div>
       </label>
 
@@ -427,7 +421,7 @@ function RoleRuleEditor({
               />
             )}
 
-            <div className="space-y-2">
+            <div className="space-y-2 border-t border-muted pt-3">
               <p className="text-sm text-foreground">Expires in</p>
               <div className="flex gap-2">
                 <div className="flex-1">
@@ -483,20 +477,20 @@ function RoleRuleEditor({
                     selectsRange={false}
                     triggerButtonSize="small"
                     contentSide="top"
+                    to={grant.expiry || undefined}
                     minDate={new Date()}
+                    maxDate={dayjs().add(1, 'year').toDate()}
                     onChange={(date) => {
                       const selectedDate = date.to || date.from
                       onChange({
                         ...grant,
                         hasExpiry: true,
-                        expiry: selectedDate ? toDatetimeLocalValue(new Date(selectedDate)) : '',
+                        expiry: selectedDate ?? '',
                       })
                     }}
+                    triggerButtonClassName="min-w-[120px]"
                   >
-                    <span className="inline-flex items-center gap-2">
-                      <Calendar size={14} />
-                      Select date
-                    </span>
+                    {grant.expiry ? dayjs(grant.expiry).format('DD MMM, HH:mm') : 'Select date'}
                   </DatePicker>
                 )}
               </div>
@@ -755,7 +749,7 @@ export const JITAccess = () => {
                                   <Pencil size={14} className="text-foreground-lighter" />
                                   Edit
                                 </DropdownMenuItem>
-                                <DropdownMenuItem className="gap-x-2" onClick={() => {}}>
+                                <DropdownMenuItem className="gap-x-2" onClick={() => { }}>
                                   <Trash2 size={14} className="text-foreground-lighter" />
                                   Delete
                                 </DropdownMenuItem>
