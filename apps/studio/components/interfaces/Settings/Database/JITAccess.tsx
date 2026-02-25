@@ -2,6 +2,7 @@ import { useParams } from 'common'
 import { DatePicker } from 'components/ui/DatePicker'
 import { DocsButton } from 'components/ui/DocsButton'
 import { InlineLink } from 'components/ui/InlineLink'
+import { WarningIcon } from 'ui'
 import { DOCS_URL } from 'lib/constants'
 import { Calendar, EllipsisVertical, Pencil, Plus, Trash2, UserPlus } from 'lucide-react'
 import Link from 'next/link'
@@ -386,19 +387,12 @@ function RoleRuleEditor({
           {isSuperuserRole && (
             <Admonition
               type="warning"
-              showIcon={false}
               layout="responsive"
               title="Superuser access grants full database control"
-              description={
-                <>
-                  <code className="text-code-inline">postgres</code> has full administrative access
-                  and bypasses row-level security. Even temporary access can modify or delete any
-                  data. Consider using a custom Postgres role with only the permissions required.
-                </>
-              }
+              description="The selected role has unrestricted access and bypasses row-level security. Consider using a custom Postgres role with only the permissions required."
               actions={
                 <Button type="default" size="tiny" asChild>
-                  <Link href={`${DOCS_URL}/guides/platform/jit-access`} target="_blank">
+                  <Link href={`${DOCS_URL}/guides/database/postgres/roles`} target="_blank">
                     Learn more
                   </Link>
                 </Button>
@@ -453,7 +447,7 @@ function RoleRuleEditor({
                     <SelectItem_Shadcn_ value="7d">7 days</SelectItem_Shadcn_>
                     <SelectItem_Shadcn_ value="30d">30 days</SelectItem_Shadcn_>
                     <SelectItem_Shadcn_ value="custom">Custom</SelectItem_Shadcn_>
-                    <SelectItem_Shadcn_ value="never">No expiry</SelectItem_Shadcn_>
+                    <SelectItem_Shadcn_ value="never">Never</SelectItem_Shadcn_>
                   </SelectContent_Shadcn_>
                 </Select_Shadcn_>
               </div>
@@ -480,6 +474,15 @@ function RoleRuleEditor({
                 </DatePicker>
               )}
             </div>
+
+            {grant.expiryMode === 'never' && (
+              <div className="w-full flex gap-x-2 items-center mt-3 mx-0.5">
+                <WarningIcon />
+                <span className="text-xs text-left text-foreground-lighter">
+                  No expiry means ongoing database access until manually revoked.
+                </span>
+              </div>
+            )}
           </div>
 
           <div className="space-y-2">
@@ -663,7 +666,7 @@ export const JITAccess = () => {
                   </p>
                 </div>
                 <Button type="default" icon={<UserPlus size={14} />} onClick={openAddUserSheet}>
-                  Add user
+                  Grant access
                 </Button>
               </div>
               <Table className="border-t">
@@ -787,7 +790,13 @@ export const JITAccess = () => {
                     <SelectContent_Shadcn_>
                       {MOCK_MEMBERS.map((member) => (
                         <SelectItem_Shadcn_ key={member.id} value={member.id}>
-                          {member.name ? `${member.name} (${member.email})` : member.email}
+                          {member.name ? (
+                            <>
+                              {member.name} <span className="text-foreground-lighter">({member.email})</span>
+                            </>
+                          ) : (
+                            member.email
+                          )}
                         </SelectItem_Shadcn_>
                       ))}
                     </SelectContent_Shadcn_>
@@ -814,11 +823,9 @@ export const JITAccess = () => {
                   </div>
 
                   <p className="text-xs text-foreground-lighter mt-2 leading-normal">
-                    Use custom{' '}
-                    <InlineLink href={`${DOCS_URL}/guides/database/postgres/roles`}>
-                      Postgres roles
-                    </InlineLink>{' '}
-                    to enforce least-privilege access when enabling JIT.
+                    Create <InlineLink href={`${DOCS_URL}/guides/database/postgres/roles`}>
+                      custom Postgres roles
+                    </InlineLink> to control exactly what temporary access allows.
                   </p>
                 </FormItemLayout>
               </div>
