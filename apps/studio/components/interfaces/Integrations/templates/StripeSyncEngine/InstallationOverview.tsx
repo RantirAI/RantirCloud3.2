@@ -68,8 +68,9 @@ export const StripeSyncInstallationPage = () => {
     mode: 'onSubmit',
   })
 
-  // Use the unified status hook
-  const { installationStatus, syncState } = useStripeSyncStatus({
+  const {
+    parsedSchema: { status: installationStatus },
+  } = useStripeSyncStatus({
     projectRef: project?.ref,
     connectionString: project?.connectionString,
   })
