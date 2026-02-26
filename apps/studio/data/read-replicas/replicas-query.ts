@@ -64,7 +64,11 @@ export const usePrimaryDatabase = ({ projectRef }: { projectRef?: string }) => {
  * If multiple read replicas available, (naively) prioritise replica in the same region as primary
  * to minimize any latency. Otherwise just use the first available read replica
  */
-export const useConnectionStringForReadOps = () => {
+export const useConnectionStringForReadOps = (): {
+  type: 'replica' | 'primary' | undefined
+  identifier: string | undefined
+  connectionString: string | undefined | null
+} => {
   const { hasLoaded: flagsLoaded } = useFeatureFlags()
   const defaultToReadReplicaConnectionString = useFlag('defaultToReadReplicaConnectionString')
 
@@ -81,7 +85,7 @@ export const useConnectionStringForReadOps = () => {
     : readReplicas[0]
 
   if (!isSuccessProject || isLoadingDatabases || !flagsLoaded) {
-    return { connectionString: undefined, type: undefined }
+    return { connectionString: undefined, type: undefined, identifier: undefined }
   }
 
   if (!defaultToReadReplicaConnectionString) {
