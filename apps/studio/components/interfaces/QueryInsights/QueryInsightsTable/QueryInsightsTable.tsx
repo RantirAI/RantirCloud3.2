@@ -15,6 +15,9 @@ import {
   TabsList_Shadcn_,
   TabsTrigger_Shadcn_,
   TabsContent_Shadcn_,
+  Tooltip,
+  TooltipContent,
+  TooltipTrigger,
   cn,
   DropdownMenu,
   DropdownMenuContent,
@@ -79,6 +82,7 @@ export const QueryInsightsTable = ({
   const dataGridContainerRef = useRef<HTMLDivElement>(null)
   const triageContainerRef = useRef<HTMLDivElement>(null)
   const scrollContainerRef = useRef<HTMLDivElement>(null)
+  const [triageContainerWidth, setTriageContainerWidth] = useState(0)
   const [sort, setSort] = useState<{ column: string; order: 'asc' | 'desc' } | null>({
     column: 'prop_total_time',
     order: 'desc',
@@ -296,15 +300,24 @@ export const QueryInsightsTable = ({
               <div className="w-full flex items-center gap-x-3 group">
                 <div className="flex-shrink-0 w-6">
                   {row.issueType && IssueIcon && (
-                    <div
-                      className={cn(
-                        'h-6 w-6 rounded-full border flex items-center justify-center',
-                        ISSUE_DOT_COLORS[row.issueType]?.border,
-                        ISSUE_DOT_COLORS[row.issueType]?.background
+                    <Tooltip>
+                      <TooltipTrigger asChild>
+                        <div
+                          className={cn(
+                            'h-6 w-6 rounded-full border flex items-center justify-center cursor-default',
+                            ISSUE_DOT_COLORS[row.issueType]?.border,
+                            ISSUE_DOT_COLORS[row.issueType]?.background
+                          )}
+                        >
+                          <IssueIcon size={14} className={ISSUE_DOT_COLORS[row.issueType].color} />
+                        </div>
+                      </TooltipTrigger>
+                      {row.hint && (
+                        <TooltipContent side="top" className="max-w-[260px]">
+                          {row.hint}
+                        </TooltipContent>
                       )}
-                    >
-                      <IssueIcon size={14} className={ISSUE_DOT_COLORS[row.issueType].color} />
-                    </div>
+                    </Tooltip>
                   )}
                 </div>
                 <CodeBlock
@@ -449,12 +462,20 @@ export const QueryInsightsTable = ({
     })
   }, [sort, timeConsumedWidth])
 
+  const triageQueryColWidth = useMemo(() => {
+    if (!triageContainerWidth) return 380
+    // reserve space for: time consumed + calls (100) + actions (300) + border (4)
+    const fixed = timeConsumedWidth + 100 + 300 + 4
+    return Math.max(380, triageContainerWidth - fixed - 120)
+  }, [triageContainerWidth, timeConsumedWidth])
+
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const triageColumns = useMemo((): Column<any>[] => [
     {
       key: 'query',
       name: 'Query',
-      minWidth: 500,
+      minWidth: triageQueryColWidth,
+      width: triageQueryColWidth,
       resizable: true,
       headerCellClass: 'first:pl-6 cursor-default',
       renderHeaderCell: () => (
@@ -466,7 +487,7 @@ export const QueryInsightsTable = ({
         const row = props.row as ClassifiedQuery
         const IssueIcon = row.issueType ? ISSUE_ICONS[row.issueType] : null
         return (
-          <div className="w-full flex items-center gap-x-3">
+          <div className="w-full flex items-center gap-x-3 group">
             <div className="flex-shrink-0 w-6">
               {row.issueType && IssueIcon && (
                 <div
@@ -501,6 +522,18 @@ export const QueryInsightsTable = ({
                 {row.hint}
               </p>
             </div>
+            <ButtonTooltip
+              tooltip={{ content: { text: 'Query details' } }}
+              icon={<ArrowRight size={14} />}
+              size="tiny"
+              type="default"
+              onClick={(e: React.MouseEvent) => {
+                e.stopPropagation()
+                setSelectedTriageRow(props.rowIdx)
+                setSheetView('details')
+              }}
+              className="p-1 flex-shrink-0 group-hover:flex hidden"
+            />
           </div>
         )
       },
@@ -571,11 +604,15 @@ export const QueryInsightsTable = ({
     },
     {
       key: 'actions',
-      name: '',
+      name: 'Actions',
       minWidth: 300,
       resizable: false,
       headerCellClass: 'cursor-default',
-      renderHeaderCell: () => null,
+      renderHeaderCell: () => (
+        <div className="flex items-center text-xs w-full">
+          <p className="!text-foreground font-medium">Actions</p>
+        </div>
+      ),
       renderCell: (props) => {
         const row = props.row as ClassifiedQuery
         return (
@@ -634,7 +671,7 @@ export const QueryInsightsTable = ({
         )
       },
     },
-  ], [timeConsumedWidth, explainLoadingQuery, handleGoToLogs, handleAiSuggestedFix])
+  ], [triageQueryColWidth, timeConsumedWidth, explainLoadingQuery, handleGoToLogs, handleAiSuggestedFix])
 
   const handleKeyDown = useCallback(
     (event: KeyboardEvent) => {
@@ -677,6 +714,16 @@ export const QueryInsightsTable = ({
       gridRef.current?.scrollToCell({ idx: 0, rowIdx: 0 })
     }
   }, [mode])
+
+  useEffect(() => {
+    const el = triageContainerRef.current
+    if (!el) return
+    const observer = new ResizeObserver(([entry]) => {
+      setTriageContainerWidth(entry.contentRect.width)
+    })
+    observer.observe(el)
+    return () => observer.disconnect()
+  }, [])
 
   useEffect(() => {
     if (urlSearch !== searchQuery) {
@@ -770,13 +817,13 @@ export const QueryInsightsTable = ({
       </div>
       </div>
 
-      <div ref={scrollContainerRef} className="flex-1 min-h-0 overflow-y-auto">
+      <div ref={scrollContainerRef} className="flex-1 min-h-0 flex flex-col overflow-hidden">
         {isLoading ? (
           <div className="px-6 py-4">
             <GenericSkeletonLoader />
           </div>
         ) : mode === 'triage' ? (
-          <div ref={triageContainerRef} className="flex-1 min-w-0 overflow-x-auto">
+          <div ref={triageContainerRef} className="flex-1 min-h-0 min-w-0 overflow-x-auto">
             <DataGrid
               ref={triageGridRef}
               style={{ height: '100%' }}
@@ -787,11 +834,13 @@ export const QueryInsightsTable = ({
               rows={filteredTriageItems}
               rowClass={(_, idx) => {
                 const isSelected = idx === selectedTriageRow
+                const query = filteredTriageItems[idx]?.query
+                const isCharted = currentSelectedQuery ? currentSelectedQuery === query : false
                 return [
-                  `${isSelected ? 'bg-surface-300 dark:bg-surface-300' : 'bg-200 hover:bg-surface-200'} cursor-pointer`,
+                  `${isSelected ? 'bg-surface-300 dark:bg-surface-300' : isCharted ? 'bg-surface-200 dark:bg-surface-200' : 'bg-200 hover:bg-surface-200'} cursor-pointer`,
                   '[&>div:first-child]:border-l-4 [&>div:first-child]:pl-5 [&>div:last-child]:pr-6',
-                  `${isSelected ? '[&>div:first-child]:border-l-foreground' : '[&>div:first-child]:border-l-transparent'}`,
-                  '[&>.rdg-cell]:box-border [&>.rdg-cell]:outline-none [&>.rdg-cell]:shadow-none',
+                  `${isSelected || isCharted ? '[&>div:first-child]:border-l-foreground' : '[&>div:first-child]:border-l-transparent'}`,
+                  '[&>.rdg-cell]:box-border [&>.rdg-cell]:outline-none [&>.rdg-cell]:shadow-none [&>.rdg-cell]:py-3',
                   '[&>.rdg-cell.column-prop_total_time]:relative',
                 ].join(' ')
               }}
@@ -804,8 +853,10 @@ export const QueryInsightsTable = ({
                       onClick={(event) => {
                         event.stopPropagation()
                         if (typeof idx === 'number' && idx >= 0) {
-                          setSelectedTriageRow(idx)
-                          setSheetView('details')
+                          const query = filteredTriageItems[idx]?.query
+                          if (query && onCurrentSelectQuery) {
+                            onCurrentSelectQuery(currentSelectedQuery === query ? null : query)
+                          }
                         }
                       }}
                     />
@@ -829,7 +880,7 @@ export const QueryInsightsTable = ({
           </div>
         ) : (
           /* ── Explorer View ── */
-          <div ref={dataGridContainerRef} className="flex-1 min-w-0 overflow-x-auto">
+          <div ref={dataGridContainerRef} className="flex-1 min-h-0 min-w-0 overflow-x-auto">
             <DataGrid
               ref={gridRef}
               style={{ height: '100%' }}
@@ -846,7 +897,7 @@ export const QueryInsightsTable = ({
                   `${isSelected ? 'bg-surface-300 dark:bg-surface-300' : isCharted ? 'bg-surface-200 dark:bg-surface-200' : 'bg-200 hover:bg-surface-200'} cursor-pointer`,
                   '[&>div:first-child]:border-l-4 [&>div:first-child]:pl-5 [&>div:last-child]:pr-6',
                   `${isSelected || isCharted ? '[&>div:first-child]:border-l-foreground' : '[&>div:first-child]:border-l-transparent'}`,
-                  '[&>.rdg-cell]:box-border [&>.rdg-cell]:outline-none [&>.rdg-cell]:shadow-none',
+                  '[&>.rdg-cell]:box-border [&>.rdg-cell]:outline-none [&>.rdg-cell]:shadow-none [&>.rdg-cell]:py-3',
                   '[&>.rdg-cell.column-prop_total_time]:relative',
                 ].join(' ')
               }}
