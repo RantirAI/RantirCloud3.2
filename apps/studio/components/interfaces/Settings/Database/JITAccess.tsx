@@ -704,6 +704,10 @@ export const JITAccess = () => {
   }
 
   const deleteUserDisplayName = userPendingDelete?.name ?? userPendingDelete?.email ?? 'this user'
+  const editingUser = useMemo(
+    () => users.find((user) => user.id === editingUserId) ?? null,
+    [users, editingUserId]
+  )
 
   return (
     <PageSection id="jit-access">
@@ -791,9 +795,7 @@ export const JITAccess = () => {
                     <TableRow className="[&>td]:hover:bg-inherit">
                       <TableCell colSpan={4}>
                         <p className="text-sm text-foreground">No user rules yet</p>
-                        <p className="text-sm text-foreground-lighter">
-                          Grant JIT access above
-                        </p>
+                        <p className="text-sm text-foreground-lighter">Grant JIT access above</p>
                       </TableCell>
                     </TableRow>
                   ) : (
@@ -983,7 +985,17 @@ export const JITAccess = () => {
               </div>
             </ScrollArea>
 
-            <SheetFooter className="!justify-between w-full mt-auto py-4 border-t">
+            <SheetFooter className="w-full mt-auto py-4 border-t">
+              {sheetMode === 'edit' && editingUser && (
+                <div className="mr-auto">
+                  <Button
+                    type="danger"
+                    onClick={() => openDeleteDialog(editingUser)}
+                  >
+                    Delete rule
+                  </Button>
+                </div>
+              )}
               <Button type="default" onClick={closeSheet}>
                 Cancel
               </Button>
@@ -1015,7 +1027,7 @@ export const JITAccess = () => {
             </AlertDialogHeader>
             <AlertDialogFooter>
               <AlertDialogCancel>Cancel</AlertDialogCancel>
-              <AlertDialogAction variant="warning" onClick={handleConfirmDelete}>
+              <AlertDialogAction variant="danger" onClick={handleConfirmDelete}>
                 Delete rule
               </AlertDialogAction>
             </AlertDialogFooter>
