@@ -1,17 +1,26 @@
 import { PermissionAction } from '@supabase/shared-types/out/constants'
 import { IS_PLATFORM, useParams } from 'common'
+import { SIDEBAR_KEYS } from 'components/layouts/ProjectLayout/LayoutSidebar/LayoutSidebarProvider'
+import { AiAssistantDropdown } from 'components/ui/AiAssistantDropdown'
 import { isEqual } from 'lodash'
-import { Copy, Eye, EyeOff, Play } from 'lucide-react'
-import { Key, ReactNode, useCallback, useEffect, useMemo, useState } from 'react'
+import { Check, ChevronDown, Copy, Eye, EyeOff, Play, X as XIcon } from 'lucide-react'
+import { Key, ReactNode, useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { Item, Menu, useContextMenu } from 'react-contexify'
 import DataGrid, { Column, RenderRowProps, Row } from 'react-data-grid'
 import { createPortal } from 'react-dom'
 import { toast } from 'sonner'
+import { useAiAssistantStateSnapshot } from 'state/ai-assistant-state'
+import { useSidebarManagerSnapshot } from 'state/sidebar-manager-state'
 import type { ResponseError } from 'types'
 import {
   Button,
+  Checkbox_Shadcn_,
   cn,
   copyToClipboard,
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
   ResizableHandle,
   ResizablePanel,
   ResizablePanelGroup,
@@ -24,7 +33,12 @@ import DefaultPreviewColumnRenderer from './LogColumnRenderers/DefaultPreviewCol
 import FunctionsEdgeColumnRender from './LogColumnRenderers/FunctionsEdgeColumnRender'
 import FunctionsLogsColumnRender from './LogColumnRenderers/FunctionsLogsColumnRender'
 import type { LogData, LogQueryError, QueryType } from './Logs.types'
-import { isDefaultLogPreviewFormat } from './Logs.utils'
+import {
+  buildLogsPrompt,
+  formatLogsAsJson,
+  formatLogsAsMarkdown,
+  isDefaultLogPreviewFormat,
+} from './Logs.utils'
 import LogSelection from './LogSelection'
 import { DefaultErrorRenderer } from './LogsErrorRenderers/DefaultErrorRenderer'
 import ResourcesExceededErrorRenderer from './LogsErrorRenderers/ResourcesExceededErrorRenderer'
@@ -89,10 +103,14 @@ export const LogTable = ({
   const { profile } = useProfile()
   const [selectedLogId] = useSelectedLog()
   const { show: showContextMenu } = useContextMenu()
+  const { openSidebar } = useSidebarManagerSnapshot()
+  const aiSnap = useAiAssistantStateSnapshot()
 
   const [cellPosition, setCellPosition] = useState<any>()
-  const [selectionOpen, setSelectionOpen] = useState(false)
   const [selectedRow, setSelectedRow] = useState<LogData | null>(null)
+  const [selectedRows, setSelectedRows] = useState<Set<string>>(new Set())
+  const [anchorRowId, setAnchorRowId] = useState<string | null>(null)
+  const [copiedFormat, setCopiedFormat] = useState<'json' | 'markdown' | null>(null)
 
   const { can: canCreateLogQuery } = useAsyncCheckPermissions(
     PermissionAction.CREATE,
@@ -105,14 +123,10 @@ export const LogTable = ({
 
   const firstRow = data[0]
 
-  // move timestamp to the first column, if it exists
   function getFirstRow() {
     if (!firstRow) return {}
-
     const { timestamp, ...rest } = firstRow
-
     if (!timestamp) return firstRow
-
     return { timestamp, ...rest }
   }
 
@@ -124,6 +138,82 @@ export const LogTable = ({
   const panelContentMaxSize = 60
 
   const LOGS_EXPLORER_CONTEXT_MENU_ID = 'logs-explorer-context-menu'
+
+  const getRowKey = useCallback(
+    (row: LogData): string => {
+      if (!hasId) return JSON.stringify(row)
+      return (row as LogData).id
+    },
+    [hasId]
+  )
+
+  const [dedupedData, logMap] = useMemo<[LogData[], LogMap]>(() => {
+    const deduped = [...new Set(data)] as LogData[]
+    if (!hasId) return [deduped, {}]
+    const map = deduped.reduce((acc: LogMap, d: LogData) => {
+      acc[d.id] = d
+      return acc
+    }, {})
+    return [deduped, map]
+  }, [data, hasId])
+
+  const logDataRows = useMemo(() => {
+    if (hasId && hasTimestamp) {
+      return Object.values(logMap).sort((a, b) => b.timestamp - a.timestamp)
+    } else {
+      return dedupedData
+    }
+  }, [dedupedData, hasId, hasTimestamp, logMap])
+
+  // Side panel is open only when a single row is selected via regular click (not multi-select)
+  const selectionOpen = Boolean((selectedLog || isSelectedLogLoading) && selectedRows.size === 0)
+
+  const selectedRowsData = useMemo(
+    () => logDataRows.filter((r) => selectedRows.has(getRowKey(r))),
+    [logDataRows, selectedRows, getRowKey]
+  )
+
+  const checkboxColumn: Column<LogData> = {
+    key: 'multi-select',
+    name: '',
+    width: 36,
+    minWidth: 36,
+    maxWidth: 36,
+    resizable: false,
+    renderCell: ({ row }) => {
+      const key = getRowKey(row)
+      const toggle = () => {
+        const next = new Set(selectedRows)
+        if (next.has(key)) {
+          next.delete(key)
+        } else {
+          next.add(key)
+        }
+        setSelectedRows(next)
+        setAnchorRowId(key)
+        if (next.size > 0) {
+          setSelectedRow(null)
+          onSelectedLogChange?.(null)
+        }
+      }
+      return (
+        <div
+          className="absolute group inset-0 flex justify-center items-center cursor-pointer"
+          onClick={(e) => {
+            e.stopPropagation()
+            toggle()
+          }}
+        >
+          <Checkbox_Shadcn_
+            className="group-hover:border-foreground-muted"
+            checked={selectedRows.has(key)}
+            onCheckedChange={toggle}
+          />
+        </div>
+      )
+    },
+  }
+
   const DEFAULT_COLUMNS = columnNames.map((v: keyof LogData, idx) => {
     const column = `logs-column-${idx}`
     const result: Column<LogData> = {
@@ -148,7 +238,6 @@ export const LogTable = ({
       },
       minWidth: 128,
     }
-
     return result
   })
 
@@ -161,25 +250,21 @@ export const LogTable = ({
       case 'api':
         columns = DatabaseApiColumnRender
         break
-
       case 'database':
         columns = DatabasePostgresColumnRender
         break
-
       case 'fn_edge':
         columns = FunctionsEdgeColumnRender
         break
       case 'functions':
         columns = FunctionsLogsColumnRender
         break
-
       case 'auth':
         columns = AuthColumnRenderer
         break
       case 'pg_cron':
         columns = DatabasePostgresColumnRender
         break
-
       default:
         if (firstRow && isDefaultLogPreviewFormat(firstRow)) {
           columns = DefaultPreviewColumnRenderer
@@ -190,36 +275,22 @@ export const LogTable = ({
     }
   }
 
-  const [dedupedData, logMap] = useMemo<[LogData[], LogMap]>(() => {
-    const deduped = [...new Set(data)] as LogData[]
-
-    if (!hasId) {
-      return [deduped, {}]
-    }
-
-    const map = deduped.reduce((acc: LogMap, d: LogData) => {
-      acc[d.id] = d
-      return acc
-    }, {})
-
-    return [deduped, map]
-  }, [data, hasId])
-
-  const logDataRows = useMemo(() => {
-    if (hasId && hasTimestamp) {
-      return Object.values(logMap).sort((a, b) => b.timestamp - a.timestamp)
-    } else {
-      return dedupedData
-    }
-  }, [dedupedData, hasId, hasTimestamp, logMap])
+  columns = [checkboxColumn, ...columns]
 
   const RowRenderer = useCallback<(key: Key, props: RenderRowProps<LogData, unknown>) => ReactNode>(
     (key, props) => {
       const handleContextMenu = (e: React.MouseEvent) => {
-        if (columns.length > 0) {
-          setCellPosition({ row: props.row, column: columns[0] })
+        const firstDataColumn = columns.find((c) => c.key !== 'multi-select')
+        if (firstDataColumn) {
+          setCellPosition({ row: props.row, column: firstDataColumn })
         }
         showContextMenu(e, { id: LOGS_EXPLORER_CONTEXT_MENU_ID })
+      }
+      const handleClick = (e: React.MouseEvent) => {
+        // Check if clicking on the checkbox column - let that handler handle it
+        const target = e.target as HTMLElement
+        if (target.closest('[data-column-key="multi-select"]')) return
+        onRowClick(props.row)
       }
       return (
         <Row
@@ -228,6 +299,7 @@ export const LogTable = ({
           isRowSelected={false}
           selectedCellIdx={undefined}
           onContextMenu={handleContextMenu}
+          onClick={handleClick}
         />
       )
     },
@@ -247,6 +319,97 @@ export const LogTable = ({
     const eventMessage = cellPosition.row.event_message
     copyToClipboard(eventMessage, () => {
       toast.success('Copied to clipboard')
+    })
+  }
+
+  function onRowClick(row: LogData) {
+    const key = getRowKey(row)
+
+    // Regular single click — clear multi-select, open side panel
+    setSelectedRows(new Set())
+    setAnchorRowId(key)
+    setSelectedRow(row)
+    onSelectedLogChange?.(row)
+  }
+
+  const handleKeyDown = useCallback(
+    (event: KeyboardEvent) => {
+      if (event.key === 'Escape') {
+        setSelectedRows(new Set())
+        setAnchorRowId(null)
+        return
+      }
+
+      // Arrow navigation only in single-select mode
+      if (!logDataRows.length || !selectedRow || selectedRows.size > 0) return
+
+      const currentIndex = logDataRows.findIndex((row) => isEqual(row, selectedRow))
+      if (currentIndex === -1) return
+
+      if (event.key === 'ArrowUp' && currentIndex > 0) {
+        const prevRow = logDataRows[currentIndex - 1]
+        onRowClick(prevRow)
+      } else if (event.key === 'ArrowDown' && currentIndex < logDataRows.length - 1) {
+        const nextRow = logDataRows[currentIndex + 1]
+        onRowClick(nextRow)
+      }
+    },
+    [logDataRows, selectedRow, selectedRows, onRowClick]
+  )
+
+  useEffect(() => {
+    if (!isSelectedLogLoading && !selectedLog) {
+      setSelectedRow(null)
+    }
+  }, [selectedLog, isSelectedLogLoading])
+
+  useEffect(() => {
+    window.addEventListener('keydown', handleKeyDown)
+    return () => {
+      window.removeEventListener('keydown', handleKeyDown)
+    }
+  }, [handleKeyDown])
+
+  useEffect(() => {
+    if (!isLoading && !selectedRow) {
+      const logData = data.find((x) => x.id === selectedLogId)
+      if (logData) setSelectedRow(logData)
+    }
+  }, [isLoading])
+
+  // Clear multi-select when a new query starts loading
+  useEffect(() => {
+    if (isLoading) {
+      setSelectedRows(new Set())
+      setAnchorRowId(null)
+    }
+  }, [isLoading])
+
+  // Copy feedback timeout
+  useEffect(() => {
+    if (!copiedFormat) return
+    const timer = setTimeout(() => setCopiedFormat(null), 2000)
+    return () => clearTimeout(timer)
+  }, [copiedFormat])
+
+  function handleCopySelectedRows(format: 'json' | 'markdown') {
+    const text =
+      format === 'json'
+        ? formatLogsAsJson(selectedRowsData)
+        : formatLogsAsMarkdown(selectedRowsData)
+    copyToClipboard(text, () => {
+      setCopiedFormat(format)
+      toast.success(
+        `Copied ${selectedRowsData.length} log${selectedRowsData.length !== 1 ? 's' : ''} as ${format.toUpperCase()}`
+      )
+    })
+  }
+
+  function handleOpenAiAssistant() {
+    const prompt = buildLogsPrompt(selectedRowsData)
+    openSidebar(SIDEBAR_KEYS.AI_ASSISTANT)
+    aiSnap.newChat({
+      initialMessage: prompt,
     })
   }
 
@@ -312,21 +475,99 @@ export const LogTable = ({
     </div>
   )
 
+  const MultiSelectActionBar = () => {
+    const count = selectedRows.size
+    if (count === 0) return null
+
+    return (
+      <div
+        className="flex items-center gap-2 px-3 py-1.5 border-b bg-surface-200 text-sm sticky top-0 z-10"
+        style={{ height: 40 }}
+      >
+        <span className="text-foreground-light font-mono">
+          {count} row{count !== 1 ? 's' : ''} selected
+        </span>
+
+        <div className="flex items-center gap-1 ml-auto">
+          {/* Copy dropdown */}
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button
+                type="default"
+                size="tiny"
+                icon={
+                  copiedFormat ? <Check size={12} className="text-brand" /> : <Copy size={12} />
+                }
+                iconRight={<ChevronDown size={11} />}
+              >
+                {copiedFormat ? 'Copied!' : 'Copy'}
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end" className="w-44">
+              <DropdownMenuItem
+                onClick={() => handleCopySelectedRows('json')}
+                className="gap-2 text-xs"
+              >
+                <Copy size={13} />
+                Copy as JSON
+              </DropdownMenuItem>
+              <DropdownMenuItem
+                onClick={() => handleCopySelectedRows('markdown')}
+                className="gap-2 text-xs"
+              >
+                <Copy size={13} />
+                Copy as Markdown
+              </DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
+
+          {/* Explain with AI */}
+          <AiAssistantDropdown
+            label="Explain with AI"
+            buildPrompt={() => buildLogsPrompt(selectedRowsData)}
+            onOpenAssistant={handleOpenAiAssistant}
+            additionalDropdownItems={[
+              {
+                label: 'Copy as JSON',
+                icon: <Copy size={13} />,
+                onClick: () => handleCopySelectedRows('json'),
+              },
+              {
+                label: 'Copy as Markdown',
+                icon: <Copy size={13} />,
+                onClick: () => handleCopySelectedRows('markdown'),
+              },
+            ]}
+          />
+
+          {/* Clear */}
+          <Button
+            type="text"
+            size="tiny"
+            icon={<XIcon size={12} />}
+            onClick={() => {
+              setSelectedRows(new Set())
+              setAnchorRowId(null)
+            }}
+            className="text-foreground-lighter hover:text-foreground"
+          />
+        </div>
+      </div>
+    )
+  }
+
   const RenderErrorAlert = () => {
     if (!error) return null
-
     const childProps = {
       isCustomQuery: queryType ? false : true,
       error: error!,
     }
-
     if (
       typeof error === 'object' &&
       error.error?.errors.find((err) => err.reason === 'resourcesExceeded')
     ) {
       return <ResourcesExceededErrorRenderer {...childProps} />
     }
-
     return (
       <div className="text-foreground flex gap-2 font-mono p-4">
         <DefaultErrorRenderer {...childProps} />
@@ -338,55 +579,6 @@ export const LogTable = ({
     if (EmptyState) return EmptyState
     else return <LogsTableEmptyState />
   }
-
-  function onRowClick(row: LogData) {
-    setSelectedRow(row)
-    onSelectedLogChange?.(row)
-  }
-
-  // Keyboard navigation
-  const handleKeyDown = useCallback(
-    (event: KeyboardEvent) => {
-      if (!logDataRows.length || !selectedRow) return
-
-      const currentIndex = logDataRows.findIndex((row) => isEqual(row, selectedRow))
-      if (currentIndex === -1) return
-
-      if (event.key === 'ArrowUp' && currentIndex > 0) {
-        const prevRow = logDataRows[currentIndex - 1]
-        onRowClick(prevRow)
-      } else if (event.key === 'ArrowDown' && currentIndex < logDataRows.length - 1) {
-        const nextRow = logDataRows[currentIndex + 1]
-        onRowClick(nextRow)
-      }
-    },
-    [logDataRows, selectedRow, onRowClick]
-  )
-
-  useEffect(() => {
-    if (selectedLog || isSelectedLogLoading) {
-      setSelectionOpen(true)
-    }
-    if (!isSelectedLogLoading && !selectedLog) {
-      setSelectedRow(null)
-    }
-  }, [selectedLog, isSelectedLogLoading])
-
-  useEffect(() => {
-    window.addEventListener('keydown', handleKeyDown)
-    return () => {
-      window.removeEventListener('keydown', handleKeyDown)
-    }
-  }, [handleKeyDown])
-
-  useEffect(() => {
-    if (!isLoading && !selectedRow) {
-      // [Joshen] Only want to run this once on a fresh session when log param is provided in URL
-      // Subsequently, selectedRow state is just controlled by the user's clicks on LogTable
-      const logData = data.find((x) => x.id === selectedLogId)
-      if (logData) setSelectedRow(logData)
-    }
-  }, [isLoading])
 
   if (!data) return null
 
@@ -400,46 +592,59 @@ export const LogTable = ({
           maxSize={`${panelContentMaxSize}`}
           defaultSize={`${panelContentMaxSize}`}
         >
-          <DataGrid
-            role="table"
-            style={{ height: '100%' }}
-            className={cn('flex-1 flex-grow h-full border-0', {
-              'data-grid--simple-logs': queryType,
-              'data-grid--logs-explorer': !queryType,
-            })}
-            rowHeight={40}
-            headerRowHeight={queryType ? 0 : 28}
-            onSelectedCellChange={(row) => {
-              setCellPosition(row)
-            }}
-            onCellClick={(row) => {
-              onRowClick(row.row)
-            }}
-            columns={columns}
-            rowClass={(row: LogData) => {
-              return cn(
-                'font-mono tracking-tight !bg-studio hover:!bg-surface-100 cursor-pointer',
-                {
-                  '!bg-surface-200 rdg-row--focused': isEqual(row, selectedRow),
-                }
-              )
-            }}
-            rows={logDataRows}
-            rowKeyGetter={(r) => {
-              if (!hasId) return JSON.stringify(r)
-              const row = r as LogData
-              return row.id
-            }}
-            renderers={{
-              renderRow: RowRenderer,
-              noRowsFallback: !isLoading ? (
-                <>
-                  {logDataRows.length === 0 && !error && <RenderNoResultAlert />}
-                  {error && <RenderErrorAlert />}
-                </>
-              ) : null,
-            }}
-          />
+          <div className="flex flex-col h-full">
+            <div
+              style={{
+                maxHeight: selectedRows.size > 0 ? 40 : 0,
+                overflow: 'hidden',
+                transition: 'max-height 150ms ease',
+              }}
+            >
+              <MultiSelectActionBar />
+            </div>
+            <DataGrid
+              role="table"
+              style={{ flex: '1 1 0%', minHeight: 0 }}
+              className={cn('border-0', {
+                'data-grid--simple-logs': queryType,
+                'data-grid--logs-explorer': !queryType,
+              })}
+              rowHeight={40}
+              headerRowHeight={queryType ? 0 : 28}
+              onSelectedCellChange={(row) => {
+                setCellPosition(row)
+              }}
+              columns={columns}
+              rowClass={(row: LogData) => {
+                const key = getRowKey(row)
+                const isMultiSelected = selectedRows.has(key)
+                const isSingleSelected = isEqual(row, selectedRow)
+                return cn(
+                  'font-mono tracking-tight !bg-studio hover:!bg-surface-100 cursor-pointer',
+                  {
+                    '!bg-surface-200 rdg-row--focused': isSingleSelected || isMultiSelected,
+                  }
+                )
+              }}
+              rows={logDataRows}
+              rowKeyGetter={(r) => {
+                if (!hasId) return JSON.stringify(r)
+                const row = r as LogData
+                return row.id
+              }}
+              renderers={{
+                renderRow: RowRenderer,
+                noRowsFallback: !isLoading ? (
+                  // gridColumn: '1 / -1' makes the fallback span all CSS grid columns,
+                  // including the checkbox column we prepend, so it fills the full width.
+                  <div style={{ gridColumn: '1 / -1' }}>
+                    {logDataRows.length === 0 && !error && <RenderNoResultAlert />}
+                    {error && <RenderErrorAlert />}
+                  </div>
+                ) : null,
+              }}
+            />
+          </div>
           {typeof window !== 'undefined' &&
             createPortal(
               <Menu id={LOGS_EXPLORER_CONTEXT_MENU_ID} animation={false}>
@@ -466,7 +671,6 @@ export const LogTable = ({
                 projectRef={projectRef}
                 onClose={() => {
                   onSelectedLogChange?.(null)
-                  setSelectionOpen(false)
                 }}
                 log={selectedLog}
                 error={selectedLogError}

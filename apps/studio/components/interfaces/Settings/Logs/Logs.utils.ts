@@ -1,13 +1,13 @@
 import { useMonaco } from '@monaco-editor/react'
+import { IS_PLATFORM } from 'common'
+import BackwardIterator from 'components/ui/CodeEditor/Providers/BackwardIterator'
+import type { PlanId } from 'data/subscriptions/types'
 import dayjs, { Dayjs } from 'dayjs'
 import { get } from 'lodash'
 import uniqBy from 'lodash/uniqBy'
 import { useEffect } from 'react'
-
-import { IS_PLATFORM } from 'common'
-import BackwardIterator from 'components/ui/CodeEditor/Providers/BackwardIterator'
-import type { PlanId } from 'data/subscriptions/types'
 import logConstants from 'shared-data/logConstants'
+
 import { LogsTableName, SQL_FILTER_TEMPLATES } from './Logs.constants'
 import type { Filters, LogData, LogsEndpointParams } from './Logs.types'
 
@@ -755,4 +755,37 @@ export function role(metadata: any) {
   }
 
   return payload.role
+}
+
+export function formatLogsAsJson(rows: LogData[]): string {
+  return JSON.stringify(rows, null, 2)
+}
+
+export function formatLogsAsMarkdown(rows: LogData[]): string {
+  return rows
+    .map((row, i) => {
+      const lines: string[] = [`## Log ${i + 1}`]
+      if (row.timestamp) {
+        lines.push(`**Timestamp:** ${new Date(Number(row.timestamp) / 1000).toISOString()}`)
+      }
+      if (row.event_message) {
+        lines.push(`**Message:** ${row.event_message}`)
+      }
+      const { id: _id, timestamp: _ts, event_message: _msg, ...rest } = row as any
+      if (Object.keys(rest).length > 0) {
+        lines.push('', '**Details:**', '```json', JSON.stringify(rest, null, 2), '```')
+      }
+      return lines.join('\n')
+    })
+    .join('\n\n---\n\n')
+}
+
+export function buildLogsPrompt(rows: LogData[]): string {
+  const header = `I have ${rows.length} log entr${rows.length === 1 ? 'y' : 'ies'} I'd like help debugging:\n\n`
+  const body = formatLogsAsMarkdown(rows)
+  return (
+    header +
+    body +
+    '\n\nReply with a concise list that answers these questions: What do these logs indicate, what might be the underlying issue, and what steps can I take to resolve it?'
+  )
 }
