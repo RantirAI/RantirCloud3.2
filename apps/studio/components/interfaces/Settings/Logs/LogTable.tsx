@@ -43,6 +43,7 @@ import LogSelection from './LogSelection'
 import { DefaultErrorRenderer } from './LogsErrorRenderers/DefaultErrorRenderer'
 import ResourcesExceededErrorRenderer from './LogsErrorRenderers/ResourcesExceededErrorRenderer'
 import { LogsTableEmptyState } from './LogsTableEmptyState'
+import { MultiSelectActionBar } from './MultiSelectActionBar'
 import { ButtonTooltip } from '@/components/ui/ButtonTooltip'
 import { DownloadResultsButton } from '@/components/ui/DownloadResultsButton'
 import { useSelectedLog } from '@/hooks/analytics/useSelectedLog'
@@ -475,87 +476,6 @@ export const LogTable = ({
     </div>
   )
 
-  const MultiSelectActionBar = () => {
-    const count = selectedRows.size
-    if (count === 0) return null
-
-    return (
-      <div
-        className="flex items-center gap-2 px-3 py-1.5 border-b bg-surface-200 text-sm sticky top-0 z-10"
-        style={{ height: 40 }}
-      >
-        <span className="text-foreground-light font-mono">
-          {count} row{count !== 1 ? 's' : ''} selected
-        </span>
-
-        <div className="flex items-center gap-1 ml-auto">
-          {/* Copy dropdown */}
-          <DropdownMenu>
-            <DropdownMenuTrigger asChild>
-              <Button
-                type="default"
-                size="tiny"
-                icon={
-                  copiedFormat ? <Check size={12} className="text-brand" /> : <Copy size={12} />
-                }
-                iconRight={<ChevronDown size={11} />}
-              >
-                {copiedFormat ? 'Copied!' : 'Copy'}
-              </Button>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent align="end" className="w-44">
-              <DropdownMenuItem
-                onClick={() => handleCopySelectedRows('json')}
-                className="gap-2 text-xs"
-              >
-                <Copy size={13} />
-                Copy as JSON
-              </DropdownMenuItem>
-              <DropdownMenuItem
-                onClick={() => handleCopySelectedRows('markdown')}
-                className="gap-2 text-xs"
-              >
-                <Copy size={13} />
-                Copy as Markdown
-              </DropdownMenuItem>
-            </DropdownMenuContent>
-          </DropdownMenu>
-
-          {/* Explain with AI */}
-          <AiAssistantDropdown
-            label="Explain with AI"
-            buildPrompt={() => buildLogsPrompt(selectedRowsData)}
-            onOpenAssistant={handleOpenAiAssistant}
-            additionalDropdownItems={[
-              {
-                label: 'Copy as JSON',
-                icon: <Copy size={13} />,
-                onClick: () => handleCopySelectedRows('json'),
-              },
-              {
-                label: 'Copy as Markdown',
-                icon: <Copy size={13} />,
-                onClick: () => handleCopySelectedRows('markdown'),
-              },
-            ]}
-          />
-
-          {/* Clear */}
-          <Button
-            type="text"
-            size="tiny"
-            icon={<XIcon size={12} />}
-            onClick={() => {
-              setSelectedRows(new Set())
-              setAnchorRowId(null)
-            }}
-            className="text-foreground-lighter hover:text-foreground"
-          />
-        </div>
-      </div>
-    )
-  }
-
   const RenderErrorAlert = () => {
     if (!error) return null
     const childProps = {
@@ -600,7 +520,17 @@ export const LogTable = ({
                 transition: 'max-height 150ms ease',
               }}
             >
-              <MultiSelectActionBar />
+              <MultiSelectActionBar
+                selectedRows={selectedRows}
+                selectedRowsData={selectedRowsData}
+                copiedFormat={copiedFormat}
+                onCopy={handleCopySelectedRows}
+                onClear={() => {
+                  setSelectedRows(new Set())
+                  setAnchorRowId(null)
+                }}
+                onOpenAiAssistant={handleOpenAiAssistant}
+              />
             </div>
             <DataGrid
               role="table"
