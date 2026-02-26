@@ -8,6 +8,14 @@ import { EllipsisVertical, Pencil, Trash2, UserPlus } from 'lucide-react'
 import Link from 'next/link'
 import { useMemo, useState } from 'react'
 import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
   Badge,
   Button,
   Card,
@@ -120,7 +128,7 @@ const MOCK_MEMBERS: JITMember[] = [
   { id: 'member-1', name: 'Alice', email: 'alice@example.com' },
   { id: 'member-2', name: 'Bob', email: 'bob@example.com' },
   { id: 'member-3', name: 'Carol', email: 'carol@example.com' },
-  { id: 'member-4', name: 'Dave', email: 'dave@example.com' },
+  { id: 'member-4', email: 'dave@example.com' },
   { id: 'member-5', name: 'Eve', email: 'eve@example.com' },
   { id: 'member-6', name: 'Frank', email: 'frank@example.com' },
 ]
@@ -161,9 +169,9 @@ function createEmptyGrant(roleId: string): JITRoleGrantDraft {
   return {
     roleId,
     enabled: false,
-    expiryMode: '30d',
-    hasExpiry: false,
-    expiry: '',
+    expiryMode: '1h',
+    hasExpiry: true,
+    expiry: getRelativeDatetimeByMode('1h'),
     hasIpRestriction: false,
     ipRanges: '',
   }
@@ -370,12 +378,37 @@ function RoleRuleEditor({
         <Checkbox_Shadcn_
           id={checkboxId}
           checked={grant.enabled}
-          onCheckedChange={(value) => onChange({ ...grant, enabled: value === true })}
+          onCheckedChange={(value) => {
+            const isEnabled = value === true
+
+            if (!isEnabled) {
+              onChange({ ...grant, enabled: false })
+              return
+            }
+
+            if (
+              (grant.hasExpiry && grant.expiry) ||
+              (!grant.hasExpiry && grant.expiryMode === 'never')
+            ) {
+              onChange({ ...grant, enabled: true })
+              return
+            }
+
+            onChange({
+              ...grant,
+              enabled: true,
+              hasExpiry: true,
+              expiryMode: '1h',
+              expiry: getRelativeDatetimeByMode('1h'),
+            })
+          }}
           aria-label={`Enable ${role.label}`}
           className="mt-0.5"
         />
         <div className="min-w-0 flex-1">
-          <code className="text-code-inline dark:!bg-surface-300 dark:!border-control !tracking-normal">{role.label}</code>
+          <code className="text-code-inline dark:!bg-surface-300 dark:!border-control !tracking-normal">
+            {role.label}
+          </code>
         </div>
       </label>
 
@@ -445,7 +478,7 @@ function RoleRuleEditor({
                           ...grant,
                           expiryMode: nextMode,
                           hasExpiry: true,
-                          expiry: grant.expiry || relativeDatetimeLocal(24),
+                          expiry: grant.expiry || relativeDatetimeLocal(1),
                         })
                         return
                       }
@@ -541,6 +574,16 @@ export const JITAccess = () => {
   const [editingUserId, setEditingUserId] = useState<string | null>(null)
   const [draft, setDraft] = useState<JITUserRuleDraft>(() => createDraft())
   const [showInlineValidation, setShowInlineValidation] = useState(false)
+  const [userPendingDelete, setUserPendingDelete] = useState<JITUserRule | null>(null)
+
+  const membersWithRules = useMemo(() => new Set(users.map((user) => user.memberId)), [users])
+  const availableMembersForAdd = useMemo(
+    () => MOCK_MEMBERS.filter((member) => !membersWithRules.has(member.id)),
+    [membersWithRules]
+  )
+  const isDuplicateSelectedMember =
+    sheetMode === 'add' && draft.memberId !== '' && membersWithRules.has(draft.memberId)
+  const memberOptions = sheetMode === 'edit' ? MOCK_MEMBERS : availableMembersForAdd
 
   const enabledRoleCount = useMemo(
     () => draft.grants.filter((grant) => grant.enabled).length,
@@ -548,10 +591,14 @@ export const JITAccess = () => {
   )
   const inlineValidation = useMemo(
     () => ({
-      member: draft.memberId ? undefined : 'Select a user to grant JIT access.',
+      member: !draft.memberId
+        ? 'Select a user to grant JIT access.'
+        : isDuplicateSelectedMember
+          ? 'This user already has a JIT access rule. Edit their existing rule from the list.'
+          : undefined,
       roles: enabledRoleCount > 0 ? undefined : 'Select at least one role.',
     }),
-    [draft.memberId, enabledRoleCount]
+    [draft.memberId, enabledRoleCount, isDuplicateSelectedMember]
   )
 
   const closeSheet = () => {
@@ -572,6 +619,27 @@ export const JITAccess = () => {
     setDraft(draftFromRule(user))
     setShowInlineValidation(false)
     setSheetOpen(true)
+  }
+
+  const openDeleteDialog = (user: JITUserRule) => {
+    setUserPendingDelete(user)
+  }
+
+  const closeDeleteDialog = () => {
+    setUserPendingDelete(null)
+  }
+
+  const handleConfirmDelete = () => {
+    if (!userPendingDelete) return
+
+    setUsers((prev) => prev.filter((user) => user.id !== userPendingDelete.id))
+
+    if (editingUserId === userPendingDelete.id) {
+      setEditingUserId(null)
+      setSheetOpen(false)
+    }
+
+    closeDeleteDialog()
   }
 
   const updateGrant = (
@@ -600,6 +668,8 @@ export const JITAccess = () => {
 
     closeSheet()
   }
+
+  const deleteUserDisplayName = userPendingDelete?.name ?? userPendingDelete?.email ?? 'this user'
 
   return (
     <PageSection id="jit-access">
@@ -658,7 +728,6 @@ export const JITAccess = () => {
         </Card>
 
         {enabled && (
-
           <Card>
             <CardContent className="space-y-4 p-0">
               <div className="flex items-center justify-between pt-6 pb-2 px-4">
@@ -747,12 +816,21 @@ export const JITAccess = () => {
                               <DropdownMenuContent align="end" side="bottom" className="w-40">
                                 <DropdownMenuItem
                                   className="gap-x-2"
-                                  onClick={() => openEditUserSheet(user)}
+                                  onClick={(event) => {
+                                    event.stopPropagation()
+                                    openEditUserSheet(user)
+                                  }}
                                 >
                                   <Pencil size={14} className="text-foreground-lighter" />
                                   Edit
                                 </DropdownMenuItem>
-                                <DropdownMenuItem className="gap-x-2" onClick={() => { }}>
+                                <DropdownMenuItem
+                                  className="gap-x-2"
+                                  onClick={(event) => {
+                                    event.stopPropagation()
+                                    openDeleteDialog(user)
+                                  }}
+                                >
                                   <Trash2 size={14} className="text-foreground-lighter" />
                                   Delete
                                 </DropdownMenuItem>
@@ -767,7 +845,6 @@ export const JITAccess = () => {
               </Table>
             </CardContent>
           </Card>
-
         )}
 
         <Sheet open={sheetOpen} onOpenChange={(open) => !open && closeSheet()}>
@@ -789,6 +866,10 @@ export const JITAccess = () => {
                 <FormItemLayout layout="vertical" isReactForm={false} label="User">
                   <Select_Shadcn_
                     value={draft.memberId}
+                    disabled={
+                      sheetMode === 'edit' ||
+                      (sheetMode === 'add' && availableMembersForAdd.length === 0)
+                    }
                     onValueChange={(value) => {
                       setDraft((prev) => ({ ...prev, memberId: value }))
                     }}
@@ -797,7 +878,7 @@ export const JITAccess = () => {
                       <SelectValue_Shadcn_ placeholder="Select a member" />
                     </SelectTrigger_Shadcn_>
                     <SelectContent_Shadcn_>
-                      {MOCK_MEMBERS.map((member) => (
+                      {memberOptions.map((member) => (
                         <SelectItem_Shadcn_ key={member.id} value={member.id}>
                           {member.name ? (
                             <>
@@ -811,6 +892,19 @@ export const JITAccess = () => {
                       ))}
                     </SelectContent_Shadcn_>
                   </Select_Shadcn_>
+
+                  {sheetMode === 'edit' && (
+                    <p className="mt-2 text-xs text-foreground-lighter">
+                      The user cannot be changed when editing an existing JIT access rule.
+                    </p>
+                  )}
+
+                  {sheetMode === 'add' && availableMembersForAdd.length === 0 && (
+                    <p className="mt-2 text-xs text-foreground-lighter">
+                      All project members already have JIT access rules. Edit an existing rule from
+                      the table above.
+                    </p>
+                  )}
 
                   {showInlineValidation && inlineValidation.member && (
                     <p className="mt-2 text-xs text-destructive">{inlineValidation.member}</p>
@@ -864,6 +958,33 @@ export const JITAccess = () => {
             </SheetFooter>
           </SheetContent>
         </Sheet>
+
+        <AlertDialog
+          open={userPendingDelete !== null}
+          onOpenChange={(open) => !open && closeDeleteDialog()}
+        >
+          <AlertDialogContent size="small">
+            <AlertDialogHeader>
+              <AlertDialogTitle>Delete JIT access rule</AlertDialogTitle>
+              <AlertDialogDescription asChild>
+                <div className="space-y-2 text-sm">
+                  <p>
+                    Remove the JIT access rule for <strong>{deleteUserDisplayName}</strong>?
+                  </p>
+                  <p>
+                    This only removes the rule from the list. The project member will not be deleted from the project.
+                  </p>
+                </div>
+              </AlertDialogDescription>
+            </AlertDialogHeader>
+            <AlertDialogFooter>
+              <AlertDialogCancel>Cancel</AlertDialogCancel>
+              <AlertDialogAction variant="warning" onClick={handleConfirmDelete}>
+                Delete rule
+              </AlertDialogAction>
+            </AlertDialogFooter>
+          </AlertDialogContent>
+        </AlertDialog>
       </PageSectionContent>
     </PageSection>
   )
