@@ -5,7 +5,7 @@ on:
     branches: [master]
     paths:
       - "apps/studio/evals/scorer.ts"
-      - "apps/studio/evals/scorer-push.ts"
+      - "apps/studio/evals/scorer-online.ts"
 
 permissions:
   contents: read
