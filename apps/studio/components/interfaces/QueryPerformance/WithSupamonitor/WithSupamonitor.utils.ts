@@ -11,10 +11,7 @@ export function filterSystemLogs(
   { includeIntrospection = false }: { includeIntrospection?: boolean } = {}
 ): ParsedLogEntry[] {
   return logs.filter((log) => {
-    if (
-      log.user_name &&
-      (SUPAMONITOR_EXCLUDED_ROLES as readonly string[]).includes(log.user_name)
-    )
+    if (log.user_name && (SUPAMONITOR_EXCLUDED_ROLES as readonly string[]).includes(log.user_name))
       return false
     if (
       log.application_name &&
