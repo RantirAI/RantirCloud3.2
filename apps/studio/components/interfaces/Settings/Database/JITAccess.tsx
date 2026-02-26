@@ -790,9 +790,9 @@ export const JITAccess = () => {
                   {users.length === 0 ? (
                     <TableRow className="[&>td]:hover:bg-inherit">
                       <TableCell colSpan={4}>
-                        <p className="text-sm text-foreground">No users yet</p>
+                        <p className="text-sm text-foreground">No user rules yet</p>
                         <p className="text-sm text-foreground-lighter">
-                          Add a user above to allow JIT access.
+                          Grant JIT access above
                         </p>
                       </TableCell>
                     </TableRow>
