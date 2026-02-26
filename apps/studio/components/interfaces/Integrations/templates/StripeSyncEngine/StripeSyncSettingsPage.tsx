@@ -62,7 +62,10 @@ export const StripeSyncSettingsPage = () => {
                       <div>Sync in progress...</div>
                     </div>
                     <div className="text-foreground-light text-sm">
-                      Started {formatRelative(new Date(syncState.started_at!), new Date())}
+                      Started{' '}
+                      {syncState.started_at
+                        ? formatRelative(new Date(syncState.started_at), new Date())
+                        : 'recently'}
                     </div>
                   </>
                 ) : (
@@ -75,7 +78,10 @@ export const StripeSyncSettingsPage = () => {
                       </Button>
                     </div>
                     <div className="text-foreground-light text-sm">
-                      Last synced {formatRelative(new Date(syncState.closed_at!), new Date())}
+                      Last synced{' '}
+                      {syncState.closed_at
+                        ? formatRelative(new Date(syncState.closed_at), new Date())
+                        : 'recently'}
                     </div>
                   </>
                 )}
