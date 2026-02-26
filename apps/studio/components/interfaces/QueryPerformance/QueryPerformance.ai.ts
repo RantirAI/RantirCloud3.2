@@ -1,6 +1,10 @@
 import { QueryPerformanceRow } from './QueryPerformance.types'
 import type { QueryPlanRow } from 'components/interfaces/ExplainVisualizer/ExplainVisualizer.types'
 import type { ClassifiedQuery } from 'components/interfaces/QueryInsights/QueryInsightsHealth/QueryInsightsHealth.types'
+import {
+  getTableName,
+  getColumnName,
+} from 'components/interfaces/QueryInsights/QueryInsightsTable/QueryInsightsTable.utils'
 
 export interface QueryExplanationPrompt {
   query: string
@@ -65,6 +69,15 @@ export function buildQueryInsightFixPrompt(item: ClassifiedQuery): QueryExplanat
 
   const context = item.issueType ? issueContext[item.issueType] : ''
 
+  const tableName = getTableName(item.query)
+  const columnName = getColumnName(item.query)
+  const queryContext = [
+    tableName && `Table: ${tableName}`,
+    columnName && `Column: ${columnName}`,
+  ]
+    .filter(Boolean)
+    .join('\n')
+
   const prompt = `You are a PostgreSQL performance expert. A query has been flagged in our Query Insights triage view.
 
 **Issue:** ${item.hint}
@@ -72,6 +85,12 @@ ${context}
 
 **Performance stats:**
 ${stats}
+${queryContext ? `\n**Query context:**\n${queryContext}` : ''}
+
+**Full query:**
+\`\`\`sql
+${item.query}
+\`\`\`
 
 Your task is to provide a concrete fix the user can run directly in their SQL Editor.
 
@@ -80,7 +99,11 @@ Respond with:
 2. The exact SQL to fix it — this could be a \`CREATE INDEX\` statement, a rewritten version of the query, or another SQL command
 3. A brief explanation of why the fix helps and what improvement to expect
 
-Format the SQL as a runnable code block. Do not add caveats or lengthy explanations — focus on the fix.`
+Format the SQL as a runnable code block. Do not add caveats or lengthy explanations — focus on the fix.
+
+**Important:** The SQL Editor runs statements inside a transaction block. Do not use \`CREATE INDEX CONCURRENTLY\` — use plain \`CREATE INDEX\` instead.
+
+**Important:** Use table and column names exactly as they appear in the full query above, including their schema prefix (e.g. \`auth.users\`, not \`public.users\`). Do not guess or change schema names.`
 
   return { query: item.query, prompt }
 }
