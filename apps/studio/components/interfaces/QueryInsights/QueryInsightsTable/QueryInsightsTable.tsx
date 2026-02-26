@@ -13,6 +13,7 @@ import {
 } from 'lucide-react'
 import { useRouter } from 'next/router'
 import { useParams } from 'common'
+// eslint-disable-next-line no-restricted-imports
 import DataGrid, { Column, DataGridHandle, Row } from 'react-data-grid'
 import {
   AiIconAnimation,

@@ -1,5 +1,4 @@
-export const isTimeMetric = (dataKey: string) =>
-  dataKey.endsWith('p50') || dataKey.endsWith('p95')
+export const isTimeMetric = (dataKey: string) => dataKey.endsWith('p50') || dataKey.endsWith('p95')
 
 export const formatTime = (value: number) => {
   const d = new Date(value)

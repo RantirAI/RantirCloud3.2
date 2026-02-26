@@ -71,10 +71,7 @@ export function buildQueryInsightFixPrompt(item: ClassifiedQuery): QueryExplanat
 
   const tableName = getTableName(item.query)
   const columnName = getColumnName(item.query)
-  const queryContext = [
-    tableName && `Table: ${tableName}`,
-    columnName && `Column: ${columnName}`,
-  ]
+  const queryContext = [tableName && `Table: ${tableName}`, columnName && `Column: ${columnName}`]
     .filter(Boolean)
     .join('\n')
 
