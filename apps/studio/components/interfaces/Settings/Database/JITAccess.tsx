@@ -840,7 +840,7 @@ export const JITAccess = () => {
                     >
                       custom Postgres roles
                     </InlineLink>{' '}
-                    before granting JIT access. Narrow roles limit the impact of temporary access.
+                    before granting JIT access. Narrow roles limit the impact of direct access.
                   </p>
 
                   {showInlineValidation && inlineValidation.roles && (
