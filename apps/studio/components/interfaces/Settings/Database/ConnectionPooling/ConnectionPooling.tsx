@@ -95,8 +95,8 @@ export const ConnectionPooling = () => {
     computeInstance?.variant.name ?? capitalize(project?.infra_compute_size) ?? 'Nano'
   const poolingOptimizations =
     POOLING_OPTIMIZATIONS[
-    (computeInstance?.variant.identifier as keyof typeof POOLING_OPTIMIZATIONS) ??
-    (project?.infra_compute_size === 'nano' ? 'ci_nano' : 'ci_micro')
+      (computeInstance?.variant.identifier as keyof typeof POOLING_OPTIMIZATIONS) ??
+        (project?.infra_compute_size === 'nano' ? 'ci_nano' : 'ci_micro')
     ]
   const defaultPoolSize = poolingOptimizations.poolSize ?? 15
   const defaultMaxClientConn = poolingOptimizations.maxClientConn ?? 200
@@ -222,7 +222,9 @@ export const ConnectionPooling = () => {
                 <div className="flex flex-row gap-2 justify-between w-full">
                   <div className="flex flex-col text-sm">
                     <h5 className="text-foreground font-normal">Connection poolers</h5>
-                    <p className="text-foreground-lighter">Configuration is shared across all connection poolers.</p>
+                    <p className="text-foreground-lighter">
+                      Configuration is shared across all connection poolers.
+                    </p>
                   </div>
                   <div className="flex flex-row gap-1 items-center">
                     <Badge>Shared</Badge>
