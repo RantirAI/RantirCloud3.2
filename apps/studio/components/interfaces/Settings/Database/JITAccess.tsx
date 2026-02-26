@@ -609,12 +609,12 @@ export const JITAccess = () => {
         </PageSectionSummary>
         <DocsButton href={`${DOCS_URL}/guides/platform/jit-access`} />
       </PageSectionMeta>
-      <PageSectionContent>
+      <PageSectionContent className="space-y-4">
         <Card>
           <CardContent className="space-y-4">
             <FormLayout
               layout="flex-row-reverse"
-              label="JIT access"
+              label="Allow JIT access"
               description="Allow time-limited database access to specific project members."
             >
               <div className="flex items-center justify-end w-fit flex-shrink-0">
@@ -655,8 +655,11 @@ export const JITAccess = () => {
               }
             />
           )}
+        </Card>
 
-          {enabled && (
+        {enabled && (
+
+          <Card>
             <CardContent className="space-y-4 p-0">
               <div className="flex items-center justify-between pt-6 pb-2 px-4">
                 <div>
@@ -763,8 +766,9 @@ export const JITAccess = () => {
                 </TableBody>
               </Table>
             </CardContent>
-          )}
-        </Card>
+          </Card>
+
+        )}
 
         <Sheet open={sheetOpen} onOpenChange={(open) => !open && closeSheet()}>
           <SheetContent
