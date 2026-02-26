@@ -1,3 +1,5 @@
+export const isTimeMetric = (dataKey: string) => dataKey === 'p50' || dataKey === 'p95'
+
 export const formatTime = (value: number) => {
   const d = new Date(value)
   return d.toLocaleString('en-US', {

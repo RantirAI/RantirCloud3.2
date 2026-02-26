@@ -1,3 +1,5 @@
+import type { HealthLevel } from './QueryInsightsHealth.types'
+
 export const SLOW_QUERY_THRESHOLD_MS = 200
 export const HIGH_CALL_THRESHOLD = 100
 
@@ -9,18 +11,10 @@ export const SCORE_DEDUCTIONS = {
   slowLowCalls: 5,
 } as const
 
-export type HealthLevel = 'healthy' | 'warning' | 'critical'
-
 export const HEALTH_LEVELS: Record<HealthLevel, { label: string; min: number }> = {
   healthy: { label: 'Healthy', min: 70 },
   warning: { label: 'Needs attention', min: 40 },
   critical: { label: 'Critical', min: 0 },
-}
-
-export const getHealthLevel = (score: number): HealthLevel => {
-  if (score >= HEALTH_LEVELS.healthy.min) return 'healthy'
-  if (score >= HEALTH_LEVELS.warning.min) return 'warning'
-  return 'critical'
 }
 
 export const HEALTH_COLORS: Record<HealthLevel, string> = {

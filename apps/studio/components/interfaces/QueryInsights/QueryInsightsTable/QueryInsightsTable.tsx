@@ -7,14 +7,9 @@ import {
   AiIconAnimation,
   Button,
   CodeBlock,
-  Sheet,
-  SheetContent,
-  SheetDescription,
-  SheetTitle,
   Tabs_Shadcn_,
   TabsList_Shadcn_,
   TabsTrigger_Shadcn_,
-  TabsContent_Shadcn_,
   Tooltip,
   TooltipContent,
   TooltipTrigger,
@@ -32,7 +27,6 @@ import { Input } from 'ui-patterns/DataInputs/Input'
 import { GenericSkeletonLoader } from 'ui-patterns/ShimmeringLoader'
 import TwoOptionToggle from 'components/ui/TwoOptionToggle'
 import { ButtonTooltip } from 'components/ui/ButtonTooltip'
-import { ExplainVisualizer } from 'components/interfaces/ExplainVisualizer/ExplainVisualizer'
 import { parseAsString, useQueryStates } from 'nuqs'
 
 import type { QueryPerformanceRow } from '../../QueryPerformance/QueryPerformance.types'
@@ -40,15 +34,14 @@ import { useQueryInsightsIssues } from '../hooks/useQueryInsightsIssues'
 import type { Mode, IssueFilter } from './QueryInsightsTable.types'
 import { getQueryType, getTableName, getColumnName, formatDuration } from './QueryInsightsTable.utils'
 import { ISSUE_DOT_COLORS, ISSUE_ICONS, QUERY_INSIGHTS_EXPLORER_COLUMNS, NON_SORTABLE_COLUMNS } from './QueryInsightsTable.constants'
-import { QueryDetail } from '../../QueryPerformance/QueryDetail'
-import { QueryIndexes } from '../../QueryPerformance/QueryIndexes'
-import { buildExplainOptimizationPrompt, buildQueryInsightFixPrompt } from '../../QueryPerformance/QueryPerformance.ai'
+import { buildQueryInsightFixPrompt } from '../../QueryPerformance/QueryPerformance.ai'
 import { QUERY_PERFORMANCE_ROLE_DESCRIPTION } from '../../QueryPerformance/QueryPerformance.constants'
 import { useExecuteSqlMutation } from 'data/sql/execute-sql-mutation'
 import { useSelectedProjectQuery } from 'hooks/misc/useSelectedProject'
 import { wrapWithRollback } from 'data/sql/utils/transaction'
 import type { QueryPlanRow } from 'components/interfaces/ExplainVisualizer/ExplainVisualizer.types'
 import type { ClassifiedQuery } from '../QueryInsightsHealth/QueryInsightsHealth.types'
+import { QueryInsightsDetailSheet } from './QueryInsightsDetailSheet'
 
 interface QueryInsightsTableProps {
   data: QueryPerformanceRow[]
@@ -88,7 +81,6 @@ export const QueryInsightsTable = ({
     order: 'desc',
   })
 
-  // Explain state
   const [explainResults, setExplainResults] = useState<Record<string, QueryPlanRow[]>>({})
   const [explainLoadingQuery, setExplainLoadingQuery] = useState<string | null>(null)
   const explainQueryRef = useRef<string | null>(null)
@@ -130,7 +122,6 @@ export const QueryInsightsTable = ({
     () => {
       let items = [...classified]
 
-      // Apply search filter
       if (searchQuery.trim()) {
         const searchLower = searchQuery.toLowerCase()
         items = items.filter((item) => {
@@ -150,7 +141,6 @@ export const QueryInsightsTable = ({
         })
       }
 
-      // Apply sorting
       if (sort) {
         items.sort((a, b) => {
           const aValue: unknown = a[sort.column as keyof typeof a]
@@ -169,7 +159,6 @@ export const QueryInsightsTable = ({
     [classified, searchQuery, sort]
   )
 
-  // Computed active sheet row
   const activeSheetRow: ClassifiedQuery | undefined = useMemo(() => {
     if (mode === 'triage') {
       return selectedTriageRow !== undefined ? filteredTriageItems[selectedTriageRow] : undefined
@@ -179,7 +168,7 @@ export const QueryInsightsTable = ({
 
   const runExplain = useCallback(
     (query: string) => {
-      if (explainResults[query]) return // already cached
+      if (explainResults[query]) return
       explainQueryRef.current = query
       setExplainLoadingQuery(query)
       executeExplain({
@@ -207,7 +196,6 @@ export const QueryInsightsTable = ({
     [openSidebar, aiSnap]
   )
 
-  // Auto-run EXPLAIN ANALYZE when the explain tab becomes active
   useEffect(() => {
     if (sheetView === 'explain' && activeSheetRow?.query) {
       runExplain(activeSheetRow.query)
@@ -233,8 +221,7 @@ export const QueryInsightsTable = ({
     return QUERY_INSIGHTS_EXPLORER_COLUMNS.map((col) => {
       const isSortable = !NON_SORTABLE_COLUMNS.includes(col.id as never)
 
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      const result: Column<any> = {
+      const result: Column<ClassifiedQuery> = {
         key: col.id,
         name: col.name,
         cellClass: `column-${col.id}`,
@@ -464,13 +451,11 @@ export const QueryInsightsTable = ({
 
   const triageQueryColWidth = useMemo(() => {
     if (!triageContainerWidth) return 380
-    // reserve space for: time consumed + calls (100) + actions (300) + border (4)
     const fixed = timeConsumedWidth + 100 + 300 + 4
     return Math.max(380, triageContainerWidth - fixed - 120)
   }, [triageContainerWidth, timeConsumedWidth])
 
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const triageColumns = useMemo((): Column<any>[] => [
+  const triageColumns = useMemo((): Column<ClassifiedQuery>[] => [
     {
       key: 'query',
       name: 'Query',
@@ -879,7 +864,6 @@ export const QueryInsightsTable = ({
             />
           </div>
         ) : (
-          /* ── Explorer View ── */
           <div ref={dataGridContainerRef} className="flex-1 min-h-0 min-w-0 overflow-x-auto">
             <DataGrid
               ref={gridRef}
@@ -938,7 +922,7 @@ export const QueryInsightsTable = ({
         )}
       </div>
 
-      <Sheet
+      <QueryInsightsDetailSheet
         open={activeSheetRow !== undefined}
         onOpenChange={(open) => {
           if (!open) {
@@ -946,116 +930,18 @@ export const QueryInsightsTable = ({
             setSelectedRow(undefined)
           }
         }}
-        modal={false}
-      >
-        <SheetTitle className="sr-only">Query details</SheetTitle>
-        <SheetDescription className="sr-only">Query Insights Details &amp; Indexes</SheetDescription>
-        <SheetContent
-          side="right"
-          className="flex flex-col h-full bg-studio border-l lg:!w-[calc(100vw-802px)] max-w-[700px] w-full"
-          hasOverlay={false}
-          onInteractOutside={(event) => {
-            if (
-              dataGridContainerRef.current?.contains(event.target as Node) ||
-              triageContainerRef.current?.contains(event.target as Node)
-            ) {
-              event.preventDefault()
-            }
-          }}
-        >
-          <Tabs_Shadcn_
-            value={sheetView}
-            className="flex flex-col h-full"
-            onValueChange={(v) => setSheetView(v as 'details' | 'indexes' | 'explain')}
-          >
-            <div className="px-5 border-b">
-              <TabsList_Shadcn_ className="px-0 flex gap-x-4 min-h-[46px] border-b-0 [&>button]:h-[47px]">
-                <TabsTrigger_Shadcn_
-                  value="details"
-                  className="px-0 pb-0 data-[state=active]:bg-transparent !shadow-none"
-                >
-                  Query details
-                </TabsTrigger_Shadcn_>
-                <TabsTrigger_Shadcn_
-                  value="indexes"
-                  className="px-0 pb-0 data-[state=active]:bg-transparent !shadow-none"
-                >
-                  Indexes
-                </TabsTrigger_Shadcn_>
-                {activeSheetRow?.issueType !== 'error' && (
-                  <TabsTrigger_Shadcn_
-                    value="explain"
-                    className="px-0 pb-0 data-[state=active]:bg-transparent !shadow-none"
-                  >
-                    Explain
-                  </TabsTrigger_Shadcn_>
-                )}
-              </TabsList_Shadcn_>
-            </div>
-            <TabsContent_Shadcn_ value="details" className="mt-0 flex-grow min-h-0 overflow-y-auto">
-              {activeSheetRow && (
-                <QueryDetail
-                  selectedRow={activeSheetRow}
-                  onClickViewSuggestion={() => setSheetView('indexes')}
-                  onClose={() => {
-                    setSelectedTriageRow(undefined)
-                    setSelectedRow(undefined)
-                  }}
-                />
-              )}
-            </TabsContent_Shadcn_>
-            <TabsContent_Shadcn_ value="indexes" className="mt-0 flex-grow min-h-0 overflow-y-auto">
-              {activeSheetRow && <QueryIndexes selectedRow={activeSheetRow} />}
-            </TabsContent_Shadcn_>
-            <TabsContent_Shadcn_ value="explain" className="mt-0 flex-grow min-h-0 flex flex-col overflow-hidden">
-              {explainLoadingQuery ? (
-                <div className="px-6 py-4 flex items-center gap-2 text-sm text-foreground-light">
-                  <Loader2 size={14} className="animate-spin" /> Running EXPLAIN ANALYZE...
-                </div>
-              ) : activeSheetRow && explainResults[activeSheetRow.query]?.length > 0 ? (
-                <>
-                  <div className="flex items-center justify-between px-5 py-2 border-b flex-shrink-0">
-                    <p className="text-xs text-foreground-lighter">
-                      EXPLAIN ANALYZE output
-                    </p>
-                    <Button
-                      type="default"
-                      size="tiny"
-                      icon={<AiIconAnimation size={14} />}
-                      onClick={() => {
-                        const rows = explainResults[activeSheetRow.query]
-                        const { query, prompt } = buildExplainOptimizationPrompt(
-                          activeSheetRow.query,
-                          rows,
-                          {
-                            mean_time: activeSheetRow.mean_time,
-                            calls: activeSheetRow.calls,
-                            total_time: activeSheetRow.total_time,
-                          }
-                        )
-                        openSidebar(SIDEBAR_KEYS.AI_ASSISTANT)
-                        aiSnap.newChat({
-                          sqlSnippets: [{ label: 'Query', content: query }],
-                          initialMessage: prompt,
-                        })
-                      }}
-                    >
-                      Optimize with AI
-                    </Button>
-                  </div>
-                  <div className="flex-1 min-h-0 overflow-y-auto">
-                    <ExplainVisualizer rows={explainResults[activeSheetRow.query]} />
-                  </div>
-                </>
-              ) : (
-                <div className="px-6 py-4 text-sm text-foreground-lighter">
-                  No explain results available.
-                </div>
-              )}
-            </TabsContent_Shadcn_>
-          </Tabs_Shadcn_>
-        </SheetContent>
-      </Sheet>
+        activeSheetRow={activeSheetRow}
+        sheetView={sheetView}
+        onSheetViewChange={setSheetView}
+        onClose={() => {
+          setSelectedTriageRow(undefined)
+          setSelectedRow(undefined)
+        }}
+        dataGridContainerRef={dataGridContainerRef}
+        triageContainerRef={triageContainerRef}
+        explainLoadingQuery={explainLoadingQuery}
+        explainResults={explainResults}
+      />
     </div>
   )
 }

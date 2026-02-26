@@ -2,6 +2,8 @@ import type { QueryPerformanceRow } from '../../QueryPerformance/QueryPerformanc
 
 export type IssueType = 'error' | 'index' | 'slow' | null
 
+export type HealthLevel = 'healthy' | 'warning' | 'critical'
+
 export interface ClassifiedQuery extends QueryPerformanceRow {
   issueType: IssueType
   hint: string

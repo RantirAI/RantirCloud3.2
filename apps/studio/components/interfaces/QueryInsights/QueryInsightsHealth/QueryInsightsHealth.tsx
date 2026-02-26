@@ -1,9 +1,8 @@
 import { useQueryInsightsIssues } from '../hooks/useQueryInsightsIssues'
 import { useQueryInsightsScore } from '../hooks/useQueryInsightsScore'
-import { HEALTH_COLORS, HEALTH_LEVELS, getHealthLevel } from './QueryInsightsHealth.constants'
+import { HEALTH_COLORS, HEALTH_LEVELS } from './QueryInsightsHealth.constants'
 import type { QueryPerformanceRow } from '../../QueryPerformance/QueryPerformance.types'
 import { QueryInsightsHealthMetric } from './QueryInsightsHealthMetric'
-import { cn } from 'ui'
 import { useMemo } from 'react'
 
 interface QueryInsightsHealthProps {

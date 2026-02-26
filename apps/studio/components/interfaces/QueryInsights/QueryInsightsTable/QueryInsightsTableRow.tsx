@@ -42,7 +42,6 @@ export const QueryInsightsTableRow = ({
         </div>
       )}
 
-      {/* Query + hint */}
       <div className="flex-1 min-w-0">
         <p className="text-xs font-mono text-foreground line-clamp-1">
           <span className="text-foreground">{item.queryType ?? '–'}</span>
@@ -65,7 +64,6 @@ export const QueryInsightsTableRow = ({
         </p>
       </div>
 
-      {/* Stats */}
       <div className="flex items-stretch divide-x divide-border flex-shrink-0 tabular-nums">
         <Tooltip>
           <TooltipTrigger asChild>
@@ -108,7 +106,6 @@ export const QueryInsightsTableRow = ({
         </Tooltip>
       </div>
 
-      {/* Actions — fixed width so stats column never shifts */}
       <div className="flex items-center gap-2 flex-shrink-0 justify-end w-[260px]">
         <Button
           type="default"
@@ -121,7 +118,6 @@ export const QueryInsightsTableRow = ({
           Go to Logs
         </Button>
 
-        {/* Explain: index + slow only */}
         {(item.issueType === 'index' || item.issueType === 'slow') && (
           <Button
             type="default"
@@ -136,7 +132,6 @@ export const QueryInsightsTableRow = ({
           </Button>
         )}
 
-        {/* Create Index: index only (primary CTA) */}
         {item.issueType === 'index' && (
           <Button
             type="primary"
@@ -150,7 +145,6 @@ export const QueryInsightsTableRow = ({
           </Button>
         )}
 
-        {/* Fix with AI: error + slow */}
         {(item.issueType === 'error' || item.issueType === 'slow') && (
           <Button
             type="default"

@@ -51,9 +51,9 @@ export const QueryInsightsChart = ({ chartData, selectedChartData, isLoading }: 
   const filteredData = useMemo(() => {
     if (hiddenSeries.size === 0) return data
     return data.map((point) => {
-      const filtered = { ...point }
+      const filtered = { ...point } as Record<string, number | undefined>
       hiddenSeries.forEach((key) => {
-        ; (filtered as any)[key] = undefined
+        filtered[key] = undefined
       })
       return filtered
     })
