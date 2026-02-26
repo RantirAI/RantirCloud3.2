@@ -90,7 +90,7 @@ export function usePrefetchEditorTablePage() {
         // eat prefetching errors as they are not critical
       })
     },
-    [project, queryClient, roleImpersonationState, router]
+    [connectionString, project, queryClient, roleImpersonationState, router]
   )
 }
 
