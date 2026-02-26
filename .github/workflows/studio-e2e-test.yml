@@ -17,6 +17,11 @@ jobs:
   test:
     timeout-minutes: 60
     runs-on: blacksmith-4vcpu-ubuntu-2404
+    strategy:
+      fail-fast: false
+      matrix:
+        shardIndex: [1, 2]
+        shardTotal: [2]
 
     env:
       OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
@@ -55,10 +60,53 @@ jobs:
         if: steps.filter.outputs.studio == 'true'
         run: pnpm -C e2e/studio exec playwright install chromium --with-deps --only-shell
 
+      - name: Drop unnecessary migrations
+        run: |
+          rm -rf supabase
+          pnpm supabase init
+
       - name: 🚀 Run Playwright tests against Vercel Preview
         if: steps.filter.outputs.studio == 'true'
         id: playwright
-        run: pnpm e2e
+        run: pnpm e2e --shard=${{ matrix.shardIndex }}/${{ matrix.shardTotal }}
+
+      - name: Upload blob report to GitHub Actions Artifacts
+        if: always() && steps.filter.outputs.studio == 'true'
+        uses: actions/upload-artifact@v4
+        with:
+          name: blob-report-${{ matrix.shardIndex }}
+          path: e2e/studio/blob-report
+          retention-days: 7
+
+      - name: Fail job if tests failed
+        if: steps.filter.outputs.studio == 'true' && (steps.playwright.outcome != 'success' || steps.summarize.outputs.flaky_count > 0)
+        run: |
+          echo "E2E tests failed" >&2
+          exit 1
+
+  merge-reports:
+    # Merge reports after playwright-tests, even if some shards have failed
+    if: ${{ !cancelled() }}
+    needs: [test]
+
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-node@v5
+        with:
+          node-version: lts/*
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Download blob reports from GitHub Actions Artifacts
+        uses: actions/download-artifact@v5
+        with:
+          path: e2e/studio/blob-reports
+          pattern: blob-report-*
+          merge-multiple: true
+
+      - name: Merge Playwright reports
+        run: pnpm --prefix e2e/studio exec playwright merge-reports --config=playwright.merge.config.ts -- blob-report
 
       - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
         if: always() && steps.filter.outputs.studio == 'true'
@@ -75,9 +123,3 @@ jobs:
         with:
           report-file: e2e/studio/test-results/test-results.json
           comment-title: '🎭 Playwright Test Results'
-
-      - name: Fail job if tests failed
-        if: steps.filter.outputs.studio == 'true' && (steps.playwright.outcome != 'success' || steps.summarize.outputs.flaky_count > 0)
-        run: |
-          echo "E2E tests failed" >&2
-          exit 1
