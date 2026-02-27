@@ -28,6 +28,7 @@ interface PlatformWebhooksHeaderProps {
   endpointStatus?: 'enabled' | 'disabled'
   endpointActions?: ReactNode
   webhooksHref: string
+  scopeLabel: string
 }
 
 export const PlatformWebhooksHeader = ({
@@ -37,6 +38,7 @@ export const PlatformWebhooksHeader = ({
   endpointStatus,
   endpointActions,
   webhooksHref,
+  scopeLabel,
 }: PlatformWebhooksHeaderProps) => {
   return (
     <PageHeader size="default" className="pb-6">
@@ -45,12 +47,12 @@ export const PlatformWebhooksHeader = ({
           <BreadcrumbList>
             <BreadcrumbItem>
               <BreadcrumbLink asChild>
-                <Link href={webhooksHref}>Webhooks</Link>
+                <Link href={webhooksHref}>{scopeLabel}</Link>
               </BreadcrumbLink>
             </BreadcrumbItem>
             <BreadcrumbSeparator />
             <BreadcrumbItem>
-              <BreadcrumbPage>Endpoint details</BreadcrumbPage>
+              <BreadcrumbPage>Endpoint</BreadcrumbPage>
             </BreadcrumbItem>
           </BreadcrumbList>
         </PageHeaderBreadcrumb>

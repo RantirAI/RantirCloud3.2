@@ -230,6 +230,7 @@ export const PlatformWebhooksPage = ({ scope, endpointId }: PlatformWebhooksPage
           ) : undefined
         }
         webhooksHref={webhooksHref}
+        scopeLabel={scopeLabel}
       />
 
       <PageContainer size="default">
