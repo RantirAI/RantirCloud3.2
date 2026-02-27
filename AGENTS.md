@@ -25,6 +25,14 @@ The shorthand `pnpm dev:studio-local` combines setup + dev with Option B.
 
 **Gotcha:** The committed `.env` has placeholder URLs on port 8000 (for the Docker Compose approach). When using `supabase start`, the API runs on port 54321. You must either use `.env.local` (Option A) or `NODE_ENV=test` (Option B) to override these values. `.env.local` is NOT loaded when `NODE_ENV=test`.
 
+**Option C — External Supabase Cloud DEV project (current setup):**
+
+Studio connects to an external Supabase Cloud project (ref: `lygnzqrsaikskagxoonm`). The `.env.local` file contains the DEV project keys. Start Studio with: `SUPABASE_URL=https://lygnzqrsaikskagxoonm.supabase.co pnpm --filter studio dev`
+
+The `SUPABASE_URL` override on the command line is needed because a Cursor Secret with the same name exists but contains the dashboard URL instead of the API URL.
+
+**Known limitation:** Studio's Table Editor and SQL Editor use the pg-meta backend (`STUDIO_PG_META_URL`), which Supabase Cloud does not expose externally at `/pg`. These features will show validation errors. Application data is still fully accessible via the REST API (`/rest/v1/`) and Auth API (`/auth/v1/`).
+
 ### Running other apps
 
 - `www`: Copy `apps/www/.env.local.example` to `apps/www/.env.local`, then `pnpm dev:www` (port 3000). No Docker needed.
