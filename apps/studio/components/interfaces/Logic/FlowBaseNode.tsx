@@ -51,7 +51,13 @@ function FlowBaseNodeInner({ id, data, selected }: NodeProps) {
       <div
         className={cn(
           'rounded-lg border-2 bg-surface-100 px-4 py-3 shadow-sm transition-all min-w-[180px] max-w-[220px]',
-          selected ? 'border-brand-500 shadow-md' : 'border-default hover:border-foreground-muted'
+          (data as any)?._runStatus === 'success'
+            ? 'border-brand-500 shadow-md ring-2 ring-brand-500/30'
+            : (data as any)?._runStatus === 'error'
+              ? 'border-destructive-500 shadow-md ring-2 ring-destructive-500/30'
+              : selected
+                ? 'border-brand-500 shadow-md'
+                : 'border-default hover:border-foreground-muted'
         )}
       >
         <div className="flex items-center gap-2.5">
