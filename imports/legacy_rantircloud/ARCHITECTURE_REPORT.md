@@ -1,6 +1,6 @@
 # Legacy Rantir Cloud — Architectural Analysis Report
 
-**Source:** `nodes.zip` (committed to master), extracted to `imports/legacy_rantircloud/src/`
+**Source:** `imports/legacy_rantircloud/` (full codebase, 1,177 files)
 **Date:** 2026-02-27
 **Scope:** Analysis only — no code modified, no files copied, no components created.
 
@@ -8,214 +8,357 @@
 
 ## 1. Inventory Summary
 
-| Metric | Count |
-|--------|-------|
-| Total files | 161 (all `index.ts`) |
-| Total node directories | 160 |
-| Action nodes | 143 |
-| Transformer nodes | 10 |
-| Trigger nodes | 2 |
-| Condition nodes | 2 |
-| Uncategorized | 1 (webflow) |
-
-**What is present:** Node plugin definitions only.
-**What is NOT present:** Flow engine, execution engine, runtime orchestration, state management, serialization format, UI components, configuration panels, persistence layer, CSS, build config.
+| Category | Files | Key Path |
+|----------|-------|----------|
+| Type definitions | 17 | `types/` |
+| Core logic / lib | 71 | `lib/` |
+| State management (stores) | 15 | `stores/` |
+| React contexts | 2 | `contexts/` |
+| Services | 33 | `services/` |
+| React hooks | 47 | `hooks/` |
+| Components (total) | 538+ | `components/` |
+| Flow builder UI | 80 | `components/flow/` |
+| App builder UI | 228 | `components/app-builder/` |
+| Node plugin definitions | 161 | `nodes/` |
+| Pages / routes | 51 | `pages/` |
+| Utilities | 10 | `utils/` |
+| Supabase integration | 2 | `integrations/supabase/` |
+| Schema | 1 | `schema/` |
+| Assets | 20+ | `assets/` |
+| Entry point / config | 4 | `App.tsx`, `main.tsx`, `index.css`, `vite-env.d.ts` |
 
 ---
 
-## 2. Categorized Analysis
+## 2. Categorized Deep Analysis
 
 ### 2.1 Flow Engine Core Logic
 
-| Component | Status |
-|-----------|--------|
-| Execution engine | **NOT INCLUDED** — no flow runner, scheduler, or step executor code |
-| Runtime orchestration | **NOT INCLUDED** — no DAG traversal, parallel execution, or retry logic |
-| Node registry | **REFERENCED** — `import { nodeRegistry } from '@/lib/node-registry'` appears in 1 node (loop-node). Registry itself is missing. |
-| Node lifecycle handling | **NOT INCLUDED** — no init/teardown/timeout/error-boundary code |
+#### Execution Engine
+**File:** `lib/flow-store.ts` (1,762 lines)
+- Zustand store implementing the **entire flow execution engine**
+- `executeFlow()` — DAG traversal with topological sort
+- `executeSingleNode()` — isolated node testing
+- Conditional branch resolution via `findBranchAncestry()`
+- Loop execution with iteration tracking
+- Debug logging per node step
+- Edge animation during execution
+- Error node tracking
+- Variable resolution during execution
 
-### 2.2 Node Definitions (THE PRIMARY ASSET)
+**Verdict:** ⚠️ Reusable with significant refactor — execution logic is tightly coupled to Zustand store state and UI concerns (edge animation, dialog state).
 
-Every file follows a consistent `NodePlugin` interface:
+#### Runtime Orchestration
+**Files:**
+- `services/flowService.ts` (736 lines) — Supabase CRUD for flows, execution history, deployment, version management
+- `services/flowMonitoringService.ts` — execution monitoring and logging
+- `services/flowSecretsService.ts` — encrypted secret management for API keys
 
+**Verdict:** ⚠️ Reusable with refactor — good service abstractions, but all call `supabase.from()` directly. Needs adapter layer.
+
+#### Node Registry
+**File:** `lib/node-registry.ts` (104 lines)
+- Singleton `NodeRegistry` class with `Map<string, NodePlugin>`
+- `register()` / `registerConditionally()` based on user installations
+- `getPlugin()` / `getAvailablePlugins()` / `getAllPlugins()`
+- `requiresInstallation()` checks against core node list
+- Dispatches `window.CustomEvent('nodeRegistryUpdated')` for reactivity
+
+**Verdict:** ✅ Reusable with minor refactor — replace `window.dispatchEvent` with proper event system.
+
+#### Node Lifecycle / Core Node Types
+**File:** `lib/coreNodeTypes.ts` (55 lines)
+- `CORE_NODE_TYPES` Set — 27 built-in nodes that don't require installation
+- Includes: `http-request`, `condition`, `for-each-loop`, `ai-agent`, `webhook-trigger`, `response`, `logger`, etc.
+- `isCoreNode()` check function
+
+**Verdict:** ✅ Reusable as-is
+
+#### Node Registration
+**Files:**
+- `lib/register-nodes.ts` — bulk registration of all node plugins
+- `lib/register-node-components.ts` — React Flow node type mapping
+- `lib/node-alias-registry.ts` — node type aliases for backward compatibility
+
+**Verdict:** ✅ Reusable with minor refactor
+
+### 2.2 Node Definitions
+
+**Path:** `nodes/` (161 files across 160 directories)
+
+| Category | Count | Examples |
+|----------|-------|---------|
+| action | 143 | activecampaign, mailchimp, slack, stripe, gmail, shopify |
+| transformer | 10 | ai-mapper, calculator, csv, data-filter, for-each-loop |
+| trigger | 2 | webhook-trigger, cal-com |
+| condition | 2 | condition, approval |
+
+**Consistent `NodePlugin` interface (from `types/node-plugin.ts`):**
 ```typescript
 interface NodePlugin {
-  type: string;                    // unique slug (e.g., 'activecampaign')
-  name: string;                    // display name
-  description: string;             // tooltip/description
-  category: 'action' | 'trigger' | 'transformer' | 'condition';
-  icon: LucideIcon;                // from lucide-react
-  color: string;                   // hex color
-  inputs: NodeInput[];             // typed input definitions
-  outputs: NodeOutput[];           // typed output definitions
-  execute(inputs, context): Promise<Record<string, any>>;
-  getDynamicInputs?(currentInputs): NodeInput[];  // optional
+  type: string;
+  name: string;
+  description: string;
+  category: 'trigger' | 'action' | 'condition' | 'transformer';
+  icon?: any;           // lucide-react icon component
+  color?: string;       // hex color
+  inputs?: NodeInput[];
+  outputs?: NodeOutput[];
+  getDynamicInputs?(currentInputs): NodeInput[];
+  getDynamicOutputs?(currentInputs): NodeOutput[];
+  execute?(inputs, context: ExecutionContext): Promise<Record<string, any>>;
 }
 ```
 
-**Input types observed:** `text`, `select`, `boolean`, `number`, `textarea`, `code` (with `language: 'json'`), `loopVariables`
-**Output types observed:** `string`, `number`, `boolean`, `object`, `array`
+**Input types:** `text`, `select`, `number`, `code`, `variable`, `textarea`, `boolean`, `databaseSelector`, `tableSelector`, `webflowFieldMapping`, `webflowSelect`, `clicdataSelect`, `loopVariables`, `queryParamsEditor`, `hidden`
 
-### 2.3 UI Node Components / Configuration Panels
+**Execution pattern:** 126/160 nodes call `supabase.functions.invoke('{slug}-proxy')` for API execution via edge functions. No direct database calls.
 
-**NOT INCLUDED.** The archive contains only data-layer node definitions. There are no:
-- React components for rendering nodes on canvas
-- Input/output handle components
-- Configuration panel UIs
-- Node property editors
+**Verdict:** ⚠️ All 160 reusable with refactor (Supabase client import path, `resolveVariable` centralization, `localStorage`/`window` removal in 14 nodes)
 
-These were part of the legacy Rantir Cloud frontend (likely at `@/components/flow/`) and are not in the archive.
+### 2.3 UI Node Components
+
+**Path:** `components/flow/` (80 files)
+
+| Subfolder | Purpose | Key Files |
+|-----------|---------|-----------|
+| `nodes/` | React Flow node renderers | `BaseNode.tsx`, `ConditionalNode.tsx`, `ForEachLoopNode.tsx`, `LoopNode.tsx` |
+| `edges/` | Custom edge renderers | `StraightEdge.tsx`, `StepEdge.tsx` |
+| `editor/` | Node configuration panels | `NodeInputField.tsx`, `VariableBindingSidebar.tsx`, `CodeEditorModal.tsx`, `LoopConfigurationPanel.tsx`, `AdvancedJsonMapper.tsx` |
+| `condition/` | Condition-specific UI | `ConditionCaseEditor.tsx`, `ResponseChecker.tsx` |
+| `deployment/` | Flow deployment UI | `FlowDeploymentManager.tsx`, `WebhookConfiguration.tsx`, `ChatEmbedConfiguration.tsx` |
+| `webhook/` | Webhook testing/config | `WebhookTester.tsx`, `PayloadTreeViewer.tsx`, `SamplePayloadSelector.tsx` |
+| `icons/` | Custom integration SVGs | `AirtableIcon.tsx`, `HubSpotIcon.tsx`, `SalesforceIcon.tsx`, `ShopifyIcon.tsx`, `SnowflakeIcon.tsx` |
+| Root | Canvas, palette, toolbar | `FlowCanvas.tsx`, `NodePalette.tsx`, `FlowToolbar.tsx`, `NodeProperties.tsx`, `FlowVariablesManager.tsx` |
+
+**Key components:**
+- `FlowCanvas.tsx` — Main React Flow canvas with drag-drop, auto-layout
+- `NodePalette.tsx` — Node picker/search sidebar
+- `NodeProperties.tsx` — Right panel for configuring selected node
+- `BaseNode.tsx` — Universal node renderer with input/output handles
+- `NodeInputField.tsx` — Dynamic form field renderer for all input types
+
+**Verdict:** ⚠️ Reusable with refactor — largest chunk of reusable UI. Depends on legacy CSS (`FlowBuilderStyles.css`), Zustand stores, and legacy routing. Core rendering logic (BaseNode, NodeInputField, edges) is highly portable.
 
 ### 2.4 Flow Serialization Format
 
-**NOT INCLUDED.** No JSON schema, import/export utilities, or persistence format definitions found.
+**From `services/flowService.ts`:**
+```typescript
+interface FlowData {
+  id: string;
+  flow_project_id: string;
+  nodes: FlowNode[];      // React Flow node format
+  edges: FlowEdge[];      // React Flow edge format
+  version: number;
+  version_name?: string;
+  version_description?: string;
+  created_at: string;
+  updated_at: string;
+  is_published: boolean;
+}
+```
+
+**From `types/flowTypes.ts`:**
+```typescript
+interface FlowNode extends Node {   // extends @xyflow/react Node
+  data: {
+    type: string;
+    label: string;
+    inputs?: Record<string, any>;
+    disabled?: boolean;
+    isFirstNode?: boolean;
+    selectedOutputHandle?: string;
+    payloadMappings?: PayloadMapping[];
+    loopConfig?: LoopConfiguration;
+  };
+}
+```
+
+**Persistence:** Stored in Supabase tables (`flow_data`, `flow_projects`, `flow_executions`, `node_configurations`) via `flowService.ts`.
+
+**Verdict:** ✅ Reusable as-is — standard React Flow JSON format with metadata extensions. Clean candidate for new persistence layer.
 
 ### 2.5 State Management
 
-**NOT INCLUDED.** No stores, contexts, or global state files. However, legacy state patterns are visible inside nodes:
-- `localStorage.getItem('flow-env-vars')` — env var storage
-- `localStorage.getItem('flow-variables-${flowId}')` — flow-scoped variables
-- `window.location.pathname.split('/').pop()` — flow ID from URL
+**Path:** `stores/` (15 Zustand stores)
+
+| Store | Purpose | Logic-Relevant |
+|-------|---------|:---:|
+| `flowHistoryStore.ts` | Undo/redo for flow editor | ✅ |
+| `variableStore.ts` | Flow variable management | ✅ |
+| `databaseStore.ts` | Database connection state | ⚠️ |
+| `aiSidebarStore.ts` | AI assistant state | ❌ |
+| `aiWallStore.ts` | AI Wall feature state | ❌ |
+| `appBuilderStore.ts` | App builder state | ❌ |
+| `appBuilderSidebarStore.ts` | App builder sidebar | ❌ |
+| `classStore.ts` | CSS class management | ❌ |
+| `componentStateStore.ts` | Component state tracking | ❌ |
+| `componentUsageStore.ts` | Component usage analytics | ❌ |
+| `dashboardLayoutStore.ts` | Dashboard layout | ❌ |
+| `designSystemStore.ts` | Design system tokens | ❌ |
+| `designTokenStore.ts` | Design token values | ❌ |
+| `snapshotStore.ts` | Snapshot management | ❌ |
+| `userComponentStore.ts` | User component library | ❌ |
+
+**Key flow state (in `lib/flow-store.ts`, not in `stores/`):**
+- `FlowState` — nodes, edges, debug logs, execution status, viewport, UI state
+- 1,762 lines of combined state + actions + execution engine
+
+**Verdict:** Flow-relevant stores (2/15) are reusable with refactor. The main flow store (`lib/flow-store.ts`) needs decomposition — split execution engine from UI state.
 
 ### 2.6 Supabase Integration Logic
 
-| Pattern | Count | Detail |
-|---------|-------|--------|
-| `supabase.functions.invoke('{name}-proxy')` | 126 nodes | Every action node calls a dedicated edge function |
-| `import { supabase } from '@/integrations/supabase/client'` | 147 nodes | Direct Supabase client import |
-| `import { databaseService } from '@/services/databaseService'` | 1 node (data-table) | Abstracted DB service |
-| `import { tableService } from '@/services/tableService'` | 1 node (data-table) | Abstracted table service |
-| Direct `supabase.from()` / `supabase.rpc()` | 0 | No direct PostgREST calls in nodes |
+**Path:** `integrations/supabase/`
 
-**Auth coupling:** None directly in nodes. Auth is handled externally by the Supabase client singleton.
+| File | Content |
+|------|---------|
+| `client.ts` | Supabase client singleton using `import.meta.env.VITE_*` (Vite-specific) |
+| `types.ts` | Auto-generated Database type definitions |
 
-**Edge function naming convention:** `{integration-slug}-proxy` or `{integration-slug}-action`
+**Database calls across services:**
 
-### 2.7 Visual Builder Specific Code
+| Service | Tables Used | Call Count |
+|---------|-------------|-----------|
+| `flowService.ts` | `flow_projects`, `flow_data`, `flow_executions`, `node_configurations` | 25+ |
+| `databaseService.ts` | Dynamic user tables | 15+ |
+| `integrationsService.ts` | `integrations`, `user_integrations` | 10+ |
+| `tableService.ts` | Dynamic user tables | 10+ |
+| `activityService.ts` | `activity_logs` | 5+ |
+| `environmentService.ts` | `flow_environment_variables` | 5+ |
 
-**NOT INCLUDED.** No visual builder components, canvas renderers, drag-and-drop handlers, or layout managers.
+**Edge function calls:** 126 node types invoke dedicated edge functions (`{slug}-proxy` or `{slug}-action`)
 
-**Referenced but missing:**
-- `@/components/flow/icons/AirtableIcon` (and HubSpot, Salesforce, Shopify, Snowflake)
-- `@/components/flow/` — entire flow UI component tree
-- `@/lib/node-registry` — node registration system
+**Auth coupling:** Auth handled by Supabase client singleton + `hooks/useAuth.tsx`. Not deeply coupled to node logic.
+
+**Verdict:** ⚠️ Supabase client must be adapted — legacy uses `import.meta.env.VITE_*` (Vite), Studio uses `process.env.*` (Next.js). Services need adapter layer but core logic is portable.
+
+### 2.7 Visual Builder Specific Code (NOT related to Logic)
+
+**These are NOT relevant to the Logic project type:**
+
+| Path | Purpose | Why Not Reusable |
+|------|---------|-----------------|
+| `components/app-builder/` (228 files) | Drag-drop visual app builder | Entirely separate product domain |
+| `components/ai-wall/` (13 files) | AI wall/canvas feature | Unrelated feature |
+| `components/docs/` (24 files) | Document editor | Unrelated feature |
+| `components/sheets/` (6 files) | Spreadsheet view | Unrelated feature |
+| `stores/appBuilderStore.ts` | App builder state | Unrelated |
+| `stores/aiWallStore.ts` | AI wall state | Unrelated |
+| `stores/designSystemStore.ts` | Design tokens | Unrelated |
+| `stores/classStore.ts` | CSS classes | Unrelated |
+| `lib/converters/` (6 files) | Figma/Framer/React/HTML/Webflow converters | Unrelated |
+| `lib/stylesToTailwind.ts` | CSS → Tailwind conversion | Unrelated |
+| `lib/canvasCSSGenerator.ts` | CSS generation for canvas | Unrelated |
+
+### 2.8 Tight Coupling to Legacy Stack
+
+| Pattern | Files Affected | Severity | Migration Effort |
+|---------|---------------|----------|-----------------|
+| `import.meta.env.VITE_*` | `integrations/supabase/client.ts` | 🔴 High | Must replace with Next.js `process.env` |
+| `localStorage` usage | 14 node files + multiple components | 🟡 Medium | Replace with React state/context |
+| `window.location` for routing | 14 node files + flow store | 🟡 Medium | Replace with Next.js router |
+| `window.dispatchEvent` | `lib/node-registry.ts` | 🟢 Low | Replace with event emitter or React context |
+| `@/` path alias (Vite) | All files | 🟢 Low | Works in Next.js with tsconfig paths |
+| CSS files (legacy system) | `FlowBuilderStyles.css`, `App.css`, etc. (9 files) | 🟡 Medium | Convert to Tailwind or CSS modules |
+| Zustand stores | 15 stores + flow-store | 🟢 Low | Zustand works in Next.js |
+| `@xyflow/react` | `types/flowTypes.ts`, `lib/flow-store.ts` | ✅ Compatible | Already installed in Studio |
 
 ---
 
-## 3. Dependency Analysis
+## 3. Folder → Purpose → Reusability Matrix
 
-### External Dependencies (per node files)
+### Full Classification
 
-| Dependency | Usage | Available in Studio? |
-|------------|-------|---------------------|
-| `lucide-react` | Icons for every node | ✅ Yes — already in Studio |
-| `@/types/node-plugin` | Core type definitions | ❌ Missing — must be created |
-| `@/integrations/supabase/client` | Supabase client singleton | ⚠️ Needs adaptation — Studio has different Supabase client |
-| `@/lib/node-registry` | Node registration | ❌ Missing — must be created |
-| `@/services/databaseService` | DB abstraction (1 node) | ❌ Missing |
-| `@/services/tableService` | Table abstraction (1 node) | ❌ Missing |
-| `@/components/flow/icons/*` | Custom SVG icons (5 nodes) | ❌ Missing — can use lucide fallbacks |
-
-### Legacy Stack Coupling
-
-| Pattern | Count | Severity |
-|---------|-------|----------|
-| `localStorage` usage | 14 nodes | 🟡 Medium — must be replaced with proper state management |
-| `window.location` usage | 14 nodes | 🟡 Medium — must use Next.js router |
-| `resolveVariable()` helper (copy-pasted) | 12 nodes | 🟡 Medium — should be centralized utility |
-| Vite-only setup (`@/` alias) | All 161 files | 🟢 Low — `@/` alias just needs tsconfig mapping |
-| Legacy CSS system | 0 files | ✅ None — no CSS in archive |
-
----
-
-## 4. Folder → Purpose → Reusability Matrix
-
-### Node Categories
-
-| Folder | Purpose | Reusable As-Is | Reusable With Refactor | Not Reusable | Legacy Dep | Clean Candidate |
-|--------|---------|:-:|:-:|:-:|:-:|:-:|
-| `nodes/activecampaign/` ... (143 action nodes) | Integration action definitions | | ✅ | | `supabase client`, `localStorage` | ✅ |
-| `nodes/webhook-trigger/` | Webhook trigger with dynamic output inference | | ✅ | | `supabase client` | ✅ |
-| `nodes/cal-com/` | Calendar trigger | | ✅ | | `supabase client` | ✅ |
-| `nodes/ai-agent/` | AI agent with multi-model support | | ✅ | | `supabase client` | ✅ |
-| `nodes/ai-mapper/` | AI-powered data transformation | | ✅ | | `supabase client` | ✅ |
-| `nodes/for-each-loop/` | Loop control flow | | ✅ | | `nodeRegistry` | ✅ |
-| `nodes/loop-node/` | Generic loop | | ✅ | | `nodeRegistry` | ✅ |
-| `nodes/data-filter/` | Data filtering/transformation | | ✅ | | minimal | ✅ |
-| `nodes/condition/` | Conditional branching | | ✅ | | minimal | ✅ |
-| `nodes/approval/` | Human-in-the-loop approval | | ✅ | | `supabase client` | ✅ |
-| `nodes/calculator/` | Math operations | | ✅ | | none | ✅ |
-| `nodes/http-request/` | Generic HTTP client | | ✅ | | `supabase client` | ✅ |
-| `nodes/data-table/` | Database CRUD operations | | ✅ | | `databaseService`, `tableService` | ✅ |
+| Folder / File | Purpose | Reusable As-Is | Reusable With Refactor | Not Reusable | Legacy Dep | Clean Candidate for `/logic` |
+|---------------|---------|:-:|:-:|:-:|:-:|:-:|
+| **`types/node-plugin.ts`** | NodePlugin interface, NodeInput, NodeOutput, ExecutionContext | ✅ | | | | ✅ |
+| **`types/flowTypes.ts`** | FlowNode, FlowEdge, LoopConfiguration, debug types | ✅ | | | @xyflow/react | ✅ |
+| **`lib/node-registry.ts`** | Node registration system | | ✅ | | `window.dispatchEvent` | ✅ |
+| **`lib/coreNodeTypes.ts`** | Core node type list | ✅ | | | | ✅ |
+| **`lib/register-nodes.ts`** | Bulk node registration | | ✅ | | import paths | ✅ |
+| **`lib/register-node-components.ts`** | React Flow node type mapping | | ✅ | | import paths | ✅ |
+| **`lib/node-alias-registry.ts`** | Node type aliases | ✅ | | | | ✅ |
+| **`lib/flow-store.ts`** | Flow state + execution engine | | ⚠️ | | Zustand, UI coupling | ✅ (needs decomposition) |
+| **`lib/dagre-layout.ts`** | Auto-layout algorithm | ✅ | | | | ✅ |
+| **`lib/tree-layout.ts`** | Tree layout algorithm | ✅ | | | | ✅ |
+| **`stores/flowHistoryStore.ts`** | Undo/redo | | ✅ | | Zustand | ✅ |
+| **`stores/variableStore.ts`** | Variable management | | ✅ | | Zustand | ✅ |
+| **`services/flowService.ts`** | Flow CRUD, execution, deployment | | ✅ | | Supabase direct calls | ✅ |
+| **`services/flowMonitoringService.ts`** | Execution monitoring | | ✅ | | Supabase | ✅ |
+| **`services/flowSecretsService.ts`** | Secret management | | ✅ | | Supabase | ✅ |
+| **`services/environmentService.ts`** | Env variable management | | ✅ | | Supabase | ✅ |
+| **`hooks/useFlowAutosave.tsx`** | Auto-save hook | | ✅ | | legacy routing | ✅ |
+| **`hooks/useFlowHistory.ts`** | History hook | | ✅ | | | ✅ |
+| **`hooks/useFlowNodes.tsx`** | Node management hook | | ✅ | | | ✅ |
+| **`hooks/useNodeAliases.ts`** | Alias resolution hook | ✅ | | | | ✅ |
+| **`hooks/useVariableResolver.ts`** | Variable resolution | | ✅ | | localStorage | ✅ |
+| **`hooks/useUserNodeInstallations.tsx`** | Installed node tracking | | ✅ | | Supabase | ✅ |
+| **`nodes/` (all 160)** | Integration node definitions | | ✅ | | Supabase client import | ✅ |
+| **`components/flow/nodes/BaseNode.tsx`** | Universal node renderer | | ✅ | | legacy CSS | ✅ |
+| **`components/flow/edges/`** | Custom edge components | | ✅ | | | ✅ |
+| **`components/flow/editor/NodeInputField.tsx`** | Dynamic input renderer | | ✅ | | | ✅ |
+| **`components/flow/NodePalette.tsx`** | Node picker | | ✅ | | legacy CSS | ✅ |
+| **`components/flow/NodeProperties.tsx`** | Node config panel | | ✅ | | legacy CSS | ✅ |
+| **`components/flow/FlowCanvas.tsx`** | Main canvas | | ✅ | | Zustand, CSS | ✅ |
+| **`components/flow/FlowToolbar.tsx`** | Canvas toolbar | | ✅ | | | ✅ |
+| **`components/flow/deployment/`** | Deploy UI | | ✅ | | Supabase | ✅ |
+| **`components/flow/webhook/`** | Webhook testing UI | | ✅ | | | ✅ |
+| **`components/flow/icons/`** | Custom SVG icons | ✅ | | | | ✅ |
+| **`integrations/supabase/client.ts`** | Supabase singleton | | | ✅ | `import.meta.env.VITE_*` | Must rebuild for Next.js |
+| **`integrations/supabase/types.ts`** | DB types | | ✅ | | | ✅ |
+| **`data/nodeTemplates.ts`** | Node templates | ✅ | | | | ✅ |
+| **`schema/integrations.sql`** | DB schema | ✅ | | | | ✅ |
+| `components/app-builder/` (228) | Visual app builder | | | ✅ | Entirely separate domain | |
+| `components/ai-wall/` (13) | AI wall feature | | | ✅ | Unrelated feature | |
+| `components/docs/` (24) | Document editor | | | ✅ | Unrelated feature | |
+| `components/sheets/` (6) | Spreadsheet views | | | ✅ | Unrelated feature | |
+| `lib/converters/` (6) | Format converters | | | ✅ | Unrelated feature | |
+| `lib/stylesToTailwind.ts` | CSS conversion | | | ✅ | Unrelated feature | |
+| `stores/appBuilderStore.ts` (etc.) | App builder state (13) | | | ✅ | Unrelated feature | |
+| `App.tsx`, `main.tsx` | Vite entry points | | | ✅ | Vite-only | |
 
 ### Summary Counts
 
 | Classification | Count |
 |----------------|-------|
-| **Reusable as-is** | 0 (all need at minimum import path changes) |
-| **Reusable with refactor** | 160 (all nodes) |
-| **Not reusable** | 0 |
-| **Depends on legacy stack** | 14 (localStorage/window — light refactor) |
-| **Clean candidate for `/logic`** | 160 (all nodes, after refactor) |
+| **Reusable as-is** | ~12 files (types, core lists, icons, templates, schema, layout algorithms) |
+| **Reusable with refactor** | ~350 files (all nodes, flow components, services, hooks, stores, registries) |
+| **Not reusable** | ~280+ files (app builder, AI wall, docs, sheets, converters, Vite config) |
+| **Clean candidate for `/logic`** | ~370 files across types, lib, nodes, flow components, services, hooks |
 
 ---
 
-## 5. Refactor Requirements (For Future Extraction)
+## 4. What's Needed to Extract to `/logic`
 
-These are the changes needed to make nodes usable in the new `/logic` project type. **Do not execute yet.**
+**Priority 1 — Type Foundation (can copy as-is):**
+1. `types/node-plugin.ts` — NodePlugin, NodeInput, NodeOutput, ExecutionContext
+2. `types/flowTypes.ts` — FlowNode, FlowEdge, LoopConfiguration
+3. `lib/coreNodeTypes.ts` — CORE_NODE_TYPES set
 
-### Priority 1 — Infrastructure (must exist before any node works)
+**Priority 2 — Infrastructure (needs refactor):**
+4. `lib/node-registry.ts` — replace `window.dispatchEvent` with React context
+5. `integrations/supabase/client.ts` — rebuild for Next.js `process.env`
+6. `lib/flow-store.ts` — decompose into execution engine + UI state
 
-1. **Create `NodePlugin` type definition** — extract from usage patterns above
-2. **Create Supabase client adapter** — wrap Studio's Supabase client to match `@/integrations/supabase/client` interface
-3. **Create `nodeRegistry`** — registration system for discovered nodes
-4. **Replace `localStorage`/`window.location`** — centralize `resolveVariable()` into a single utility that uses proper React state/context
+**Priority 3 — Node Plugins (batch refactor):**
+7. All 160 `nodes/*/index.ts` — update Supabase client import, centralize `resolveVariable()`
 
-### Priority 2 — Path Aliases
-
-5. **Map `@/` alias** — configure `tsconfig.json` paths or use relative imports
-
-### Priority 3 — Per-Node Cleanup
-
-6. **Standardize edge function invocation** — ensure all `supabase.functions.invoke()` calls go through a unified proxy layer
-7. **Replace 5 custom icons** — AirtableIcon, HubSpotIcon, SalesforceIcon, ShopifyIcon, SnowflakeIcon → use lucide-react alternatives or create new SVGs
-
----
-
-## 6. What's Missing From The Archive
-
-The following components are referenced by the nodes but not included. They would need to be either recovered from the legacy codebase or rebuilt:
-
-| Missing Component | Path Referenced | Required For |
-|-------------------|----------------|-------------|
-| `NodePlugin` types | `@/types/node-plugin` | All 161 files |
-| Supabase client singleton | `@/integrations/supabase/client` | 147 nodes |
-| Node registry | `@/lib/node-registry` | Loop nodes |
-| Database service | `@/services/databaseService` | data-table node |
-| Table service | `@/services/tableService` | data-table node |
-| Custom integration icons | `@/components/flow/icons/*` | 5 nodes |
-| Flow execution engine | Unknown path | Running flows |
-| Flow serialization | Unknown path | Save/load flows |
-| Node UI components | `@/components/flow/` | Visual rendering |
-| State management | Unknown | Flow variable resolution |
+**Priority 4 — UI Components (needs restyling):**
+8. `components/flow/nodes/BaseNode.tsx` — replace legacy CSS with Tailwind
+9. `components/flow/editor/NodeInputField.tsx` — adapt form fields
+10. `components/flow/FlowCanvas.tsx` — integrate with new layout
 
 ---
 
-## 7. Conclusion
+## 5. Key Architectural Insights
 
-The `nodes.zip` archive is a **node definition library** — 160 integration plugins following a consistent `NodePlugin` interface. It is the **data layer** of the flow system, not the engine or UI.
+1. **React Flow is already the foundation** — `types/flowTypes.ts` extends `@xyflow/react` types directly. The serialization format IS React Flow's native format. This is a perfect match for the Phase 2 scaffold.
 
-**Strengths:**
-- Extremely consistent structure across all 160 nodes
-- Clean separation of concerns (each node is self-contained)
-- Well-typed inputs/outputs with metadata
-- `getDynamicInputs()` pattern enables dynamic configuration
-- All edge function calls follow a naming convention
+2. **Execution engine is embedded in UI state** — `lib/flow-store.ts` mixes execution logic with dialog state, viewport tracking, and edge animation. The `executeFlow()` function is ~200 lines of reusable DAG traversal that needs extraction.
 
-**Weaknesses:**
-- 14 nodes use `localStorage`/`window.location` (browser globals)
-- `resolveVariable()` helper is copy-pasted across 12 files instead of centralized
-- No accompanying engine, UI, or persistence code
-- Missing type definitions (`NodePlugin` interface must be reconstructed)
+3. **Supabase edge functions are the execution runtime** — Nodes don't execute API calls directly. They delegate to Supabase edge functions (`{slug}-proxy`). This means the node execution is already server-side. The Cloudflare worker at `imports/cloudflare-worker/` may be an alternative execution target.
 
-**Recommendation:** All 160 nodes are clean candidates for the new `/logic` project type after a systematic refactor pass. The `NodePlugin` interface should be formalized first, followed by creating infrastructure adapters (Supabase client wrapper, registry, variable resolver).
+4. **Node plugin system is clean and consistent** — 160 nodes follow the same interface. The `getDynamicInputs()` pattern enables sophisticated conditional forms. This is production-ready design.
+
+5. **14 nodes have browser globals** — `localStorage` and `window.location` in 14 nodes are the only code-smell. Every other node is pure logic.
+
+6. **No CSS framework lock-in in node logic** — CSS is only in UI components (`FlowBuilderStyles.css`), not in node definitions or services. The logic layer is style-agnostic.

@@ -1,0 +1,70 @@
+/* Print Styles for Document Editor */
+@media print {
+  /* Hide toolbars and UI elements */
+  .no-print {
+    display: none !important;
+  }
+
+  /* Reset page margins */
+  @page {
+    margin: 0.5in;
+  }
+
+  /* Ensure proper page breaks */
+  body {
+    margin: 0;
+    padding: 0;
+  }
+
+  /* Page break controls */
+  .print-page-break {
+    page-break-after: always;
+    break-after: page;
+  }
+
+  /* Avoid breaking inside elements */
+  h1, h2, h3, h4, h5, h6 {
+    page-break-after: avoid;
+    break-after: avoid;
+  }
+
+  /* Prevent orphans and widows */
+  p {
+    orphans: 3;
+    widows: 3;
+  }
+
+  /* Ensure images don't break across pages */
+  img {
+    page-break-inside: avoid;
+    break-inside: avoid;
+  }
+
+  /* Hide background colors and shadows for print */
+  * {
+    background: white !important;
+    box-shadow: none !important;
+  }
+}
+
+/* Page break indicator for preview */
+.page-break-indicator {
+  position: relative;
+  height: 2px;
+  background: linear-gradient(to right, transparent, hsl(var(--border)), transparent);
+  margin: 2rem 0;
+}
+
+.page-break-indicator::after {
+  content: 'Page Break';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  background: hsl(var(--background));
+  padding: 0.25rem 0.75rem;
+  font-size: 0.75rem;
+  color: hsl(var(--muted-foreground));
+  border: 1px solid hsl(var(--border));
+  border-radius: 0.25rem;
+}

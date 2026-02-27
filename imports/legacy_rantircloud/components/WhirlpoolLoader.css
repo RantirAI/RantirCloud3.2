@@ -1,0 +1,130 @@
+/* Whirlpool Loader Styles */
+.cssload-container {
+  position: relative;
+}
+
+.cssload-whirlpool,
+.cssload-whirlpool::before,
+.cssload-whirlpool::after {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  border: 1px solid hsl(var(--muted));
+  border-left-color: hsl(var(--foreground));
+  border-radius: 974px;
+  -o-border-radius: 974px;
+  -ms-border-radius: 974px;
+  -webkit-border-radius: 974px;
+  -moz-border-radius: 974px;
+}
+
+.cssload-whirlpool {
+  margin: -24px 0 0 -24px;
+  height: 49px;
+  width: 49px;
+  animation: cssload-rotate 1150ms linear infinite;
+  -o-animation: cssload-rotate 1150ms linear infinite;
+  -ms-animation: cssload-rotate 1150ms linear infinite;
+  -webkit-animation: cssload-rotate 1150ms linear infinite;
+  -moz-animation: cssload-rotate 1150ms linear infinite;
+}
+
+.cssload-whirlpool::before {
+  content: "";
+  margin: -22px 0 0 -22px;
+  height: 43px;
+  width: 43px;
+  animation: cssload-rotate 1150ms linear infinite;
+  -o-animation: cssload-rotate 1150ms linear infinite;
+  -ms-animation: cssload-rotate 1150ms linear infinite;
+  -webkit-animation: cssload-rotate 1150ms linear infinite;
+  -moz-animation: cssload-rotate 1150ms linear infinite;
+}
+
+.cssload-whirlpool::after {
+  content: "";
+  margin: -28px 0 0 -28px;
+  height: 55px;
+  width: 55px;
+  animation: cssload-rotate 2300ms linear infinite;
+  -o-animation: cssload-rotate 2300ms linear infinite;
+  -ms-animation: cssload-rotate 2300ms linear infinite;
+  -webkit-animation: cssload-rotate 2300ms linear infinite;
+  -moz-animation: cssload-rotate 2300ms linear infinite;
+}
+
+/* Small size adjustments */
+.cssload-whirlpool.h-6 {
+  margin: -12px 0 0 -12px;
+  height: 24px;
+  width: 24px;
+}
+
+.cssload-whirlpool.h-6::before {
+  margin: -11px 0 0 -11px;
+  height: 21px;
+  width: 21px;
+}
+
+.cssload-whirlpool.h-6::after {
+  margin: -14px 0 0 -14px;
+  height: 27px;
+  width: 27px;
+}
+
+/* Large size adjustments */
+.cssload-whirlpool.h-16 {
+  margin: -32px 0 0 -32px;
+  height: 64px;
+  width: 64px;
+}
+
+.cssload-whirlpool.h-16::before {
+  margin: -29px 0 0 -29px;
+  height: 57px;
+  width: 57px;
+}
+
+.cssload-whirlpool.h-16::after {
+  margin: -37px 0 0 -37px;
+  height: 73px;
+  width: 73px;
+}
+
+@keyframes cssload-rotate {
+  100% {
+    transform: rotate(360deg);
+  }
+}
+
+@-o-keyframes cssload-rotate {
+  100% {
+    -o-transform: rotate(360deg);
+  }
+}
+
+@-ms-keyframes cssload-rotate {
+  100% {
+    -ms-transform: rotate(360deg);
+  }
+}
+
+@-webkit-keyframes cssload-rotate {
+  100% {
+    -webkit-transform: rotate(360deg);
+  }
+}
+
+@-moz-keyframes cssload-rotate {
+  100% {
+    -moz-transform: rotate(360deg);
+  }
+}
+
+/* Dark mode styles */
+.dark .cssload-whirlpool,
+.dark .cssload-whirlpool::before,
+.dark .cssload-whirlpool::after {
+  border-color: hsl(var(--muted));
+  border-left-color: hsl(var(--foreground));
+}
