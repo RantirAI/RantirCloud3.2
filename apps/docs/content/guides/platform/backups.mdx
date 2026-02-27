@@ -57,7 +57,9 @@ curl -X POST "https://api.supabase.com/v1/projects/$PROJECT_REF/database/backups
 
 When selecting a backup to restore to, choose the closest available backup made before your desired restore point. You can always choose earlier backups, but consider how many days of data you might lose.
 
-The Dashboard prompts you for confirmation before proceeding with the restoration. The project is inaccessible during this process, so plan for downtime beforehand. Downtime depends on the size of the database—the larger it is, the longer the downtime will be. After you confirm, we run the underlying SQL of the chosen backup against the project. We use the Postgres utility [psql](https://www.postgresql.org/docs/current/app-psql.html) to facilitate the restoration. The Dashboard will display a notification once the restoration completes.
+The Dashboard prompts you for confirmation before proceeding with the restoration. The project is inaccessible during this process, so plan for downtime beforehand. Downtime depends on the size of the database—the larger it is, the longer the downtime will be.
+
+After you confirm, we trigger the process to restore the desired backup data to your project. The dashboard will display a notification once the restoration completes.
 
 If your project uses subscriptions or replication slots, you need to drop them before the restoration and re-create them afterwards. We exempt the slot used by Realtime from this requirement and handle it automatically.
 
