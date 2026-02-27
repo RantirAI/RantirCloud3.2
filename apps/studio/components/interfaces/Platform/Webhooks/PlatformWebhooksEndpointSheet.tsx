@@ -53,7 +53,8 @@ const endpointFormSchema = z
 
 export type EndpointFormValues = z.infer<typeof endpointFormSchema>
 
-const toEventTypes = (values: EndpointFormValues) => (values.subscribeAll ? ['*'] : values.eventTypes)
+const toEventTypes = (values: EndpointFormValues) =>
+  values.subscribeAll ? ['*'] : values.eventTypes
 
 export const toEndpointPayload = (values: EndpointFormValues): UpsertWebhookEndpointInput => ({
   name: '',
@@ -124,7 +125,10 @@ export const PlatformWebhooksEndpointSheet = ({
       enabled: enabledOverride ?? endpoint.enabled,
       subscribeAll: endpoint.eventTypes.includes('*'),
       eventTypes: endpoint.eventTypes.includes('*') ? [] : endpoint.eventTypes,
-      customHeaders: endpoint.customHeaders.map((header) => ({ key: header.key, value: header.value })),
+      customHeaders: endpoint.customHeaders.map((header) => ({
+        key: header.key,
+        value: header.value,
+      })),
     })
   }, [enabledOverride, endpoint, form, visible])
 
@@ -149,7 +153,10 @@ export const PlatformWebhooksEndpointSheet = ({
                   render={({ field }) => (
                     <FormItemLayout label="Endpoint URL" layout="vertical" className="gap-1">
                       <FormControl_Shadcn_>
-                        <InputField {...field} placeholder="https://api.example.com/webhooks/supabase" />
+                        <InputField
+                          {...field}
+                          placeholder="https://api.example.com/webhooks/supabase"
+                        />
                       </FormControl_Shadcn_>
                     </FormItemLayout>
                   )}
@@ -159,7 +166,11 @@ export const PlatformWebhooksEndpointSheet = ({
                   control={form.control}
                   name="description"
                   render={({ field }) => (
-                    <FormItemLayout label="Description (optional)" layout="vertical" className="gap-1">
+                    <FormItemLayout
+                      label="Description (optional)"
+                      layout="vertical"
+                      className="gap-1"
+                    >
                       <FormControl_Shadcn_>
                         <Textarea {...field} rows={3} />
                       </FormControl_Shadcn_>
@@ -195,7 +206,10 @@ export const PlatformWebhooksEndpointSheet = ({
                   render={({ field }) => (
                     <FormItemLayout label="Event types" layout="vertical" className="gap-3">
                       <div className="flex items-center gap-2">
-                        <Checkbox checked={field.value} onCheckedChange={(checked) => field.onChange(!!checked)} />
+                        <Checkbox
+                          checked={field.value}
+                          onCheckedChange={(checked) => field.onChange(!!checked)}
+                        />
                         <Label>Subscribe to all events (*)</Label>
                       </div>
                     </FormItemLayout>
@@ -218,9 +232,13 @@ export const PlatformWebhooksEndpointSheet = ({
                                     checked={checked}
                                     onCheckedChange={(next) => {
                                       if (next) {
-                                        field.onChange([...new Set([...selectedEventTypes, eventType])])
+                                        field.onChange([
+                                          ...new Set([...selectedEventTypes, eventType]),
+                                        ])
                                       } else {
-                                        field.onChange(selectedEventTypes.filter((value) => value !== eventType))
+                                        field.onChange(
+                                          selectedEventTypes.filter((value) => value !== eventType)
+                                        )
                                       }
                                     }}
                                   />
@@ -245,7 +263,9 @@ export const PlatformWebhooksEndpointSheet = ({
                   layout="vertical"
                   className="gap-3"
                 >
-                  {fields.length === 0 && <p className="text-sm text-foreground-light">No custom headers.</p>}
+                  {fields.length === 0 && (
+                    <p className="text-sm text-foreground-light">No custom headers.</p>
+                  )}
 
                   {fields.map((field, index) => (
                     <div key={field.id} className="grid grid-cols-[1fr_1fr_auto] gap-2">
@@ -267,7 +287,11 @@ export const PlatformWebhooksEndpointSheet = ({
                           </FormControl_Shadcn_>
                         )}
                       />
-                      <Button type="text" onClick={() => remove(index)} icon={<Trash2 size={14} />} />
+                      <Button
+                        type="text"
+                        onClick={() => remove(index)}
+                        icon={<Trash2 size={14} />}
+                      />
                     </div>
                   ))}
 

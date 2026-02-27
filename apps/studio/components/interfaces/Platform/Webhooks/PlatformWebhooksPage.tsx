@@ -45,8 +45,14 @@ interface PlatformWebhooksPageProps {
 export const PlatformWebhooksPage = ({ scope, endpointId }: PlatformWebhooksPageProps) => {
   const router = useRouter()
   const { slug, ref } = useParams()
-  const { endpoints, deliveries, createEndpoint, updateEndpoint, deleteEndpoint, regenerateSecret } =
-    usePlatformWebhooksMockStore(scope)
+  const {
+    endpoints,
+    deliveries,
+    createEndpoint,
+    updateEndpoint,
+    deleteEndpoint,
+    regenerateSecret,
+  } = usePlatformWebhooksMockStore(scope)
   const [deliveryId, setDeliveryId] = useQueryState('deliveryId', parseAsString)
   const [panel, setPanel] = useQueryState('panel', parseAsStringLiteral(PANEL_VALUES))
   const [search, setSearch] = useQueryState(
@@ -105,8 +111,9 @@ export const PlatformWebhooksPage = ({ scope, endpointId }: PlatformWebhooksPage
   const selectedDelivery = useMemo(() => {
     if (!selectedEndpoint || !deliveryId) return null
     return (
-      deliveries.find((delivery) => delivery.id === deliveryId && delivery.endpointId === selectedEndpoint.id) ??
-      null
+      deliveries.find(
+        (delivery) => delivery.id === deliveryId && delivery.endpointId === selectedEndpoint.id
+      ) ?? null
     )
   }, [deliveries, deliveryId, selectedEndpoint])
 
@@ -210,7 +217,9 @@ export const PlatformWebhooksPage = ({ scope, endpointId }: PlatformWebhooksPage
         hasSelectedEndpoint={!!selectedEndpoint}
         headerTitle={headerTitle}
         headerDescription={headerDescription}
-        endpointStatus={selectedEndpoint ? (selectedEndpoint.enabled ? 'enabled' : 'disabled') : undefined}
+        endpointStatus={
+          selectedEndpoint ? (selectedEndpoint.enabled ? 'enabled' : 'disabled') : undefined
+        }
         endpointActions={
           selectedEndpoint ? (
             <>
@@ -292,7 +301,10 @@ export const PlatformWebhooksPage = ({ scope, endpointId }: PlatformWebhooksPage
         onSubmit={handleUpsertEndpoint}
       />
 
-      <AlertDialog open={!!endpointPendingDelete} onOpenChange={(open) => !open && setEndpointIdPendingDelete(null)}>
+      <AlertDialog
+        open={!!endpointPendingDelete}
+        onOpenChange={(open) => !open && setEndpointIdPendingDelete(null)}
+      >
         <AlertDialogContent>
           <AlertDialogHeader>
             <AlertDialogTitle>Delete endpoint</AlertDialogTitle>

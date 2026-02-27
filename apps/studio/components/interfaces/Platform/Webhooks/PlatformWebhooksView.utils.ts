@@ -1,6 +1,9 @@
 import type { WebhookDeliveryStatus } from './PlatformWebhooks.types'
 
-export const statusBadgeVariant: Record<WebhookDeliveryStatus, 'default' | 'success' | 'destructive'> = {
+export const statusBadgeVariant: Record<
+  WebhookDeliveryStatus,
+  'default' | 'success' | 'destructive'
+> = {
   pending: 'default',
   success: 'success',
   failure: 'destructive',

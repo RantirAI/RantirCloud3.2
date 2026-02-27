@@ -24,7 +24,7 @@ const randomId = (prefix: string) => `${prefix}-${Math.random().toString(36).sli
 
 const generateSigningSecret = () => `whsec_${Math.random().toString(36).slice(2, 18)}`
 
-const deepClone = <T,>(value: T): T => JSON.parse(JSON.stringify(value))
+const deepClone = <T>(value: T): T => JSON.parse(JSON.stringify(value))
 
 const toHeaders = (
   headers: UpsertWebhookEndpointInput['customHeaders'],
@@ -161,7 +161,8 @@ export const filterWebhookDeliveries = (
     .filter((delivery) => delivery.endpointId === endpointId)
     .filter((delivery) => {
       if (normalizedSearch.length === 0) return true
-      const haystack = `${delivery.eventType} ${delivery.status} ${delivery.responseCode ?? ''}`.toLowerCase()
+      const haystack =
+        `${delivery.eventType} ${delivery.status} ${delivery.responseCode ?? ''}`.toLowerCase()
       return haystack.includes(normalizedSearch)
     })
 }
@@ -178,13 +179,14 @@ export const usePlatformWebhooksMockStore = (scope: WebhookScope) => {
       const now = new Date().toISOString()
       const signingSecret = generateSigningSecret()
       const createdBy = 'mock-user@supabase.io'
-      setState((prev) =>
-        createWebhookEndpoint(prev, input, {
-          endpointId,
-          now,
-          signingSecret,
-          createdBy,
-        }).state
+      setState(
+        (prev) =>
+          createWebhookEndpoint(prev, input, {
+            endpointId,
+            now,
+            signingSecret,
+            createdBy,
+          }).state
       )
       return endpointId
     },

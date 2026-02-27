@@ -128,7 +128,11 @@ export const PlatformWebhooksEndpointList = ({
                 <TableHead>URL</TableHead>
                 <TableHead>Events</TableHead>
                 <TableHead aria-sort={getAriaSort('created')}>
-                  <TableHeadSort column="created" currentSort={sort} onSortChange={handleSortChange}>
+                  <TableHeadSort
+                    column="created"
+                    currentSort={sort}
+                    onSortChange={handleSortChange}
+                  >
                     Created
                   </TableHeadSort>
                 </TableHead>
@@ -162,7 +166,9 @@ export const PlatformWebhooksEndpointList = ({
                   <TableCell className="max-w-[420px]">
                     <p className="truncate">{endpoint.url}</p>
                     {endpoint.description && (
-                      <p className="text-xs text-foreground-light truncate mt-1">{endpoint.description}</p>
+                      <p className="text-xs text-foreground-light truncate mt-1">
+                        {endpoint.description}
+                      </p>
                     )}
                   </TableCell>
                   <TableCell className="max-w-[280px] truncate">
@@ -193,13 +199,20 @@ export const PlatformWebhooksEndpointList = ({
                             <span>View details</span>
                           </DropdownMenuItem>
 
-                          <DropdownMenuItem className="gap-x-2" onClick={() => onDeleteEndpoint(endpoint.id)}>
+                          <DropdownMenuItem
+                            className="gap-x-2"
+                            onClick={() => onDeleteEndpoint(endpoint.id)}
+                          >
                             <Trash2 size={14} />
                             <span>Delete</span>
                           </DropdownMenuItem>
                         </DropdownMenuContent>
                       </DropdownMenu>
-                      <ChevronRight aria-hidden={true} size={14} className="text-foreground-muted/60" />
+                      <ChevronRight
+                        aria-hidden={true}
+                        size={14}
+                        className="text-foreground-muted/60"
+                      />
                       <button tabIndex={-1} className="sr-only">
                         Go to endpoint details
                       </button>

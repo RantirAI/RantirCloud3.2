@@ -89,7 +89,9 @@ describe('PlatformWebhooks.store', () => {
     const endpoint = state.endpoints[0]
 
     const toggled = toggleWebhookEndpoint(state, endpoint.id)
-    expect(toggled.endpoints.find((item) => item.id === endpoint.id)?.enabled).toBe(!endpoint.enabled)
+    expect(toggled.endpoints.find((item) => item.id === endpoint.id)?.enabled).toBe(
+      !endpoint.enabled
+    )
 
     const regenerated = regenerateWebhookEndpointSecret(state, endpoint.id, 'whsec_new_secret')
     expect(regenerated.endpoints.find((item) => item.id === endpoint.id)?.signingSecret).toBe(

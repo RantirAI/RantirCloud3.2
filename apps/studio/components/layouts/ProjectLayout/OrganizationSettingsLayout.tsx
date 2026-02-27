@@ -93,7 +93,9 @@ export const generateOrganizationSettingsSections = ({
   showLegalDocuments = true,
 }: OrganizationSettingsSectionsProps): SidebarSection[] => {
   const isLinkActive = (key: string, href: string) =>
-    key === 'webhooks' ? currentPath === href || currentPath.startsWith(`${href}/`) : currentPath === href
+    key === 'webhooks'
+      ? currentPath === href || currentPath.startsWith(`${href}/`)
+      : currentPath === href
 
   const configurationLinks = [
     {

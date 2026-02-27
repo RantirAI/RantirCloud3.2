@@ -99,7 +99,8 @@ describe('OrganizationSettingsLayout helpers', () => {
     })
 
     expect(
-      sections.flatMap((section) => section.links).find((item) => item.label === 'Webhooks')?.isActive
+      sections.flatMap((section) => section.links).find((item) => item.label === 'Webhooks')
+        ?.isActive
     ).toBe(true)
   })
 

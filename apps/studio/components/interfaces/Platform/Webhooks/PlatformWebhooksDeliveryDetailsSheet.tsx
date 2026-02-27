@@ -74,11 +74,15 @@ export const PlatformWebhooksDeliveryDetailsSheet = ({
                   </div>
                   <div className="space-y-1">
                     <p className="text-sm text-foreground-light">Attempt</p>
-                    <p className="text-sm text-foreground">{deliveryAttempt ? `#${deliveryAttempt}` : '-'}</p>
+                    <p className="text-sm text-foreground">
+                      {deliveryAttempt ? `#${deliveryAttempt}` : '-'}
+                    </p>
                   </div>
                   <div className="space-y-1">
                     <p className="text-sm text-foreground-light">Timestamp</p>
-                    <p className="text-sm text-foreground">{formatDate(selectedDelivery.attemptAt)}</p>
+                    <p className="text-sm text-foreground">
+                      {formatDate(selectedDelivery.attemptAt)}
+                    </p>
                   </div>
                   <div className="space-y-1">
                     <p className="text-sm text-foreground-light">Response code</p>
@@ -89,7 +93,10 @@ export const PlatformWebhooksDeliveryDetailsSheet = ({
                 </CardContent>
               </Card>
 
-              <Tabs value={deliveryDetailsTab} onValueChange={(value) => onTabChange(value as 'event' | 'response')}>
+              <Tabs
+                value={deliveryDetailsTab}
+                onValueChange={(value) => onTabChange(value as 'event' | 'response')}
+              >
                 <TabsList className="w-full">
                   <TabsTrigger value="event" className="flex-1">
                     Event
@@ -110,7 +117,9 @@ export const PlatformWebhooksDeliveryDetailsSheet = ({
                   </div>
                   <div className="space-y-1">
                     <p className="text-sm text-foreground-light">Event timestamp</p>
-                    <p className="text-sm text-foreground">{formatDate(selectedDelivery.attemptAt)}</p>
+                    <p className="text-sm text-foreground">
+                      {formatDate(selectedDelivery.attemptAt)}
+                    </p>
                   </div>
                   <div className="space-y-2">
                     <div className="flex items-center justify-between gap-2">
@@ -124,7 +133,9 @@ export const PlatformWebhooksDeliveryDetailsSheet = ({
                       </Button>
                     </div>
                     <div className="rounded-md border border-default bg-surface-200 p-3">
-                      <pre className="whitespace-pre-wrap text-xs text-foreground">{deliveryEventPayload}</pre>
+                      <pre className="whitespace-pre-wrap text-xs text-foreground">
+                        {deliveryEventPayload}
+                      </pre>
                     </div>
                   </div>
                 </TabsContent>
@@ -154,7 +165,9 @@ export const PlatformWebhooksDeliveryDetailsSheet = ({
                       </Button>
                     </div>
                     <div className="rounded-md border border-default bg-surface-200 p-3">
-                      <pre className="whitespace-pre-wrap text-xs text-foreground">{deliveryResponsePayload}</pre>
+                      <pre className="whitespace-pre-wrap text-xs text-foreground">
+                        {deliveryResponsePayload}
+                      </pre>
                     </div>
                   </div>
                 </TabsContent>

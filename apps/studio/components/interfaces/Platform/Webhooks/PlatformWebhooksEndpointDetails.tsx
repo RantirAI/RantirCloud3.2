@@ -64,10 +64,10 @@ export const PlatformWebhooksEndpointDetails = ({
                   {selectedEndpoint.customHeaders.length === 0
                     ? '-'
                     : selectedEndpoint.customHeaders.map((header) => (
-                      <div key={header.id}>
-                        <code className="text-code-inline">{header.key}</code>: {header.value}
-                      </div>
-                    ))}
+                        <div key={header.id}>
+                          <code className="text-code-inline">{header.key}</code>: {header.value}
+                        </div>
+                      ))}
                 </TableCell>
               </TableRow>
               <TableRow>
