@@ -44,6 +44,12 @@ export function useProjectSettingsGotoCommands(options?: CommandOptions) {
         defaultHidden: true,
       },
       {
+        id: 'nav-project-settings-webhooks',
+        name: 'Webhooks',
+        route: `/project/${ref}/settings/webhooks`,
+        defaultHidden: true,
+      },
+      {
         id: 'nav-project-settings-api',
         name: 'API Settings',
         route: `/project/${ref}/integrations/data_api/settings`,

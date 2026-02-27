@@ -6,67 +6,87 @@ import { WithSidebar } from 'components/layouts/AccountLayout/WithSidebar'
 import { useCurrentPath } from 'hooks/misc/useCurrentPath'
 import { useIsFeatureEnabled } from 'hooks/misc/useIsFeatureEnabled'
 
-interface OrganizationSettingsSectionsProps {
+interface OrganizationSettingsMenuItemsProps {
   slug?: string
-  currentPath: string
   showSecuritySettings?: boolean
   showSsoSettings?: boolean
   showLegalDocuments?: boolean
 }
 
+interface OrganizationSettingsSectionsProps extends OrganizationSettingsMenuItemsProps {
+  currentPath: string
+}
+
 export const normalizeOrganizationSettingsPath = (path: string) => path.split('#')[0]
 
-export const generateOrganizationSettingsSections = ({
+export const generateOrganizationSettingsMenuItems = ({
   slug,
+  showSecuritySettings = true,
+  showSsoSettings = true,
+  showLegalDocuments = true,
+}: OrganizationSettingsMenuItemsProps) => [
+  {
+    key: 'general',
+    label: 'General',
+    href: `/org/${slug}/general`,
+  },
+  ...(showSecuritySettings
+    ? [
+        {
+          key: 'security',
+          label: 'Security',
+          href: `/org/${slug}/security`,
+        },
+      ]
+    : []),
+  {
+    key: 'apps',
+    label: 'OAuth Apps',
+    href: `/org/${slug}/apps`,
+  },
+  ...(showSsoSettings
+    ? [
+        {
+          key: 'sso',
+          label: 'SSO',
+          href: `/org/${slug}/sso`,
+        },
+      ]
+    : []),
+  {
+    key: 'webhooks',
+    label: 'Platform Webhooks',
+    href: `/org/${slug}/webhooks`,
+  },
+  {
+    key: 'audit',
+    label: 'Audit Logs',
+    href: `/org/${slug}/audit`,
+  },
+  ...(showLegalDocuments
+    ? [
+        {
+          key: 'documents',
+          label: 'Legal Documents',
+          href: `/org/${slug}/documents`,
+        },
+      ]
+    : []),
+]
+
+export const generateOrganizationSettingsSections = ({
   currentPath,
+  slug,
   showSecuritySettings = true,
   showSsoSettings = true,
   showLegalDocuments = true,
 }: OrganizationSettingsSectionsProps): SidebarSection[] => {
-  const links = [
-    {
-      key: 'general',
-      label: 'General',
-      href: `/org/${slug}/general`,
-    },
-    ...(showSecuritySettings
-      ? [
-          {
-            key: 'security',
-            label: 'Security',
-            href: `/org/${slug}/security`,
-          },
-        ]
-      : []),
-    {
-      key: 'apps',
-      label: 'OAuth Apps',
-      href: `/org/${slug}/apps`,
-    },
-    ...(showSsoSettings
-      ? [
-          {
-            key: 'sso',
-            label: 'SSO',
-            href: `/org/${slug}/sso`,
-          },
-        ]
-      : []),
-    {
-      key: 'audit',
-      label: 'Audit Logs',
-      href: `/org/${slug}/audit`,
-    },
-    ...(showLegalDocuments
-      ? [
-          {
-            key: 'documents',
-            label: 'Legal Documents',
-            href: `/org/${slug}/documents`,
-          },
-        ]
-      : []),
-  ]
+  const links = generateOrganizationSettingsMenuItems({
+    slug,
+    showSecuritySettings,
+    showSsoSettings,
+    showLegalDocuments,
+  })
 
   return [
     {
@@ -96,8 +116,8 @@ function OrganizationSettingsLayout({ children }: PropsWithChildren) {
   ])
 
   const sections = generateOrganizationSettingsSections({
-    slug,
     currentPath,
+    slug,
     showSecuritySettings,
     showSsoSettings,
     showLegalDocuments,

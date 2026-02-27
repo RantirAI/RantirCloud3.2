@@ -72,6 +72,13 @@ export const generateSettingsMenu = (
           items: [],
           disabled: !isProjectActive,
         },
+        {
+          name: 'Webhooks',
+          key: 'webhooks',
+          url: `/project/${ref}/settings/webhooks`,
+          items: [],
+          disabled: !isProjectActive,
+        },
 
         {
           name: 'API Keys',
