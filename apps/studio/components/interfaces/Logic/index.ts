@@ -1,1 +1,5 @@
 export { LogicFlowCanvas } from './LogicFlowCanvas'
+export { NodePalette } from './NodePalette'
+export { NodeInspector } from './NodeInspector'
+export { FlowBaseNode } from './FlowBaseNode'
+export { IntegrationInstallDrawer } from './IntegrationInstallDrawer'
