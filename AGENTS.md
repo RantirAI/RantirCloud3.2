@@ -8,15 +8,22 @@ This is the Supabase monorepo (Turborepo + pnpm workspaces). The primary app is 
 
 ### Running Studio locally
 
-Studio requires Docker-backed Supabase services. The recommended flow:
+Studio requires Docker-backed Supabase services. Two approaches:
 
-1. Start backend: `npx supabase start -x studio` (starts Postgres, PostgREST, GoTrue, Kong, pg-meta, etc. on port 54321)
-2. Generate env: `npx supabase status --output json > keys.json && node scripts/generateLocalEnv.js` (creates `apps/studio/.env.test`)
-3. Start Studio: `NODE_ENV=test pnpm --prefix ./apps/studio dev` (port 8082)
+**Option A — `.env.local` (preferred for local dev):**
 
-The shorthand `pnpm setup:cli` in root `package.json` combines steps 1-2. The shorthand `pnpm dev:studio-local` does setup + dev.
+1. Start backend: `npx supabase start -x studio`
+2. Create `apps/studio/.env.local` with the correct CLI-generated values (API on port 54321). See `apps/studio/.env` for the variable names; override `SUPABASE_URL`, `SUPABASE_PUBLIC_URL`, `STUDIO_PG_META_URL`, `SUPABASE_ANON_KEY`, `SUPABASE_SERVICE_KEY`, etc. to point to `http://127.0.0.1:54321`.
+3. Start Studio: `pnpm --filter studio dev` (port 8082). No `NODE_ENV=test` needed.
 
-**Gotcha:** Studio must be started with `NODE_ENV=test` so Next.js loads `.env.test` (which has correct CLI-generated API URLs on port 54321). The committed `.env` has placeholder URLs on port 8000 for the Docker Compose approach and will **not** work with `supabase start`.
+**Option B — `.env.test` (legacy approach):**
+
+1. `pnpm setup:cli` (runs `supabase start -x studio`, generates `keys.json`, creates `apps/studio/.env.test`)
+2. Start Studio: `NODE_ENV=test pnpm --prefix ./apps/studio dev` (port 8082)
+
+The shorthand `pnpm dev:studio-local` combines setup + dev with Option B.
+
+**Gotcha:** The committed `.env` has placeholder URLs on port 8000 (for the Docker Compose approach). When using `supabase start`, the API runs on port 54321. You must either use `.env.local` (Option A) or `NODE_ENV=test` (Option B) to override these values. `.env.local` is NOT loaded when `NODE_ENV=test`.
 
 ### Running other apps
 
