@@ -1,0 +1,1582 @@
+[
+  {
+    "dir": "activecampaign",
+    "type": "activecampaign",
+    "name": "ActiveCampaign",
+    "description": "Connect to ActiveCampaign for email marketing automation, contact management, and campaign tracking",
+    "category": "action",
+    "color": "#356AE6",
+    "inputCount": 3,
+    "outputCount": 5
+  },
+  {
+    "dir": "activepieces",
+    "type": "activepieces",
+    "name": "Activepieces",
+    "description": "Connect to Activepieces automation platform to trigger flows and manage workflow executions",
+    "category": "action",
+    "color": "#6C5CE7",
+    "inputCount": 3,
+    "outputCount": 4
+  },
+  {
+    "dir": "actualbudget",
+    "type": "actualbudget",
+    "name": "Actual Budget",
+    "description": "Connect to Actual Budget for personal finance management, budgeting, and expense tracking",
+    "category": "action",
+    "color": "#5A67D8",
+    "inputCount": 3,
+    "outputCount": 10
+  },
+  {
+    "dir": "acuity-scheduling",
+    "type": "acuity-scheduling",
+    "name": "Acuity Scheduling",
+    "description": "Connect to Acuity Scheduling for appointment management, client scheduling, and calendar integration",
+    "category": "action",
+    "color": "#00A0DC",
+    "inputCount": 3,
+    "outputCount": 8
+  },
+  {
+    "dir": "acumbamail",
+    "type": "acumbamail",
+    "name": "Acumbamail",
+    "description": "Connect to Acumbamail for email marketing campaigns, subscriber management, and automation",
+    "category": "action",
+    "color": "#4A90E2",
+    "inputCount": 2,
+    "outputCount": 8
+  },
+  {
+    "dir": "afforai",
+    "type": "afforai",
+    "name": "Afforai",
+    "description": "Connect to Afforai AI research assistant for document analysis, question answering, and knowledge extraction",
+    "category": "action",
+    "color": "#8B5CF6",
+    "inputCount": 2,
+    "outputCount": 10
+  },
+  {
+    "dir": "agentx",
+    "type": "agentx",
+    "name": "AgentX",
+    "description": "Advanced AI agent with extended capabilities for complex task execution",
+    "category": "action",
+    "color": "#6366F1",
+    "inputCount": 2,
+    "outputCount": 9
+  },
+  {
+    "dir": "ai-agent",
+    "type": "ai-agent",
+    "name": "AI Agent",
+    "description": "Create an AI agent with instructions and settings",
+    "category": "action",
+    "color": "#9B87F5",
+    "inputCount": 8,
+    "outputCount": 5
+  },
+  {
+    "dir": "ai-mapper",
+    "type": "ai-mapper",
+    "name": "AI Mapper",
+    "description": "Use AI to transform and map data between nodes",
+    "category": "transformer",
+    "color": "#9333EA",
+    "inputCount": 4,
+    "outputCount": 1
+  },
+  {
+    "dir": "aianswer",
+    "type": "aianswer",
+    "name": "AI Answer",
+    "description": "AI-powered phone call management and agent communication platform",
+    "category": "action",
+    "color": "#10B981",
+    "inputCount": 2,
+    "outputCount": 8
+  },
+  {
+    "dir": "aircall",
+    "type": "aircall",
+    "name": "Aircall",
+    "description": "Cloud-based phone system for sales and support teams",
+    "category": "action",
+    "color": "#00D4AA",
+    "inputCount": 3,
+    "outputCount": 3
+  },
+  {
+    "dir": "airparser",
+    "type": "airparser",
+    "name": "Airparser",
+    "description": "Extract structured data from emails, PDFs, and documents using AI",
+    "category": "action",
+    "color": "#F59E0B",
+    "inputCount": 2,
+    "outputCount": 5
+  },
+  {
+    "dir": "airtable",
+    "type": "airtable",
+    "name": "Airtable",
+    "description": "Connect to Airtable to manage your data and records across bases and tables",
+    "category": "action",
+    "color": "#FFBF3F",
+    "inputCount": 0,
+    "outputCount": 6
+  },
+  {
+    "dir": "airtop",
+    "type": "airtop",
+    "name": "Airtop",
+    "description": "Automate browser tasks using Airtop AI-powered browser automation",
+    "category": "action",
+    "color": "#6B73FF",
+    "inputCount": 2,
+    "outputCount": 6
+  },
+  {
+    "dir": "amazon-s3",
+    "type": "amazon-s3",
+    "name": "Amazon S3",
+    "description": "Store and retrieve files from Amazon S3 buckets",
+    "category": "action",
+    "color": "#FF9900",
+    "inputCount": 5,
+    "outputCount": 7
+  },
+  {
+    "dir": "amazon-ses",
+    "type": "amazon-ses",
+    "name": "Amazon SES",
+    "description": "Send emails using Amazon Simple Email Service",
+    "category": "action",
+    "color": "#FF9900",
+    "inputCount": 5,
+    "outputCount": 7
+  },
+  {
+    "dir": "amazon-sns",
+    "type": "amazon-sns",
+    "name": "Amazon SNS",
+    "description": "Send notifications using Amazon Simple Notification Service",
+    "category": "action",
+    "color": "#FF9900",
+    "inputCount": 4,
+    "outputCount": 8
+  },
+  {
+    "dir": "amazon-sqs",
+    "type": "amazon-sqs",
+    "name": "Amazon SQS",
+    "description": "Send and receive messages using Amazon Simple Queue Service",
+    "category": "action",
+    "color": "#FF9900",
+    "inputCount": 5,
+    "outputCount": 6
+  },
+  {
+    "dir": "aminos",
+    "type": "aminos",
+    "name": "Aminos",
+    "description": "Create User on Aminos One",
+    "category": "action",
+    "color": "#22C55E",
+    "inputCount": 5,
+    "outputCount": 4
+  },
+  {
+    "dir": "amplitude",
+    "type": "amplitude",
+    "name": "Amplitude",
+    "description": "Track product analytics and user behavior",
+    "category": "action",
+    "color": "#0077FF",
+    "inputCount": 2,
+    "outputCount": 3
+  },
+  {
+    "dir": "anyhook-graphql",
+    "type": "anyhook-graphql",
+    "name": "Anyhook GraphQL",
+    "description": "Connect to Anyhook GraphQL API for webhook management and GraphQL operations",
+    "category": "action",
+    "color": "#E11D48",
+    "inputCount": 5,
+    "outputCount": 4
+  },
+  {
+    "dir": "apify",
+    "type": "apify",
+    "name": "Apify",
+    "description": "Connect to Apify platform for web scraping and automation",
+    "category": "action",
+    "color": "#FF6B35",
+    "inputCount": 4,
+    "outputCount": 6
+  },
+  {
+    "dir": "apitable",
+    "type": "apitable",
+    "name": "APITable",
+    "description": "Connect to APITable for database and spreadsheet operations",
+    "category": "action",
+    "color": "#7C3AED",
+    "inputCount": 2,
+    "outputCount": 7
+  },
+  {
+    "dir": "apitemplate-io",
+    "type": "apitemplate-io",
+    "name": "APITemplate.io",
+    "description": "Generate images, PDFs, and videos from templates using APITemplate.io",
+    "category": "action",
+    "color": "#F59E0B",
+    "inputCount": 2,
+    "outputCount": 6
+  },
+  {
+    "dir": "apollo",
+    "type": "apollo",
+    "name": "Apollo",
+    "description": "Match persons and enrich companies using Apollo API for sales intelligence and prospecting",
+    "category": "action",
+    "color": "#6B46C1",
+    "inputCount": 2,
+    "outputCount": 5
+  },
+  {
+    "dir": "approval",
+    "type": "approval",
+    "name": "Approval",
+    "description": "Create approval workflows and manage approval processes",
+    "category": "condition",
+    "color": "#10B981",
+    "inputCount": 5,
+    "outputCount": 5
+  },
+  {
+    "dir": "asana",
+    "type": "asana",
+    "name": "Asana",
+    "description": "Project management and task tracking for teams",
+    "category": "action",
+    "color": "#F06A6A",
+    "inputCount": 2,
+    "outputCount": 4
+  },
+  {
+    "dir": "ashby",
+    "type": "ashby",
+    "name": "Ashby",
+    "description": "Connect to Ashby ATS for recruiting and candidate management",
+    "category": "action",
+    "color": "#6366F1",
+    "inputCount": 5,
+    "outputCount": 4
+  },
+  {
+    "dir": "assembled",
+    "type": "assembled",
+    "name": "Assembled",
+    "description": "Workforce management and scheduling",
+    "category": "action",
+    "color": "#5B4DFF",
+    "inputCount": 2,
+    "outputCount": 1
+  },
+  {
+    "dir": "assemblyai",
+    "type": "assemblyai",
+    "name": "AssemblyAI",
+    "description": "Speech-to-text transcription and audio intelligence",
+    "category": "action",
+    "color": "#FF6F00",
+    "inputCount": 2,
+    "outputCount": 3
+  },
+  {
+    "dir": "attio",
+    "type": "attio",
+    "name": "Attio",
+    "description": "Manage contacts and records in Attio CRM",
+    "category": "action",
+    "color": "#8B5CF6",
+    "inputCount": 2,
+    "outputCount": 3
+  },
+  {
+    "dir": "autocalls",
+    "type": "autocalls",
+    "name": "Autocalls",
+    "description": "Make automated calls with Autocalls",
+    "category": "action",
+    "color": "#10B981",
+    "inputCount": 2,
+    "outputCount": 3
+  },
+  {
+    "dir": "avoma",
+    "type": "avoma",
+    "name": "Avoma",
+    "description": "Manage meeting recordings and transcriptions with Avoma",
+    "category": "action",
+    "color": "#F59E0B",
+    "inputCount": 2,
+    "outputCount": 3
+  },
+  {
+    "dir": "azure-communication-services",
+    "type": "azure-communication-services",
+    "name": "Azure Communication Services",
+    "description": "Send emails using Azure Communication Services",
+    "category": "action",
+    "color": "#0078D4",
+    "inputCount": 2,
+    "outputCount": 3
+  },
+  {
+    "dir": "azure-openai",
+    "type": "azure-openai",
+    "name": "Azure OpenAI",
+    "description": "Use Azure OpenAI models for AI completions",
+    "category": "action",
+    "color": "#0078D4",
+    "inputCount": 4,
+    "outputCount": 3
+  },
+  {
+    "dir": "backblaze",
+    "type": "backblaze",
+    "name": "Backblaze B2",
+    "description": "Interact with Backblaze B2 cloud storage",
+    "category": "action",
+    "color": "#E53935",
+    "inputCount": 3,
+    "outputCount": 3
+  },
+  {
+    "dir": "bamboohr",
+    "type": "bamboohr",
+    "name": "BambooHR",
+    "description": "Manage employee data and HR operations",
+    "category": "action",
+    "color": "#73C41D",
+    "inputCount": 3,
+    "outputCount": 3
+  },
+  {
+    "dir": "bannerbear",
+    "type": "bannerbear",
+    "name": "Bannerbear",
+    "description": "Generate images and videos from templates",
+    "category": "action",
+    "color": "#FF6B35",
+    "inputCount": 2,
+    "outputCount": 4
+  },
+  {
+    "dir": "baserow",
+    "type": "baserow",
+    "name": "Baserow",
+    "description": "Manage data in Baserow databases",
+    "category": "action",
+    "color": "#0057FF",
+    "inputCount": 2,
+    "outputCount": 3
+  },
+  {
+    "dir": "beamer",
+    "type": "beamer",
+    "name": "Beamer",
+    "description": "Manage product updates and changelogs",
+    "category": "action",
+    "color": "#8B5CF6",
+    "inputCount": 2,
+    "outputCount": 3
+  },
+  {
+    "dir": "beehiiv",
+    "type": "beehiiv",
+    "name": "Beehiiv",
+    "description": "Manage newsletter subscriptions and campaigns",
+    "category": "action",
+    "color": "#FFB800",
+    "inputCount": 3,
+    "outputCount": 3
+  },
+  {
+    "dir": "bettermode",
+    "type": "bettermode",
+    "name": "Bettermode",
+    "description": "Interact with Bettermode community platform",
+    "category": "action",
+    "color": "#7C3AED",
+    "inputCount": 2,
+    "outputCount": 1
+  },
+  {
+    "dir": "bigin-by-zoho",
+    "type": "bigin-by-zoho",
+    "name": "Bigin by Zoho",
+    "description": "Manage contacts and pipeline in Bigin CRM",
+    "category": "action",
+    "color": "#E42527",
+    "inputCount": 2,
+    "outputCount": 3
+  },
+  {
+    "dir": "bika",
+    "type": "bika",
+    "name": "Bika.ai",
+    "description": "Manage Bika.ai database records and workflows",
+    "category": "action",
+    "color": "#F59E0B",
+    "inputCount": 9,
+    "outputCount": 1
+  },
+  {
+    "dir": "binance",
+    "type": "binance",
+    "name": "Binance",
+    "description": "Access Binance cryptocurrency exchange data",
+    "category": "action",
+    "color": "#F0B90B",
+    "inputCount": 4,
+    "outputCount": 1
+  },
+  {
+    "dir": "bitly",
+    "type": "bitly",
+    "name": "Bitly",
+    "description": "Shorten URLs and track clicks with Bitly",
+    "category": "action",
+    "color": "#EE6123",
+    "inputCount": 12,
+    "outputCount": 1
+  },
+  {
+    "dir": "blockscout",
+    "type": "blockscout",
+    "name": "Blockscout",
+    "description": "Query blockchain data using Blockscout explorer",
+    "category": "action",
+    "color": "#6366F1",
+    "inputCount": 10,
+    "outputCount": 1
+  },
+  {
+    "dir": "bluesky",
+    "type": "bluesky",
+    "name": "Bluesky",
+    "description": "Post and interact with Bluesky social network",
+    "category": "action",
+    "color": "#1185FE",
+    "inputCount": 6,
+    "outputCount": 1
+  },
+  {
+    "dir": "bonjoro",
+    "type": "bonjoro",
+    "name": "Bonjoro",
+    "description": "Manage video messages and tasks in Bonjoro",
+    "category": "action",
+    "color": "#FF6B6B",
+    "inputCount": 9,
+    "outputCount": 1
+  },
+  {
+    "dir": "box",
+    "type": "box",
+    "name": "Box",
+    "description": "Interact with Box cloud storage - upload, download, and manage files",
+    "category": "action",
+    "color": "#0061D5",
+    "inputCount": 6,
+    "outputCount": 2
+  },
+  {
+    "dir": "brevo",
+    "type": "brevo",
+    "name": "Brevo",
+    "description": "Send emails and manage contacts using Brevo (formerly Sendinblue)",
+    "category": "action",
+    "color": "#0B996E",
+    "inputCount": 2,
+    "outputCount": 6
+  },
+  {
+    "dir": "brilliant-directories",
+    "type": "brilliant-directories",
+    "name": "Brilliant Directories",
+    "description": "Manage directory and membership sites with Brilliant Directories",
+    "category": "action",
+    "color": "#FF6B35",
+    "inputCount": 9,
+    "outputCount": 2
+  },
+  {
+    "dir": "browse-ai",
+    "type": "browse-ai",
+    "name": "Browse AI",
+    "description": "Extract data from any website using Browse AI web scraping",
+    "category": "action",
+    "color": "#00C853",
+    "inputCount": 8,
+    "outputCount": 3
+  },
+  {
+    "dir": "browserless",
+    "type": "browserless",
+    "name": "Browserless",
+    "description": "Headless browser automation for screenshots, PDFs, and web scraping",
+    "category": "action",
+    "color": "#6366F1",
+    "inputCount": 10,
+    "outputCount": 2
+  },
+  {
+    "dir": "bubble",
+    "type": "bubble",
+    "name": "Bubble",
+    "description": "Connect to Bubble.io no-code platform via Data API",
+    "category": "action",
+    "color": "#0D6EFD",
+    "inputCount": 11,
+    "outputCount": 2
+  },
+  {
+    "dir": "bumpups",
+    "type": "bumpups",
+    "name": "BumpUps",
+    "description": "AI-powered content creation and chat for creators",
+    "category": "action",
+    "color": "#FF4081",
+    "inputCount": 9,
+    "outputCount": 3
+  },
+  {
+    "dir": "cal-com",
+    "type": "cal-com",
+    "name": "Cal.com",
+    "description": "Triggers for Cal.com booking events",
+    "category": "trigger",
+    "color": "#292929",
+    "inputCount": 2,
+    "outputCount": 1
+  },
+  {
+    "dir": "calculator",
+    "type": "calculator",
+    "name": "Calculator",
+    "description": "Perform arithmetic operations on numbers",
+    "category": "transformer",
+    "color": "#FF9800",
+    "inputCount": 3,
+    "outputCount": 3
+  },
+  {
+    "dir": "calendly",
+    "type": "calendly",
+    "name": "Calendly",
+    "description": "Manage scheduling and events with Calendly",
+    "category": "action",
+    "color": "#006BFF",
+    "inputCount": 4,
+    "outputCount": 1
+  },
+  {
+    "dir": "call-rounded",
+    "type": "call-rounded",
+    "name": "CallRounded",
+    "description": "Manage voice calls and communication",
+    "category": "action",
+    "color": "#10B981",
+    "inputCount": 5,
+    "outputCount": 1
+  },
+  {
+    "dir": "camb-ai",
+    "type": "camb-ai",
+    "name": "Camb.ai",
+    "description": "AI-powered conversation and content generation",
+    "category": "action",
+    "color": "#8B5CF6",
+    "inputCount": 10,
+    "outputCount": 1
+  },
+  {
+    "dir": "campaign-monitor",
+    "type": "campaign-monitor",
+    "name": "Campaign Monitor",
+    "description": "Email marketing and campaign management",
+    "category": "action",
+    "color": "#F37021",
+    "inputCount": 6,
+    "outputCount": 1
+  },
+  {
+    "dir": "capsule-crm",
+    "type": "capsule-crm",
+    "name": "Capsule CRM",
+    "description": "Customer relationship management with Capsule",
+    "category": "action",
+    "color": "#0D83DD",
+    "inputCount": 15,
+    "outputCount": 1
+  },
+  {
+    "dir": "captain-data",
+    "type": "captain-data",
+    "name": "Captain Data",
+    "description": "Automate data extraction and enrichment workflows",
+    "category": "action",
+    "color": "#4F46E5",
+    "inputCount": 9,
+    "outputCount": 3
+  },
+  {
+    "dir": "cartloom",
+    "type": "cartloom",
+    "name": "Cartloom",
+    "description": "E-commerce shopping cart and order management",
+    "category": "action",
+    "color": "#FF6B35",
+    "inputCount": 20,
+    "outputCount": 3
+  },
+  {
+    "dir": "cashfree-payments",
+    "type": "cashfree-payments",
+    "name": "Cashfree Payments",
+    "description": "Payment gateway for India - process payments, refunds, and payouts",
+    "category": "action",
+    "color": "#6366F1",
+    "inputCount": 16,
+    "outputCount": 3
+  },
+  {
+    "dir": "certopus",
+    "type": "certopus",
+    "name": "Certopus",
+    "description": "Generate and manage digital certificates and credentials",
+    "category": "action",
+    "color": "#10B981",
+    "inputCount": 9,
+    "outputCount": 3
+  },
+  {
+    "dir": "chainalysis-api",
+    "type": "chainalysis-api",
+    "name": "Chainalysis API",
+    "description": "Blockchain analytics and compliance - screen addresses and transactions",
+    "category": "action",
+    "color": "#1E3A8A",
+    "inputCount": 3,
+    "outputCount": 3
+  },
+  {
+    "dir": "chaindesk",
+    "type": "chaindesk",
+    "name": "Chaindesk",
+    "description": "AI-powered customer support chatbots and agents",
+    "category": "action",
+    "color": "#8B5CF6",
+    "inputCount": 11,
+    "outputCount": 3
+  },
+  {
+    "dir": "chargekeep",
+    "type": "chargekeep",
+    "name": "ChargeKeep",
+    "description": "Payment management and subscription billing platform",
+    "category": "action",
+    "color": "#4F46E5",
+    "inputCount": 3,
+    "outputCount": 3
+  },
+  {
+    "dir": "chat-aid",
+    "type": "chat-aid",
+    "name": "Chat Aid",
+    "description": "AI-powered chat assistance and customer support automation",
+    "category": "action",
+    "color": "#10B981",
+    "inputCount": 2,
+    "outputCount": 4
+  },
+  {
+    "dir": "chat-data",
+    "type": "chat-data",
+    "name": "Chat Data",
+    "description": "Chat analytics and data collection platform",
+    "category": "action",
+    "color": "#8B5CF6",
+    "inputCount": 2,
+    "outputCount": 5
+  },
+  {
+    "dir": "chatbase",
+    "type": "chatbase",
+    "name": "Chatbase",
+    "description": "Build and deploy AI chatbots trained on your data",
+    "category": "action",
+    "color": "#000000",
+    "inputCount": 2,
+    "outputCount": 5
+  },
+  {
+    "dir": "chatnode",
+    "type": "chatnode",
+    "name": "ChatNode",
+    "description": "Build conversational AI workflows and chatbot pipelines",
+    "category": "action",
+    "color": "#F59E0B",
+    "inputCount": 2,
+    "outputCount": 4
+  },
+  {
+    "dir": "chatsistant",
+    "type": "chatsistant",
+    "name": "Chatsistant",
+    "description": "AI assistant platform for customer engagement and support",
+    "category": "action",
+    "color": "#EC4899",
+    "inputCount": 2,
+    "outputCount": 5
+  },
+  {
+    "dir": "checkout",
+    "type": "checkout",
+    "name": "Checkout.com",
+    "description": "Payment processing platform by Checkout.com",
+    "category": "action",
+    "color": "#10B981",
+    "inputCount": 3,
+    "outputCount": 3
+  },
+  {
+    "dir": "circle",
+    "type": "circle",
+    "name": "Circle",
+    "description": "Community platform for creators and businesses",
+    "category": "action",
+    "color": "#6366F1",
+    "inputCount": 2,
+    "outputCount": 3
+  },
+  {
+    "dir": "clarifai",
+    "type": "clarifai",
+    "name": "Clarifai",
+    "description": "AI-powered image and video recognition platform",
+    "category": "action",
+    "color": "#0066FF",
+    "inputCount": 2,
+    "outputCount": 4
+  },
+  {
+    "dir": "claude",
+    "type": "claude",
+    "name": "Claude",
+    "description": "Anthropic Claude AI assistant for text generation and analysis",
+    "category": "action",
+    "color": "#CC785C",
+    "inputCount": 2,
+    "outputCount": 5
+  },
+  {
+    "dir": "clearout",
+    "type": "clearout",
+    "name": "Clearout",
+    "description": "Email verification and validation service",
+    "category": "action",
+    "color": "#00C853",
+    "inputCount": 2,
+    "outputCount": 7
+  },
+  {
+    "dir": "clearoutphone",
+    "type": "clearoutphone",
+    "name": "Clearout Phone",
+    "description": "Phone number verification and validation service",
+    "category": "action",
+    "color": "#00C853",
+    "inputCount": 2,
+    "outputCount": 9
+  },
+  {
+    "dir": "clicdata",
+    "type": "clicdata",
+    "name": "ClicData",
+    "description": "Business intelligence and data visualization platform",
+    "category": "action",
+    "color": "#00A3E0",
+    "inputCount": 2,
+    "outputCount": 11
+  },
+  {
+    "dir": "clickfunnels",
+    "type": "clickfunnels",
+    "name": "ClickFunnels",
+    "description": "Sales funnel builder and marketing automation platform",
+    "category": "action",
+    "color": "#1E88E5",
+    "inputCount": 4,
+    "outputCount": 3
+  },
+  {
+    "dir": "clicksend",
+    "type": "clicksend",
+    "name": "ClickSend",
+    "description": "SMS, email, and voice messaging platform",
+    "category": "action",
+    "color": "#00A8E8",
+    "inputCount": 3,
+    "outputCount": 3
+  },
+  {
+    "dir": "clickup",
+    "type": "clickup",
+    "name": "ClickUp",
+    "description": "Project management and productivity platform",
+    "category": "action",
+    "color": "#7B68EE",
+    "inputCount": 2,
+    "outputCount": 3
+  },
+  {
+    "dir": "clockify",
+    "type": "clockify",
+    "name": "Clockify",
+    "description": "Time tracking and timesheet management",
+    "category": "action",
+    "color": "#03A9F4",
+    "inputCount": 2,
+    "outputCount": 3
+  },
+  {
+    "dir": "clockodo",
+    "type": "clockodo",
+    "name": "Clockodo",
+    "description": "Time tracking and project management for businesses",
+    "category": "action",
+    "color": "#00B894",
+    "inputCount": 3,
+    "outputCount": 3
+  },
+  {
+    "dir": "close",
+    "type": "close",
+    "name": "Close",
+    "description": "Sales CRM for startups and small businesses",
+    "category": "action",
+    "color": "#2E7EE6",
+    "inputCount": 2,
+    "outputCount": 3
+  },
+  {
+    "dir": "cloudconvert",
+    "type": "cloudconvert",
+    "name": "CloudConvert",
+    "description": "File conversion API supporting 200+ formats",
+    "category": "action",
+    "color": "#E53935",
+    "inputCount": 2,
+    "outputCount": 4
+  },
+  {
+    "dir": "cloudinary",
+    "type": "cloudinary",
+    "name": "Cloudinary",
+    "description": "Cloud-based image and video management platform",
+    "category": "action",
+    "color": "#3448C5",
+    "inputCount": 4,
+    "outputCount": 10
+  },
+  {
+    "dir": "cloutly",
+    "type": "cloutly",
+    "name": "Cloutly",
+    "description": "Review management and reputation platform",
+    "category": "action",
+    "color": "#6366F1",
+    "inputCount": 2,
+    "outputCount": 6
+  },
+  {
+    "dir": "coda",
+    "type": "coda",
+    "name": "Coda",
+    "description": "All-in-one document and spreadsheet platform",
+    "category": "action",
+    "color": "#F46A54",
+    "inputCount": 2,
+    "outputCount": 12
+  },
+  {
+    "dir": "cody",
+    "type": "cody",
+    "name": "Cody",
+    "description": "AI-powered business assistant and knowledge base",
+    "category": "action",
+    "color": "#7C3AED",
+    "inputCount": 2,
+    "outputCount": 10
+  },
+  {
+    "dir": "cognito-forms",
+    "type": "cognito-forms",
+    "name": "Cognito Forms",
+    "description": "Build smart forms with calculations, document generation, and payment integration",
+    "category": "action",
+    "color": "#00A6ED",
+    "inputCount": 2,
+    "outputCount": 6
+  },
+  {
+    "dir": "cometapi",
+    "type": "cometapi",
+    "name": "CometAPI",
+    "description": "CometAPI integration for AI-powered queries and custom API calls",
+    "category": "action",
+    "color": "#25D366",
+    "inputCount": 2,
+    "outputCount": 5
+  },
+  {
+    "dir": "comfyicu",
+    "type": "comfyicu",
+    "name": "Comfy ICU",
+    "description": "Run ComfyUI workflows in the cloud for AI image and video generation",
+    "category": "action",
+    "color": "#7C3AED",
+    "inputCount": 2,
+    "outputCount": 7
+  },
+  {
+    "dir": "common",
+    "type": "common",
+    "name": "Common",
+    "description": "Common utility actions for data transformation, delays, and logic operations",
+    "category": "action",
+    "color": "#6366F1",
+    "inputCount": 1,
+    "outputCount": 7
+  },
+  {
+    "dir": "condition",
+    "type": "condition",
+    "name": "Condition",
+    "description": "Exact match (==)",
+    "category": "condition",
+    "color": "#FF6B35",
+    "inputCount": 5,
+    "outputCount": 7
+  },
+  {
+    "dir": "confluence",
+    "type": "confluence",
+    "name": "Confluence",
+    "description": "Atlassian Confluence - Get page content and create pages from templates",
+    "category": "action",
+    "color": "#0052CC",
+    "inputCount": 4,
+    "outputCount": 5
+  },
+  {
+    "dir": "connections",
+    "type": "connections",
+    "name": "Connections",
+    "description": "Read data from your data connections",
+    "category": "action",
+    "color": "#10B981",
+    "inputCount": 1,
+    "outputCount": 4
+  },
+  {
+    "dir": "constant-contact",
+    "type": "constant-contact",
+    "name": "Constant Contact",
+    "description": "Email marketing and automation platform for creating campaigns and managing contacts.",
+    "category": "action",
+    "color": "#0070C0",
+    "inputCount": 2,
+    "outputCount": 4
+  },
+  {
+    "dir": "contentful",
+    "type": "contentful",
+    "name": "Contentful",
+    "description": "Headless CMS for content management and delivery",
+    "category": "action",
+    "color": "#2478CC",
+    "inputCount": 4,
+    "outputCount": 6
+  },
+  {
+    "dir": "contextual-ai",
+    "type": "contextual-ai",
+    "name": "Contextual AI",
+    "description": "AI-powered contextual understanding and RAG platform",
+    "category": "action",
+    "color": "#6366F1",
+    "inputCount": 2,
+    "outputCount": 7
+  },
+  {
+    "dir": "contiguity",
+    "type": "contiguity",
+    "name": "Contiguity",
+    "description": "SMS, iMessage, and communication platform",
+    "category": "action",
+    "color": "#00D4AA",
+    "inputCount": 2,
+    "outputCount": 5
+  },
+  {
+    "dir": "convertkit",
+    "type": "convertkit",
+    "name": "ConvertKit",
+    "description": "Email marketing platform for creators",
+    "category": "action",
+    "color": "#FB6970",
+    "inputCount": 3,
+    "outputCount": 5
+  },
+  {
+    "dir": "copper",
+    "type": "copper",
+    "name": "Copper",
+    "description": "CRM platform built for Google Workspace",
+    "category": "action",
+    "color": "#F5A623",
+    "inputCount": 3,
+    "outputCount": 5
+  },
+  {
+    "dir": "copy-ai",
+    "type": "copy-ai",
+    "name": "Copy.ai",
+    "description": "AI-powered copywriting and workflow automation platform",
+    "category": "action",
+    "color": "#7C3AED",
+    "inputCount": 2,
+    "outputCount": 6
+  },
+  {
+    "dir": "couchbase",
+    "type": "couchbase",
+    "name": "Couchbase",
+    "description": "Interact with Couchbase NoSQL database",
+    "category": "action",
+    "color": "#EA2328",
+    "inputCount": 4,
+    "outputCount": 4
+  },
+  {
+    "dir": "crisp",
+    "type": "crisp",
+    "name": "Crisp",
+    "description": "Customer messaging platform for support and engagement",
+    "category": "action",
+    "color": "#5E3FDE",
+    "inputCount": 4,
+    "outputCount": 4
+  },
+  {
+    "dir": "crypto",
+    "type": "crypto",
+    "name": "Crypto",
+    "description": "Cryptographic operations - hashing, encryption, and encoding",
+    "category": "transformer",
+    "color": "#6366F1",
+    "inputCount": 1,
+    "outputCount": 3
+  },
+  {
+    "dir": "cryptolens",
+    "type": "cryptolens",
+    "name": "Cryptolens",
+    "description": "Software licensing and key management platform",
+    "category": "action",
+    "color": "#1E88E5",
+    "inputCount": 2,
+    "outputCount": 6
+  },
+  {
+    "dir": "csv",
+    "type": "csv",
+    "name": "CSV",
+    "description": "Convert between CSV and JSON formats",
+    "category": "transformer",
+    "color": "#4CAF50",
+    "inputCount": 1,
+    "outputCount": 7
+  },
+  {
+    "dir": "cursor",
+    "type": "cursor",
+    "name": "Cursor",
+    "description": "Interact with Cursor Cloud Agents API",
+    "category": "action",
+    "color": "#000000",
+    "inputCount": 2,
+    "outputCount": 6
+  },
+  {
+    "dir": "customer-io",
+    "type": "customer-io",
+    "name": "Customer.io",
+    "description": "Marketing automation for targeted emails, push, SMS, and event tracking",
+    "category": "action",
+    "color": "#5028C6",
+    "inputCount": 4,
+    "outputCount": 3
+  },
+  {
+    "dir": "customgpt",
+    "type": "customgpt",
+    "name": "CustomGPT",
+    "description": "Build and deploy custom AI chatbots trained on your own data",
+    "category": "action",
+    "color": "#6366F1",
+    "inputCount": 2,
+    "outputCount": 3
+  },
+  {
+    "dir": "cyberark",
+    "type": "cyberark",
+    "name": "CyberArk",
+    "description": "Enterprise privileged access management for credentials and secrets",
+    "category": "action",
+    "color": "#00A4EF",
+    "inputCount": 3,
+    "outputCount": 3
+  },
+  {
+    "dir": "dappier",
+    "type": "ai",
+    "name": "Dappier",
+    "description": "Real-time AI-powered data recommendations, search, and predictions",
+    "category": "action",
+    "color": "#4F46E5",
+    "inputCount": 2,
+    "outputCount": 3
+  },
+  {
+    "dir": "dashworks",
+    "type": "dashworks",
+    "name": "Dashworks",
+    "description": "AI knowledge assistant that searches across your connected apps",
+    "category": "action",
+    "color": "#2563EB",
+    "inputCount": 2,
+    "outputCount": 3
+  },
+  {
+    "dir": "data-filter",
+    "type": "data-filter",
+    "name": "Data Filter",
+    "description": "Filter or transform data from previous nodes",
+    "category": "transformer",
+    "color": "#9C27B0",
+    "inputCount": 3,
+    "outputCount": 3
+  },
+  {
+    "dir": "data-mapper",
+    "type": "data-mapper",
+    "name": "Data Mapper",
+    "description": "Server-side data transformation, field mapping, grouping, and sorting",
+    "category": "transformer",
+    "color": "#8B5CF6",
+    "inputCount": 2,
+    "outputCount": 3
+  },
+  {
+    "dir": "data-summarizer",
+    "type": "data-summarizer",
+    "name": "Data Summarizer",
+    "description": "Calculate averages, sums, unique counts, and min/max from datasets",
+    "category": "transformer",
+    "color": "#6366F1",
+    "inputCount": 1,
+    "outputCount": 3
+  },
+  {
+    "dir": "data-table",
+    "type": "data-table",
+    "name": "Data Table",
+    "description": "Connect to and perform CRUD operations on data tables",
+    "category": "action",
+    "color": "#0ea5e9",
+    "inputCount": 9,
+    "outputCount": 5
+  },
+  {
+    "dir": "datadog",
+    "type": "datadog",
+    "name": "Datadog",
+    "description": "Send logs and make custom API calls to Datadog",
+    "category": "action",
+    "color": "#632CA6",
+    "inputCount": 3,
+    "outputCount": 2
+  },
+  {
+    "dir": "datafuel",
+    "type": "datafuel",
+    "name": "DataFuel",
+    "description": "Crawl and scrape websites with AI-powered data from DataFuel",
+    "category": "action",
+    "color": "#FF6B2B",
+    "inputCount": 2,
+    "outputCount": 2
+  },
+  {
+    "dir": "date-helper",
+    "type": "date-helper",
+    "name": "Date Helper",
+    "description": "Manipulate, format, and calculate dates and times",
+    "category": "transformer",
+    "color": "#4A90D9",
+    "inputCount": 1,
+    "outputCount": 2
+  },
+  {
+    "dir": "datocms",
+    "type": "datocms",
+    "name": "DatoCMS",
+    "description": "Manage content with DatoCMS headless CMS",
+    "category": "action",
+    "color": "#FF7751",
+    "inputCount": 2,
+    "outputCount": 2
+  },
+  {
+    "dir": "deepgram",
+    "type": "deepgram",
+    "name": "Deepgram",
+    "description": "AI-powered speech-to-text, text-to-speech, and audio intelligence",
+    "category": "action",
+    "color": "#13EF93",
+    "inputCount": 2,
+    "outputCount": 2
+  },
+  {
+    "dir": "deepl",
+    "type": "deepl",
+    "name": "DeepL",
+    "description": "AI-powered language translation",
+    "category": "action",
+    "color": "#0F2B46",
+    "inputCount": 2,
+    "outputCount": 3
+  },
+  {
+    "dir": "deepseek",
+    "type": "deepseek",
+    "name": "DeepSeek",
+    "description": "DeepSeek AI - powerful LLM for chat completions and code generation",
+    "category": "action",
+    "color": "#4D6BFE",
+    "inputCount": 2,
+    "outputCount": 4
+  },
+  {
+    "dir": "elevenlabs",
+    "type": "elevenlabs",
+    "name": "ElevenLabs",
+    "description": "AI voice generation and text-to-speech with custom API calls",
+    "category": "action",
+    "color": "#000000",
+    "inputCount": 2,
+    "outputCount": 2
+  },
+  {
+    "dir": "for-each-loop",
+    "type": "for-each-loop",
+    "name": "For Each (Loop)",
+    "description": "Loop through array items and execute connected nodes for each item",
+    "category": "transformer",
+    "color": "#9333ea",
+    "inputCount": 7,
+    "outputCount": 5
+  },
+  {
+    "dir": "gmail",
+    "type": "gmail",
+    "name": "Gmail",
+    "description": "Send emails and manage Gmail messages using Gmail API",
+    "category": "action",
+    "color": "#EA4335",
+    "inputCount": 2,
+    "outputCount": 2
+  },
+  {
+    "dir": "google-calendar",
+    "type": "google-calendar",
+    "name": "Google Calendar",
+    "description": "Create and manage Google Calendar events",
+    "category": "action",
+    "color": "#4285F4",
+    "inputCount": 2,
+    "outputCount": 2
+  },
+  {
+    "dir": "google-docs",
+    "type": "google-docs",
+    "name": "Google Docs",
+    "description": "Create, read, edit and manage Google Docs documents",
+    "category": "action",
+    "color": "#4285F4",
+    "inputCount": 2,
+    "outputCount": 5
+  },
+  {
+    "dir": "google-sheets",
+    "type": "google-sheets",
+    "name": "Google Sheets",
+    "description": "Interact with Google Sheets - read, write, and manage spreadsheets",
+    "category": "action",
+    "color": "#34A853",
+    "inputCount": 2,
+    "outputCount": 7
+  },
+  {
+    "dir": "helpscout",
+    "type": "helpscout",
+    "name": "Help Scout",
+    "description": "Customer support platform - manage conversations, customers, and mailboxes",
+    "category": "action",
+    "color": "#1292EE",
+    "inputCount": 3,
+    "outputCount": 2
+  },
+  {
+    "dir": "http-request",
+    "type": "http-request",
+    "name": "HTTP Request",
+    "description": "Make HTTP requests to external APIs",
+    "category": "action",
+    "color": "#4CAF50",
+    "inputCount": 5,
+    "outputCount": 5
+  },
+  {
+    "dir": "hubspot",
+    "type": "hubspot",
+    "name": "HubSpot",
+    "description": "Connect to HubSpot CRM to manage contacts, deals, tickets, companies and more",
+    "category": "action",
+    "color": "#FF7A59",
+    "inputCount": 2,
+    "outputCount": 7
+  },
+  {
+    "dir": "logger",
+    "type": "logger",
+    "name": "Logger",
+    "description": "Log data to the monitoring dashboard. Only logs when enabled. Useful for debugging and tracking flow execution.",
+    "category": "action",
+    "color": "#8B5CF6",
+    "inputCount": 6,
+    "outputCount": 4
+  },
+  {
+    "dir": "loop-node",
+    "type": "loop-node",
+    "name": "Loop",
+    "description": "Loop through items in an array and process each item",
+    "category": "transformer",
+    "color": "#9333ea",
+    "inputCount": 5,
+    "outputCount": 3
+  },
+  {
+    "dir": "mailchimp",
+    "type": "mailchimp",
+    "name": "Mailchimp",
+    "description": "Add subscribers to Mailchimp lists and send campaigns",
+    "category": "action",
+    "color": "#FFE01B",
+    "inputCount": 2,
+    "outputCount": 3
+  },
+  {
+    "dir": "memberstack",
+    "type": "memberstack",
+    "name": "Memberstack",
+    "description": "Manage members and authentication with Memberstack",
+    "category": "action",
+    "color": "#6366F1",
+    "inputCount": 2,
+    "outputCount": 3
+  },
+  {
+    "dir": "notion",
+    "type": "notion",
+    "name": "Notion",
+    "description": "Create and manage Notion pages and databases",
+    "category": "action",
+    "color": "#000000",
+    "inputCount": 2,
+    "outputCount": 2
+  },
+  {
+    "dir": "response",
+    "type": "response",
+    "name": "HTTP Response",
+    "description": "Send a response back to the webhook caller. Use this to return data from your deployed flow.",
+    "category": "action",
+    "color": "#6366F1",
+    "inputCount": 4,
+    "outputCount": 3
+  },
+  {
+    "dir": "salesforce",
+    "type": "salesforce",
+    "name": "Salesforce",
+    "description": "Connect to Salesforce API for CRUD operations, queries, and bulk data management",
+    "category": "action",
+    "color": "#00A1E0",
+    "inputCount": 2,
+    "outputCount": 7
+  },
+  {
+    "dir": "shopify",
+    "type": "shopify",
+    "name": "Shopify",
+    "description": "Integrate with Shopify Admin API for managing products, orders, customers and more",
+    "category": "action",
+    "color": "#95BF47",
+    "inputCount": 3,
+    "outputCount": 3
+  },
+  {
+    "dir": "slack",
+    "type": "slack",
+    "name": "Slack",
+    "description": "Send messages and interact with Slack",
+    "category": "action",
+    "color": "#4A154B",
+    "inputCount": 1,
+    "outputCount": 2
+  },
+  {
+    "dir": "snowflake",
+    "type": "snowflake",
+    "name": "Snowflake",
+    "description": "Run queries and insert rows in Snowflake via secure edge function",
+    "category": "action",
+    "color": "#29B5E8",
+    "inputCount": 3,
+    "outputCount": 5
+  },
+  {
+    "dir": "stripe",
+    "type": "stripe",
+    "name": "Stripe",
+    "description": "Manage customers, payments, products, and subscriptions using Stripe API",
+    "category": "action",
+    "color": "#635bff",
+    "inputCount": 2,
+    "outputCount": 2
+  },
+  {
+    "dir": "trello",
+    "type": "trello",
+    "name": "Trello",
+    "description": "Visual project management with boards, lists, and cards",
+    "category": "action",
+    "color": "#0079BF",
+    "inputCount": 3,
+    "outputCount": 4
+  },
+  {
+    "dir": "twitter",
+    "type": "twitter",
+    "name": "Twitter (X)",
+    "description": "Post tweets and interact with Twitter API",
+    "category": "action",
+    "color": "#1DA1F2",
+    "inputCount": 5,
+    "outputCount": 2
+  },
+  {
+    "dir": "typeform",
+    "type": "typeform",
+    "name": "Typeform",
+    "description": "Make custom API calls to Typeform",
+    "category": "action",
+    "color": "#262627",
+    "inputCount": 2,
+    "outputCount": 3
+  },
+  {
+    "dir": "webflow",
+    "type": "webflow",
+    "name": "Webflow",
+    "description": "Connect to Webflow API to create, read, update and delete data",
+    "category": "action",
+    "color": "#4353FF",
+    "inputCount": 6,
+    "outputCount": 2
+  },
+  {
+    "dir": "webhook-trigger",
+    "type": "string",
+    "name": "Webhook Handler",
+    "description": "Handle incoming HTTP requests and expose the request data (body, headers, query parameters) to downstream nodes.",
+    "category": "trigger",
+    "color": "#10B981",
+    "inputCount": 6,
+    "outputCount": 7
+  },
+  {
+    "dir": "woocommerce",
+    "type": "woocommerce",
+    "name": "WooCommerce",
+    "description": "Manage WooCommerce products and orders",
+    "category": "action",
+    "color": "#96588A",
+    "inputCount": 4,
+    "outputCount": 2
+  },
+  {
+    "dir": "wordpress",
+    "type": "wordpress",
+    "name": "WordPress",
+    "description": "Create, update, and manage WordPress posts and pages via REST API",
+    "category": "action",
+    "color": "#21759B",
+    "inputCount": 4,
+    "outputCount": 4
+  },
+  {
+    "dir": "zendesk",
+    "type": "zendesk",
+    "name": "Zendesk",
+    "description": "Create and manage Zendesk tickets and users",
+    "category": "action",
+    "color": "#03363D",
+    "inputCount": 4,
+    "outputCount": 3
+  },
+  {
+    "dir": "zoom",
+    "type": "zoom",
+    "name": "Zoom",
+    "description": "Create and manage Zoom meetings and webinars",
+    "category": "action",
+    "color": "#2D8CFF",
+    "inputCount": 2,
+    "outputCount": 4
+  }
+]
