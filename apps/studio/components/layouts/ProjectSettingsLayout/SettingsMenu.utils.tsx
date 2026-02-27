@@ -22,7 +22,7 @@ export const generateSettingsMenu = (
   if (!IS_PLATFORM) {
     return [
       {
-        title: 'Project Settings',
+        title: 'Configuration',
         items: [
           {
             name: `Log Drains`,
@@ -42,7 +42,7 @@ export const generateSettingsMenu = (
 
   return [
     {
-      title: 'Project Settings',
+      title: 'Configuration',
       items: [
         {
           name: 'General',
@@ -113,7 +113,7 @@ export const generateSettingsMenu = (
       ],
     },
     {
-      title: 'Configuration',
+      title: 'Integrations',
       items: [
         {
           name: 'Data API',
