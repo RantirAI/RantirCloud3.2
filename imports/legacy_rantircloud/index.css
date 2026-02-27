@@ -1,0 +1,1022 @@
+@import url('https://fonts.googleapis.com/css2?family=Instrument+Sans:ital,wght@0,400;0,500;0,600;0,700;1,400;1,500;1,600;1,700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Inconsolata:wght@200;300;400;500;600;700;800;900&display=swap');
+@import '@cyntler/react-doc-viewer/dist/index.css';
+
+@font-face {
+  font-family: 'TiemposHeadline';
+  src: url('/lovable-uploads/TiemposHeadline-Light.otf') format('opentype');
+  font-weight: 300;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'TiemposHeadline';
+  src: url('/lovable-uploads/TiemposHeadline-Light.otf') format('opentype');
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+
+/* Utility class for Tiempos font */
+.font-tiempos {
+  font-family: 'TiemposHeadline', Georgia, 'Times New Roman', serif !important;
+}
+
+/* Canvas content box-sizing - ensure all canvas elements respect boundaries */
+[data-canvas-container],
+[data-canvas-container] * {
+  box-sizing: border-box;
+}
+
+/* Canvas scroll container styles */
+.canvas-scroll-container {
+  scrollbar-width: thin;
+  scrollbar-color: hsl(var(--muted-foreground) / 0.4) transparent;
+}
+
+.canvas-scroll-container::-webkit-scrollbar {
+  width: 10px;
+  height: 10px;
+}
+
+.canvas-scroll-container::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.canvas-scroll-container::-webkit-scrollbar-thumb {
+  background-color: hsl(var(--muted-foreground) / 0.4);
+  border-radius: 5px;
+  border: 2px solid transparent;
+  background-clip: content-box;
+}
+
+.canvas-scroll-container::-webkit-scrollbar-thumb:hover {
+  background-color: hsl(var(--muted-foreground) / 0.6);
+}
+
+.canvas-scroll-container::-webkit-scrollbar-corner {
+  background: transparent;
+}
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+ 
+@layer base {
+  :root {
+    /* Responsive Breakpoints */
+    --breakpoint-tablet: 991px;
+    --breakpoint-mobile: 767px;
+    
+  /* ---- Compact App Skin Tokens ---- */
+    --rc-bg: 0 0% 98%; /* #fafafa */
+    --rc-panel: 0 0% 100%; /* #ffffff */
+    --rc-border: 220 13% 91%; /* #e6e6e6 */
+    --rc-shadow: 0 1px 0 rgba(0,0,0,.06), 0 1px 2px rgba(0,0,0,.04);
+    --rc-radius: 6px;
+    --rc-fg: 217 33% 12%; /* #111418 */
+    --rc-muted: 215 14% 42%; /* #6b7280 */
+    
+    --background: 0 0% 98%; /* #fafafa */
+    --foreground: 222.2 84% 4.9%;
+ 
+    --muted: 0 0% 96.5%; /* Light grey #F6F6F6 */
+    --muted-foreground: 215.4 16.3% 46.9%;
+ 
+    --popover: 0 0% 100%;
+    --popover-foreground: 222.2 84% 4.9%;
+ 
+    --card: 0 0% 100%;
+    --card-foreground: 222.2 84% 4.9%;
+ 
+    --border: 214.3 31.8% 91.4%;
+    --input: 214.3 31.8% 91.4%;
+ 
+    --primary: 217.2 91.2% 59.8%; /* Blue/600 equivalent */
+    --primary-foreground: 210 40% 98%;
+    --primary-hover: 217.2 91.2% 53.9%; /* Darker blue on hover */
+    --primary-active: 217.2 91.2% 45.1%; /* Blue/800 on active */
+ 
+    --secondary: 0 0% 100%; /* White for secondary variant */
+    --secondary-foreground: 222.2 47.4% 11.2%;
+    --secondary-hover: 0 0% 96.5%; /* Light grey #F6F6F6 */
+    --secondary-active: 0 0% 92%; /* Slightly darker grey */
+    
+    --dark: 222.2 84% 4.9%; /* Dark variant */
+    --dark-foreground: 210 40% 98%;
+    --dark-hover: 217.2 32.6% 17.5%;
+    --dark-active: 215 20.2% 21.1%;
+ 
+     --accent: 0 0% 96.5%; /* Light grey #F6F6F6 */
+     --accent-foreground: 222.2 47.4% 11.2%;
+     
+     /* Spacing editor accent colors */
+     --accent-cool: 217.2 91.2% 59.8%; /* Blue for margin */
+     --accent-cool-foreground: 210 40% 98%;
+     --accent-warm: 25 95% 53%; /* Orange for padding */
+     --accent-warm-foreground: 20 14.3% 4.1%;
+  
+     --destructive: 0 84.2% 60.2%;
+     --destructive-foreground: 210 40% 98%;
+
+    /* Font sizes */
+    --font-size-xs: 0.75rem;
+    --font-size-sm: 0.875rem;
+    --font-size-base: 1rem;
+    --font-size-lg: 1.125rem;
+    --font-size-xl: 1.25rem;
+    --font-size-2xl: 1.5rem;
+ 
+    --ring: 217.2 91.2% 59.8%; /* Focus ring matches primary */
+    
+    /* Professional selection colors */
+    --selection-ring: 222.2 47.4% 11.2%;
+    --selection-bg: 222.2 47.4% 11.2%;
+    --selection-glow: 222.2 47.4% 11.2%;
+ 
+    /* Button and Form shadows */
+    --button-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+    --button-shadow-inner: inset 0 -1px 0 rgba(0, 0, 0, 0.1), inset 0 1px 0 rgba(255, 255, 255, 0.15);
+    --button-shadow-focus: 0 0 0 2px hsl(var(--ring) / 0.2);
+    --form-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+    --form-shadow-inner: inset 0 1px 2px rgba(0, 0, 0, 0.05);
+
+    --radius: 0.5rem;
+    
+    /* Sidebar colors */
+    --sidebar-background: var(--background);
+    --sidebar-foreground: var(--foreground);
+    --sidebar-muted: var(--muted);
+    --sidebar-muted-foreground: var(--muted-foreground);
+    --sidebar-accent: var(--accent);
+    --sidebar-accent-foreground: var(--accent-foreground);
+    --sidebar-border: var(--border);
+    --sidebar-ring: var(--ring);
+}
+
+/* Sheet/Table Scroll Container Styles */
+.sheet-viewport {
+  position: relative;
+  overflow: hidden;
+}
+
+.sheet-scroll {
+  overscroll-behavior-x: contain;
+  scrollbar-gutter: stable;
+}
+
+.sheet-table {
+  table-layout: fixed;
+}
+
+.sheet-table th,
+.sheet-table td {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* Ensure proper scrolling within layout containers */
+.sheet-scroll::-webkit-scrollbar {
+  height: 8px;
+}
+
+.sheet-scroll::-webkit-scrollbar-track {
+  background: hsl(var(--muted));
+  border-radius: 4px;
+}
+
+.sheet-scroll::-webkit-scrollbar-thumb {
+  background: hsl(var(--muted-foreground) / 0.3);
+  border-radius: 4px;
+}
+
+.sheet-scroll::-webkit-scrollbar-thumb:hover {
+  background: hsl(var(--muted-foreground) / 0.5);
+}
+ 
+  .dark {
+    --background: 240 5% 11%; /* stone-900 equivalent */
+    --foreground: 0 0% 98%;
+ 
+    --muted: 240 4% 16%; /* stone-800 equivalent */
+    --muted-foreground: 240 4% 65%;
+ 
+    --popover: 240 5% 11%;
+    --popover-foreground: 0 0% 98%;
+ 
+    --card: 240 4% 16%; /* lighter stone cards - stone-800 equivalent */
+    --card-foreground: 0 0% 98%;
+ 
+    --border: 240 5% 20%; /* subtle dark border - ~10% lighter than background */
+    --input: 240 10% 3.9%; /* zinc-950 equivalent - much darker input background */
+ 
+    --primary: 217.2 91.2% 59.8%; /* Same blue in dark mode */
+    --primary-foreground: 210 40% 98%;
+    --primary-hover: 217.2 91.2% 53.9%;
+    --primary-active: 217.2 91.2% 45.1%;
+ 
+    --secondary: 240 3% 15%; /* stone-800 using stone */
+    --secondary-foreground: 0 0% 98%;
+    --secondary-hover: 240 4% 20%;
+    --secondary-active: 240 4% 25%;
+    
+    --dark: 240 5% 6%;
+    --dark-foreground: 0 0% 98%;
+    --dark-hover: 240 3% 15%;
+    --dark-active: 240 4% 20%;
+ 
+    --accent: 240 3% 15%;
+    --accent-foreground: 0 0% 98%;
+    
+    /* Spacing editor accent colors - dark mode */
+    --accent-cool: 217.2 91.2% 59.8%; /* Blue for margin */
+    --accent-cool-foreground: 210 40% 98%;
+    --accent-warm: 25 95% 53%; /* Orange for padding */
+    --accent-warm-foreground: 25 5.7% 97.3%;
+ 
+    --destructive: 0 62.8% 30.6%;
+    --destructive-foreground: 0 85.7% 97.3%;
+ 
+    --ring: 217.2 91.2% 59.8%;
+    
+    /* Professional selection colors for dark mode */
+    --selection-ring: 210 40% 98%;
+    --selection-bg: 210 40% 98%;
+    --selection-glow: 210 40% 98%;
+    
+    /* Button and Form shadows for dark mode */
+    --button-shadow: 0 1px 2px rgba(0, 0, 0, 0.25);
+    --button-shadow-inner: inset 0 -1px 0 rgba(0, 0, 0, 0.2), inset 0 1px 0 rgba(255, 255, 255, 0.1);
+    --button-shadow-focus: 0 0 0 2px hsl(var(--ring) / 0.3);
+    --form-shadow: 0 1px 2px rgba(0, 0, 0, 0.25);
+    --form-shadow-inner: inset 0 1px 2px rgba(0, 0, 0, 0.2);
+
+    /* Dark mode compact tokens */
+    --rc-bg: 240 5% 11%; /* stone-900 equivalent */
+    --rc-panel: 240 4% 16%; /* lighter stone for cards - stone-800 equivalent */
+    --rc-border: 240 5% 20%; /* subtle dark border - ~10% lighter than background */
+    --rc-shadow: 0 1px 0 rgba(0,0,0,.4), 0 2px 4px rgba(0,0,0,.3);
+    --rc-fg: 0 0% 98%;
+    --rc-muted: 240 4% 65%;
+    
+    /* Sidebar colors for dark mode */
+    --sidebar-background: var(--background);
+    --sidebar-foreground: var(--foreground);
+    --sidebar-muted: var(--muted);
+    --sidebar-muted-foreground: var(--muted-foreground);
+    --sidebar-accent: 240 3% 15%; /* very subtle dark hover */
+    --sidebar-accent-foreground: 0 0% 98%;
+    --sidebar-border: 240 5% 20%; /* subtle dark border */
+    --sidebar-ring: var(--ring);
+  }
+  
+/* Light mode table headers - custom grey background */
+.ui-compact .dashboard-table thead {
+  background: #F6F6F6;
+  border-bottom: 1px solid hsl(var(--rc-border) / 0.5);
+}
+
+/* Dark mode table with more prominent borders and headers */
+.dark .ui-compact .dashboard-table {
+  border: 1px solid hsl(240 4% 25% / 0.7);
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
+}
+.dark .ui-compact .dashboard-table thead {
+  background: hsl(240 4% 18%);
+  border-bottom: 1px solid hsl(240 4% 25% / 0.6);
+}
+.dark .ui-compact .dashboard-table td {
+  border-bottom: 1px solid hsl(240 4% 25% / 0.5);
+}
+
+/* Dark mode cards with lighter background */
+.dark .ui-compact .dashboard-card {
+  background: hsl(240 4% 14%); /* stone-800+ for better visibility */
+}
+}
+ 
+@layer base {
+  * {
+    @apply border-border/50;
+  }
+  html, body {
+    font-family: var(--theme-font-family, 'Instrument Sans'), -apple-system, BlinkMacSystemFont, sans-serif;
+  }
+  body {
+    @apply bg-background text-foreground;
+  }
+  h1 {
+    font-family: 'TiemposHeadline', Georgia, 'Times New Roman', serif;
+  }
+  
+  /* Input labels should ALWAYS use Inconsolata 10px - not affected by theme fonts */
+  label,
+  .label,
+  [data-radix-label] {
+    font-family: 'Inconsolata', 'Courier New', monospace !important;
+    font-size: 10px !important;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+  }
+  
+  /* Ensure theme font applies to all content elements unless specifically overridden */
+  button, input, select, textarea, a, p, span, div, li, td, th {
+    font-family: inherit;
+  }
+}
+
+/* Custom blur effect for spreadsheet editing */
+.spreadsheet-blur-row {
+  filter: blur(4px) saturate(0.2);
+  pointer-events: none;
+  opacity: 0.5;
+  transition: filter 0.2s ease-out, opacity 0.2s ease-out;
+}
+
+/* Professional selection styles for app builder canvas */
+@layer components {
+  .component-selected {
+    position: relative;
+    transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+    /* Enhanced selection styling with solid border */
+    outline: 3px solid hsl(var(--primary)) !important;
+    outline-offset: 2px;
+    background: hsl(var(--primary) / 0.05) !important;
+    border-radius: 4px;
+  }
+  
+  .component-selected::before {
+    content: '';
+    position: absolute;
+    inset: -4px;
+    background: linear-gradient(45deg, hsl(var(--selection-ring) / 0.3), hsl(var(--selection-glow) / 0.2));
+    border-radius: 8px;
+    z-index: -1;
+    animation: selection-pulse 2s ease-in-out infinite;
+  }
+  
+  .component-selected::after {
+    content: '';
+    position: absolute;
+    inset: -2px;
+    background: hsl(var(--background));
+    border-radius: 6px;
+    z-index: -1;
+  }
+  
+  @keyframes selection-pulse {
+    0%, 100% {
+      opacity: 0.8;
+      transform: scale(1);
+    }
+    50% {
+      opacity: 1;
+      transform: scale(1.02);
+    }
+  }
+
+  /* Topbar buttons: subtle dark fill that adapts to any topbar color */
+  .topbar-control {
+    background-color: hsl(0 0% 0% / 0.30);
+    border: 1px solid hsl(0 0% 100% / 0.18);
+    box-shadow: inset 0 1px 0 hsl(0 0% 100% / 0.06);
+    transition: background-color 150ms ease, border-color 150ms ease;
+  }
+  .topbar-control:hover {
+    background-color: hsl(0 0% 0% / 0.40);
+    border-color: hsl(0 0% 100% / 0.26);
+  }
+  .topbar-control:active {
+    background-color: hsl(0 0% 0% / 0.48);
+  }
+
+  /* Topbar tabs: active/inactive states that blend with the topbar */
+  .topbar-tab-active {
+    background-color: hsl(0 0% 0% / 0.34);
+    color: hsl(0 0% 100% / 0.95);
+  }
+  .topbar-tab-inactive {
+    color: hsl(0 0% 100% / 0.72);
+  }
+  .topbar-tab-inactive:hover {
+    background-color: hsl(0 0% 0% / 0.22);
+    color: hsl(0 0% 100% / 0.95);
+  }
+}
+
+.scrollbar-hide {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+
+.scrollbar-hide::-webkit-scrollbar {
+  display: none;
+}
+
+.scrollbar-thin {
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+
+.scrollbar-thin::-webkit-scrollbar {
+  display: none;
+}
+
+/* Hover-to-show scrollbar - light blue accent, hidden by default */
+.scrollbar-hover-show {
+  scrollbar-width: thin;
+  scrollbar-color: transparent transparent;
+  transition: scrollbar-color 0.2s ease;
+}
+
+.scrollbar-hover-show:hover {
+  scrollbar-color: hsl(var(--primary) / 0.4) transparent;
+}
+
+.scrollbar-hover-show::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+.scrollbar-hover-show::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.scrollbar-hover-show::-webkit-scrollbar-thumb {
+  background: transparent;
+  border-radius: 3px;
+  transition: background 0.2s ease;
+}
+
+.scrollbar-hover-show:hover::-webkit-scrollbar-thumb {
+  background: hsl(var(--primary) / 0.4);
+}
+
+.scrollbar-hover-show::-webkit-scrollbar-thumb:hover {
+  background: hsl(var(--primary) / 0.6);
+}
+
+/* ---- Compact UI System ---- */
+.ui-compact { 
+  font-size: 14px; 
+  line-height: 1.45; 
+}
+
+/* App canvas and panels */
+.ui-compact .bg-canvas { 
+  background: hsl(var(--rc-bg)); 
+}
+.ui-compact .bg-panel { 
+  background: hsl(var(--rc-panel)); 
+}
+
+/* Generic "panel/card" look */
+.ui-compact .panel, 
+.ui-compact .card-compact {
+  border: 1px solid hsl(var(--rc-border));
+  border-radius: 6px;
+  box-shadow: 0 1px 0 rgba(0,0,0,.06), 0 1px 2px rgba(0,0,0,.04);
+}
+
+/* Inputs & buttons (tight) */
+.ui-compact input,
+.ui-compact select,
+.ui-compact textarea {
+  height: 34px;
+  padding: 6px 10px;
+  border-radius: 6px;
+  border: 1px solid hsl(var(--rc-border));
+}
+
+/* Primary buttons - 3D style with white text - only for specific primary actions */
+.ui-compact .btn-primary,
+.ui-compact button[data-primary="true"] {
+  background: hsl(var(--primary)) !important;
+  color: white !important;
+  font-weight: 600 !important;
+  font-size: 12px;
+  padding: 4px 8px;
+  border-radius: 12px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1), inset 0 1px 0 rgba(255, 255, 255, 0.15);
+  border: none;
+  transform: translateY(0);
+  transition: all 0.15s ease;
+}
+
+.ui-compact .btn-primary:hover,
+.ui-compact button[data-primary="true"]:hover {
+  background: hsl(var(--primary-hover)) !important;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15), inset 0 1px 0 rgba(255, 255, 255, 0.2);
+}
+
+.ui-compact .btn-primary:active,
+.ui-compact button[data-primary="true"]:active {
+  background: hsl(var(--primary-active)) !important;
+  transform: translateY(0);
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.2), inset 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+/* Tag-style buttons for prompts */
+.ui-compact .btn-tag {
+  background: hsl(var(--muted));
+  color: hsl(var(--muted-foreground));
+  font-weight: 600;
+  font-size: 11px;
+  padding: 3px 8px;
+  border-radius: 16px;
+  border: 1px solid hsl(var(--border));
+  transition: all 0.15s ease;
+  cursor: pointer;
+}
+
+.ui-compact .btn-tag:hover {
+  background: hsl(var(--accent));
+  color: hsl(var(--accent-foreground));
+}
+
+/* Tables (dense) */
+.ui-compact table tr { 
+  height: 36px; 
+}
+.ui-compact th, 
+.ui-compact td { 
+  padding: 6px 10px; 
+  font-size: 13px; 
+}
+.ui-compact thead th { 
+  color: hsl(var(--rc-muted)); 
+  font-weight: 600; 
+}
+
+/* Topbar + Sidebar */
+.ui-compact .app-topbar { 
+  height: 48px; 
+}
+.ui-compact .app-sidebar { 
+  width: 232px; 
+}
+.ui-compact .app-nav-item { 
+  height: 38px; 
+}
+
+/* ---- Compact Sidebar + Tables ---- */
+.ui-compact .sidebar { width: 208px; }
+.ui-compact .nav-item { height: 36px; padding: 0 10px; border-radius: 6px; }
+.ui-compact .nav-icon { width: 16px; height: 16px; opacity: .8; }
+
+.ui-compact .panel { border: 1px solid var(--rc-border); border-radius: 6px; box-shadow: var(--rc-shadow); background: var(--rc-panel); }
+
+/* tables with borders and shadows */
+.ui-compact .dashboard-table {
+  border: 1px solid hsl(var(--rc-border) / 0.6);
+  border-radius: 6px;
+  overflow: hidden;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.02);
+}
+
+/* cards with full borders */
+.ui-compact .dashboard-card {
+  border: 1px solid hsl(var(--rc-border));
+  border-radius: 6px;
+  background: hsl(var(--rc-panel));
+}
+/* This is now handled by the light mode specific rule above */
+.ui-compact .dashboard-table th {
+  color: hsl(var(--rc-muted));
+  font-weight: 600;
+  font-size: 12px;
+  padding: 8px 12px;
+  text-align: left;
+}
+.ui-compact .dashboard-table td {
+  padding: 8px 12px;
+  font-size: 13px;
+  border-bottom: 1px solid hsl(var(--rc-border) / 0.4);
+}
+.ui-compact .dashboard-table tr:last-child td {
+  border-bottom: none;
+}
+.ui-compact table tr { height: 36px; }
+.ui-compact th, .ui-compact td { padding: 6px 10px; font-size: 13px; }
+.ui-compact thead th { color: var(--rc-muted); font-weight: 600; }
+
+/* activity timeline */
+.ui-compact .activity-row { 
+  display: flex; 
+  align-items: flex-start; 
+  gap: 8px; 
+  padding: 6px 0;
+  position: relative;
+}
+
+.ui-compact .activity-row::before {
+  content: '';
+  position: absolute;
+  left: 8px;
+  top: 20px;
+  bottom: -6px;
+  width: 1px;
+  background: hsl(var(--border));
+}
+
+.ui-compact .activity-row:last-child::before {
+  display: none;
+}
+
+.ui-compact .activity-icon {
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  background: hsl(var(--background));
+  border: 2px solid hsl(var(--border));
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+  z-index: 1;
+  padding: 4px;
+}
+
+.ui-compact .activity-time { 
+  font-size: 12px; 
+  color: hsl(var(--muted-foreground)); 
+}
+
+/* hover add button for project section headers */
+.ui-compact .section-header { position:relative; }
+.ui-compact .section-header:hover .section-add { opacity:1; }
+.ui-compact .section-add {
+  position:absolute; right:8px; top:50%; transform:translateY(-50%);
+  opacity:0; transition:opacity .15s ease;
+}
+
+/* dot grid background */
+.ui-compact .dot-grid-bg {
+  background-image: radial-gradient(circle, rgba(156, 163, 175, 0.3) 1px, transparent 1px);
+  background-size: 12px 12px;
+  position: relative;
+}
+
+.ui-compact .dot-grid-bg::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(135deg, rgba(250, 250, 250, 0.8) 0%, transparent 50%, rgba(250, 250, 250, 0.8) 100%);
+  pointer-events: none;
+}
+
+/* Dark mode dot grid background */
+.dark .ui-compact .dot-grid-bg::before {
+  background: linear-gradient(135deg, rgba(24, 24, 27, 0.8) 0%, transparent 50%, rgba(24, 24, 27, 0.8) 100%);
+}
+
+/* Explore Sidebar */
+.ui-compact .explore-rail { 
+  width: 208px; 
+  transition: width 0.2s ease;
+}
+.ui-compact .explore-item { 
+  height: 36px; 
+  padding: 0 10px; 
+  font-size: 13px; 
+  border-radius: 6px; 
+  transition: all 0.15s ease;
+}
+.ui-compact .explore-item:hover {
+  background-color: hsl(var(--muted));
+}
+.ui-compact .explore-icon { 
+  width: 16px; 
+  height: 16px; 
+  opacity: .8; 
+  flex-shrink: 0;
+}
+
+/* Segmented tabs */
+.seg-tabs { 
+  border: 1px solid hsl(var(--border)); 
+  border-radius: 999px; 
+  background: hsl(var(--background)); 
+  padding: 2px; 
+  display: inline-flex; 
+  gap: 2px; 
+  box-shadow: 0 1px 3px 0 rgb(0 0 0 / 0.1);
+}
+.seg-tab { 
+  height: 28px; 
+  padding: 0 12px; 
+  border-radius: 999px; 
+  font-size: 13px; 
+  border: none;
+  background: none;
+  cursor: pointer;
+  transition: all 0.15s ease;
+  display: flex;
+  align-items: center;
+  font-weight: 500;
+  color: hsl(var(--muted-foreground));
+}
+.seg-tab:hover {
+  background: hsl(var(--muted) / 0.5);
+  color: hsl(var(--foreground));
+}
+.seg-tab[aria-selected="true"] { 
+  background: hsl(var(--foreground) / 0.08); 
+  box-shadow: 0 1px 3px 0 rgb(0 0 0 / 0.1); 
+  color: hsl(var(--foreground));
+  font-weight: 600; 
+}
+
+/* Enhanced Table Styling */
+.table-wrap { 
+  overflow-x: auto; 
+  -webkit-overflow-scrolling: touch;
+  scrollbar-width: thin;
+}
+.table-inner { 
+  min-width: 1200px; 
+}
+.table-head { 
+  position: sticky; 
+  top: 0; 
+  background: hsl(var(--background)); 
+  z-index: 10; 
+  border-bottom: 1px solid hsl(var(--border)); 
+}
+.col-head { 
+  height: 36px; 
+  padding: 6px 10px; 
+  font-size: 12.5px; 
+  display: flex; 
+  align-items: center; 
+  gap: 6px; 
+  font-weight: 600;
+  color: hsl(var(--muted-foreground));
+  white-space: nowrap;
+}
+.col-head:hover {
+  background: hsl(var(--muted) / 0.5);
+}
+.cell { 
+  padding: 6px 10px; 
+  font-size: 13px; 
+  white-space: nowrap; 
+  border-bottom: 1px solid hsl(var(--border) / 0.5);
+}
+.row { 
+  height: 36px; 
+  transition: background-color 0.15s ease;
+}
+.row:nth-child(odd) {
+  background: hsl(var(--muted) / 0.25);
+}
+.row:hover { 
+  background: hsl(var(--muted) / 0.5); 
+}
+.row.is-selected { 
+  background: hsl(var(--muted)); 
+  border-left: 3px solid hsl(var(--primary));
+}
+
+/* Column type icons */
+.col-type-icon {
+  width: 14px;
+  height: 14px;
+  opacity: 0.7;
+  flex-shrink: 0;
+}
+
+/* Line clamp utilities for text truncation with ellipsis */
+.line-clamp-1 {
+  display: block;
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+  max-width: 100%;
+}
+
+.line-clamp-2 {
+  overflow: hidden;
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+  white-space: normal;
+  overflow-wrap: anywhere;
+  word-break: break-word;
+}
+
+.line-clamp-3 {
+  overflow: hidden;
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 3;
+  white-space: normal;
+  overflow-wrap: anywhere;
+  word-break: break-word;
+}
+
+/* Doc Viewer Custom Styles - Match Design System */
+#react-doc-viewer {
+  --doc-viewer-primary: hsl(var(--primary));
+  --doc-viewer-border: hsl(var(--border));
+  --doc-viewer-bg: hsl(var(--card));
+  width: 100% !important;
+}
+
+/* Main document viewer wrapper */
+#react-doc-viewer,
+#react-doc-viewer #proxy-renderer,
+#react-doc-viewer #pdf-renderer {
+  width: 100% !important;
+  margin-top: -10px !important;
+  overflow: visible !important;
+  display: block !important;
+}
+
+/* Adjust control bar styling - full width */
+#react-doc-viewer #pdf-controls,
+#react-doc-viewer .doc-controls-container {
+  background: hsl(var(--card)) !important;
+  border-bottom: 1px solid hsl(var(--border)) !important;
+  box-shadow: none !important;
+  padding: 8px 12px !important;
+  width: 100% !important;
+  display: flex !important;
+  align-items: center !important;
+  gap: 8px !important;
+  flex-wrap: nowrap !important;
+  margin-bottom: 0 !important;
+}
+
+/* Override doc-viewer navigation and controls - consistent 32px buttons */
+#react-doc-viewer button,
+#react-doc-viewer #pdf-controls button,
+#react-doc-viewer #header-bar button,
+#react-doc-viewer .doc-nav-button,
+#react-doc-viewer .zoom-controls button,
+#react-doc-viewer .page-controls button,
+#react-doc-viewer .pagination-button {
+  background: hsl(var(--background)) !important;
+  border: 1px solid hsl(var(--border)) !important;
+  border-radius: 6px !important;
+  box-shadow: none !important;
+  color: hsl(var(--foreground)) !important;
+  padding: 0 !important;
+  height: 32px !important;
+  width: 32px !important;
+  min-width: 32px !important;
+  min-height: 32px !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  transition: all 0.2s ease !important;
+  flex-shrink: 0 !important;
+}
+
+#react-doc-viewer button:hover,
+#react-doc-viewer #pdf-controls button:hover,
+#react-doc-viewer .doc-nav-button:hover,
+#react-doc-viewer .zoom-controls button:hover,
+#react-doc-viewer .page-controls button:hover {
+  background: hsl(var(--accent)) !important;
+  border-color: hsl(var(--border)) !important;
+}
+
+/* Make all icons consistent size */
+#react-doc-viewer svg,
+#react-doc-viewer .icon,
+#react-doc-viewer button svg {
+  width: 16px !important;
+  height: 16px !important;
+  stroke-width: 2px !important;
+  flex-shrink: 0 !important;
+}
+
+/* Remove rounded corners on icon containers */
+#react-doc-viewer .icon-container,
+#react-doc-viewer button > div {
+  border-radius: 0 !important;
+  width: 16px !important;
+  height: 16px !important;
+}
+
+/* Page number input styling - match button height */
+#react-doc-viewer input[type="number"],
+#react-doc-viewer .page-input {
+  border: 1px solid hsl(var(--border)) !important;
+  border-radius: 6px !important;
+  background: hsl(var(--background)) !important;
+  color: hsl(var(--foreground)) !important;
+  padding: 4px 8px !important;
+  height: 32px !important;
+  min-height: 32px !important;
+  width: 60px !important;
+  font-size: 14px !important;
+  box-shadow: none !important;
+  text-align: center !important;
+}
+
+/* Remove heavy shadows from document container */
+#react-doc-viewer #pdf-page-wrapper,
+#react-doc-viewer .document-container,
+#react-doc-viewer .pdf-page-wrapper {
+  box-shadow: none !important;
+  border: 1px solid hsl(var(--border)) !important;
+  border-radius: 6px !important;
+  overflow: hidden !important;
+  margin-top: 16px !important;
+}
+
+/* Add spacing between individual PDF pages */
+#react-doc-viewer .pdf-page,
+#react-doc-viewer .document-page,
+#react-doc-viewer canvas {
+  margin-top: 8px !important;
+  margin-bottom: 8px !important;
+}
+
+#react-doc-viewer .pdf-page:first-child,
+#react-doc-viewer .document-page:first-child {
+  margin-top: 8px !important;
+}
+
+#react-doc-viewer .pdf-page:last-child,
+#react-doc-viewer .document-page:last-child {
+  margin-bottom: 8px !important;
+}
+
+/* Style the pagination controls */
+#react-doc-viewer .pagination-controls,
+#react-doc-viewer .page-controls {
+  display: flex !important;
+  align-items: center !important;
+  gap: 8px !important;
+}
+
+/* Fix control groups alignment */
+#react-doc-viewer .doc-controls,
+#react-doc-viewer .zoom-controls {
+  display: flex !important;
+  align-items: center !important;
+  gap: 8px !important;
+}
+
+/* Page info text */
+#react-doc-viewer .page-info {
+  font-size: 14px !important;
+  color: hsl(var(--muted-foreground)) !important;
+  padding: 0 8px !important;
+  white-space: nowrap !important;
+}
+
+/* Page breaks for document editor */
+.page-breaks {
+  position: relative;
+  background-image: repeating-linear-gradient(
+    transparent,
+    transparent 1122px,
+    hsl(var(--border)) 1122px,
+    hsl(var(--border)) 1123px
+  );
+  background-size: 100% 1123px;
+}
+
+/* RevoGrid Spreadsheet Scrolling - force grid to contain its scrolling */
+revo-grid {
+  display: block;
+  width: max-content;
+  min-width: 100%;
+  height: 100%;
+}
+
+/* Ensure RevoGrid internal containers handle overflow properly */
+revo-grid::part(header),
+revo-grid::part(content),
+revo-grid::part(viewport) {
+  overflow: visible !important;
+}
+
+/* Row header action buttons styling (RevoGrid) */
+.rv-rowheader-actions {
+  user-select: none;
+}
+
+.row-select-btn {
+  transition: all 0.15s ease;
+}
+
+.row-select-btn:hover {
+  border-color: hsl(var(--primary)) !important;
+}
+
+.expand-row-btn {
+  transition: all 0.15s ease;
+}
+
+.expand-row-btn:hover {
+  opacity: 1 !important;
+  background: hsl(var(--accent)) !important;
+}

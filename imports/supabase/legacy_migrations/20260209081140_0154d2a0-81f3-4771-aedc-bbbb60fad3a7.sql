@@ -1,0 +1,1 @@
+UPDATE integrations SET requires_installation = true, updated_at = now() WHERE integration_id = 'customer-io';

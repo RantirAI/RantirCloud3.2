@@ -1,0 +1,144 @@
+/* Clean React Flow Styles for Action Flow Builder */
+
+/* Remove transitions but allow transform for dragging */
+.react-flow__node {
+  transition: none !important;
+}
+
+.react-flow__node:hover {
+  /* Allow hover effects but no forced transform */
+}
+
+.react-flow__node.selected {
+  /* Allow selection effects but no forced transform */
+}
+
+/* Clean edge styles */
+.react-flow__edge-path {
+  stroke-width: 2;
+  stroke: hsl(var(--muted-foreground) / 0.3);
+  transition: none;
+}
+
+.react-flow__edge:hover .react-flow__edge-path {
+  stroke: hsl(var(--muted-foreground) / 0.5);
+  stroke-width: 2;
+}
+
+.react-flow__edge.selected .react-flow__edge-path {
+  stroke: hsl(var(--foreground) / 0.7);
+  stroke-width: 3;
+}
+
+/* Clean connection line */
+.react-flow__connectionline {
+  stroke-width: 2;
+  stroke: hsl(var(--primary));
+  stroke-dasharray: 4,4;
+  animation: dash 1s linear infinite;
+}
+
+@keyframes dash {
+  to {
+    stroke-dashoffset: -8;
+  }
+}
+
+/* Clean handle styles - Making them transparent */
+.react-flow__handle {
+  border-radius: 50% !important;
+  transition: none !important;
+  border: none !important;
+  box-shadow: none !important;
+  background: transparent !important;
+  opacity: 0 !important; /* Make handles completely transparent */
+  pointer-events: all !important; /* Keep them functional for connections */
+}
+
+.react-flow__handle:hover {
+  background: transparent !important;
+  opacity: 0 !important;
+}
+
+.react-flow__handle.connectionindicator {
+  background: transparent !important;
+  border: none !important;
+  opacity: 0 !important;
+}
+
+/* Clean controls */
+.react-flow__controls {
+  background: hsl(var(--background)) !important;
+  border: 1px solid hsl(var(--border)) !important;
+  border-radius: 8px !important;
+  box-shadow: 0 4px 6px -1px hsl(var(--foreground) / 0.1) !important;
+}
+
+.react-flow__controls button {
+  border: none !important;
+  background: transparent !important;
+  color: hsl(var(--muted-foreground)) !important;
+  transition: none !important;
+}
+
+.react-flow__controls button:hover {
+  background: hsl(var(--muted)) !important;
+  color: hsl(var(--foreground)) !important;
+}
+
+/* Clean minimap */
+.react-flow__minimap {
+  background: hsl(var(--background)) !important;
+  border: 1px solid hsl(var(--border)) !important;
+  border-radius: 8px !important;
+  box-shadow: 0 4px 6px -1px hsl(var(--foreground) / 0.1) !important;
+}
+
+/* Hide attribution */
+.react-flow__attribution {
+  display: none !important;
+}
+
+/* Clean background */
+.react-flow__background {
+  background-color: hsl(var(--muted) / 0.3);
+}
+
+/* Clean selection box */
+.react-flow__selection {
+  background: hsl(var(--primary) / 0.08) !important;
+  border: 1px solid hsl(var(--primary)) !important;
+}
+
+/* Clean node drag indicator */
+.react-flow__node.dragging {
+  opacity: 0.8 !important;
+}
+
+/* Clean edge label background */
+.react-flow__edge-textbg {
+  fill: hsl(var(--background));
+  stroke: hsl(var(--border));
+  stroke-width: 1;
+}
+
+/* Error node styles */
+.react-flow__node.error-node {
+  background: hsl(var(--destructive) / 0.1) !important;
+  border-color: hsl(var(--destructive)) !important;
+  box-shadow: 0 0 0 2px hsl(var(--destructive) / 0.2) !important;
+}
+
+.react-flow__node.error-node:hover {
+  box-shadow: 0 0 0 3px hsl(var(--destructive) / 0.3) !important;
+}
+
+/* Execution animation */
+@keyframes execution-pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.5; }
+}
+
+.executing-node {
+  animation: execution-pulse 1s ease-in-out infinite;
+}

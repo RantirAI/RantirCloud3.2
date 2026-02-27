@@ -1,0 +1,1 @@
+UPDATE integrations SET requires_installation = true WHERE node_type = 'deepgram';

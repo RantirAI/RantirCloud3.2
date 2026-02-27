@@ -1,0 +1,1 @@
+UPDATE integrations SET is_completed = true WHERE integration_id IN ('data-summarizer', 'datadog', 'elevenlabs');

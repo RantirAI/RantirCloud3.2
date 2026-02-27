@@ -1,0 +1,1 @@
+DELETE FROM integrations WHERE node_type IN ('ai-image-generator', 'ai-video-generator');

@@ -1,0 +1,1 @@
+ALTER TABLE public.flows ADD CONSTRAINT flows_flow_project_id_unique UNIQUE (flow_project_id);

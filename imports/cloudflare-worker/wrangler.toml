@@ -1,0 +1,40 @@
+# Rantir Published Apps Router
+# Cloudflare Worker Configuration
+
+name = "rantir-apps-router"
+main = "src/index.ts"
+compatibility_date = "2024-01-01"
+
+# Account and Zone IDs (fill in your values)
+# account_id = "your-account-id"
+# zone_id = "your-zone-id"
+
+# Routes for the worker
+# Uncomment and configure after adding your domain to Cloudflare
+# routes = [
+#   { pattern = "*.rantir.cloud/*", zone_name = "rantir.cloud" }
+# ]
+
+# Custom domain routing (for user custom domains)
+# This requires Cloudflare for Platforms setup
+# See: https://developers.cloudflare.com/cloudflare-for-platforms/
+
+# Environment Variables
+[vars]
+SUPABASE_URL = "https://appdmmjexevclmpyvtss.supabase.co"
+
+# KV Namespace for custom domain caching (optional, for performance)
+# Create with: wrangler kv:namespace create "CUSTOM_DOMAINS"
+# [[kv_namespaces]]
+# binding = "CUSTOM_DOMAINS"
+# id = "your-kv-namespace-id"
+
+# Development settings
+[dev]
+port = 8787
+
+# Production environment
+[env.production]
+# routes = [
+#   { pattern = "*.rantir.cloud/*", zone_name = "rantir.cloud" }
+# ]

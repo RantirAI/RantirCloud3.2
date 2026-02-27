@@ -1,0 +1,1 @@
+UPDATE integrations SET is_enabled = true, is_completed = true WHERE node_type IN ('clicksend', 'clickup', 'clockify', 'clockodo', 'close', 'cloudconvert');

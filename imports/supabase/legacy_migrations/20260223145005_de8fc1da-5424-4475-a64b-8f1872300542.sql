@@ -1,0 +1,1 @@
+UPDATE integrations SET requires_installation = true WHERE integration_id IN ('deepl', 'helpscout', 'helpscout-trigger', 'deepseek');

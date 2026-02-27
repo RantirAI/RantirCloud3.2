@@ -1,0 +1,1 @@
+UPDATE integrations SET name = 'Close' WHERE integration_id = 'close-crm';

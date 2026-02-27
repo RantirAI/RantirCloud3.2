@@ -1,0 +1,1 @@
+DELETE FROM integrations WHERE LOWER(name) = 'common' OR LOWER(integration_id) = 'common';
