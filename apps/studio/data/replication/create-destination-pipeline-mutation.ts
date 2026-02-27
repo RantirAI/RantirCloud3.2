@@ -80,8 +80,8 @@ async function createDestinationPipeline(
         project_id: projectId,
         dataset_id: datasetId,
         service_account_key: serviceAccountKey,
-        ...(connectionPoolSize !== undefined ? { connection_pool_size: connectionPoolSize } : {}),
-        ...(maxStalenessMins !== null ? { max_staleness_mins: maxStalenessMins } : {}),
+        connection_pool_size: connectionPoolSize,
+        max_staleness_mins: maxStalenessMins,
       },
     } as components['schemas']['CreateReplicationDestinationPipelineBody']['destination_config']
   } else if ('iceberg' in destinationConfig) {
@@ -114,20 +114,10 @@ async function createDestinationPipeline(
 
   const pipeline_config = {
     publication_name: publicationName,
-    ...(maxTableSyncWorkers !== undefined ? { max_table_sync_workers: maxTableSyncWorkers } : {}),
-    ...(maxCopyConnectionsPerTable !== undefined
-      ? { max_copy_connections_per_table: maxCopyConnectionsPerTable }
-      : {}),
-    ...(invalidatedSlotBehavior !== undefined
-      ? { invalidated_slot_behavior: invalidatedSlotBehavior }
-      : {}),
-    ...(batch
-      ? {
-          batch: {
-            ...(batch.maxFillMs !== undefined ? { max_fill_ms: batch.maxFillMs } : {}),
-          },
-        }
-      : {}),
+    max_table_sync_workers: maxTableSyncWorkers,
+    max_copy_connections_per_table: maxCopyConnectionsPerTable,
+    invalidated_slot_behavior: invalidatedSlotBehavior,
+    batch,
   }
 
   const { data, error } = await post('/platform/replication/{ref}/destinations-pipelines', {
@@ -141,10 +131,8 @@ async function createDestinationPipeline(
     },
     signal,
   })
-  if (error) {
-    handleError(error)
-  }
 
+  if (error) handleError(error)
   return data
 }
 

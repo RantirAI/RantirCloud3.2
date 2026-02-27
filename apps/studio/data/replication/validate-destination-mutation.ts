@@ -1,8 +1,8 @@
 import { useMutation } from '@tanstack/react-query'
-
 import type { components } from 'api-types'
 import { handleError, post } from 'data/fetchers'
 import type { ResponseError, UseCustomMutationOptions } from 'types'
+
 import { DestinationConfig } from './create-destination-pipeline-mutation'
 
 type ValidateDestinationParams = {
@@ -31,8 +31,8 @@ async function validateDestination(
         project_id: projectId,
         dataset_id: datasetId,
         service_account_key: serviceAccountKey,
-        ...(connectionPoolSize !== undefined ? { connection_pool_size: connectionPoolSize } : {}),
-        ...(maxStalenessMins !== undefined ? { max_staleness_mins: maxStalenessMins } : {}),
+        connection_pool_size: connectionPoolSize,
+        max_staleness_mins: maxStalenessMins,
       },
     } as components['schemas']['ValidateReplicationDestinationBody']['config']
   } else if ('iceberg' in destinationConfig) {

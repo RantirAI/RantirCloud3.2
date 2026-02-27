@@ -1,6 +1,5 @@
 import { useMutation } from '@tanstack/react-query'
 import { components } from 'api-types'
-
 import { handleError, post } from 'data/fetchers'
 import type { ResponseError, UseCustomMutationOptions } from 'types'
 
@@ -36,9 +35,7 @@ async function validatePipeline(
     publication_name: publicationName,
     max_table_sync_workers: maxTableSyncWorkers,
     max_copy_connections_per_table: maxCopyConnectionsPerTable,
-    ...(invalidatedSlotBehavior !== undefined
-      ? { invalidated_slot_behavior: invalidatedSlotBehavior }
-      : {}),
+    invalidated_slot_behavior: invalidatedSlotBehavior,
     batch: batchConfig,
   }
 
