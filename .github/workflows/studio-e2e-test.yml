@@ -115,7 +115,7 @@ jobs:
           merge-multiple: true
 
       - name: Merge Playwright reports
-        run: npx playwright merge-reports --config=e2e/studio/playwright.merge.config.ts -- blob-report
+        run: npx playwright merge-reports --config=e2e/studio/playwright.merge.config.ts -- e2e/studio/blob-report
 
       - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
         with:
