@@ -72,6 +72,7 @@
     "@uidotdev/usehooks": "^2.4.1",
     "@vercel/functions": "^2.1.0",
     "@vitejs/plugin-react": "^4.3.4",
+    "@xyflow/react": "^12.10.1",
     "@zip.js/zip.js": "^2.7.29",
     "ai": "5.0.52",
     "ai-commands": "workspace:*",
