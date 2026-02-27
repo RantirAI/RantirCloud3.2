@@ -429,11 +429,15 @@ const nextConfig = {
         destination: '/org/:slug/billing#invoices',
         permanent: true,
       },
-      {
-        source: '/projects',
-        destination: '/organizations',
-        permanent: false,
-      },
+      ...(process.env.NEXT_PUBLIC_IS_PLATFORM === 'true'
+        ? [
+            {
+              source: '/projects',
+              destination: '/organizations',
+              permanent: false,
+            },
+          ]
+        : []),
       {
         source: '/project/:ref/settings/auth',
         destination: '/project/:ref/auth/providers',
