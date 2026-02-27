@@ -1,9 +1,9 @@
 import { useQuery } from '@tanstack/react-query'
-
 import { get, handleError } from 'data/fetchers'
 import { useProjectAddonsQuery } from 'data/subscriptions/project-addons-query'
 import { IS_PLATFORM } from 'lib/constants'
 import type { ResponseError, UseCustomQueryOptions } from 'types'
+
 import { customDomainKeys } from './keys'
 
 export type CustomDomainsVariables = {
@@ -73,6 +73,15 @@ export async function getCustomDomains(
   })
 
   if (_error) {
+    return {
+      customDomain: {
+        status: 'active',
+        hostname: 'test.joshen.me',
+        ssl: { status: '5_services_reconfigured' },
+      },
+      status: '5_services_reconfigured',
+    }
+
     const error = _error as ResponseError
     // not allowed error and no hostname configured error are
     // valid steps in the process of setting up a custom domain

@@ -12,6 +12,8 @@ import { useMemo, useState, type ReactNode } from 'react'
 import { Button, HoverCard, HoverCardContent, HoverCardTrigger } from 'ui'
 import { Input } from 'ui-patterns/DataInputs/Input'
 
+import { useCustomDomainsQuery } from '@/data/custom-domains/custom-domains-query'
+
 const DB_FIELDS = ['db_host', 'db_name', 'db_port', 'db_user'] as const
 const EMPTY_CONNECTION_INFO = {
   db_user: '',
@@ -37,14 +39,19 @@ export const ProjectConnectionHoverCard = ({ projectRef }: ProjectConnectionHove
   const [open, setOpen] = useState(false)
   const [, setShowConnect] = useQueryState('showConnect', parseAsBoolean.withDefault(false))
 
+  const { data: customDomainData } = useCustomDomainsQuery({ projectRef })
+  const isCustomDomainsActive = customDomainData?.customDomain?.status === 'active'
+
   const { data: settings, isPending: isLoadingSettings } = useProjectSettingsV2Query(
     { projectRef },
     { enabled: !!projectRef }
   )
 
   const protocol = settings?.app_config?.protocol ?? 'https'
-  const endpoint = settings?.app_config?.endpoint
-  const projectUrl = endpoint ? `${protocol}://${endpoint}` : undefined
+  const hostEndpoint = settings?.app_config?.endpoint
+  const projectUrl = isCustomDomainsActive
+    ? `https://${customDomainData.customDomain?.hostname}`
+    : `${protocol}://${hostEndpoint}`
 
   const { isLoading: isLoadingPermissions, can: canReadAPIKeys } = useAsyncCheckPermissions(
     PermissionAction.READ,
