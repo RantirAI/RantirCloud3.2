@@ -167,7 +167,12 @@ export async function executeFlow(
         body: JSON.stringify(payload),
       })
 
-      const body = await resp.json().catch(() => ({ raw: await resp.text() }))
+      let body: any
+      try {
+        body = await resp.json()
+      } catch {
+        body = { raw: await resp.text() }
+      }
 
       if (!resp.ok) {
         result = {
