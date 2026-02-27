@@ -18,7 +18,22 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
 }
 
 const handleGet = async (req: NextApiRequest, res: NextApiResponse) => {
-  // Platform specific endpoint
+  const { ref } = req.query
+
+  // For custom projects, return their metadata from the request header
+  // (client passes it since localStorage isn't available server-side)
+  const projectMeta = req.headers['x-local-project-meta']
+  if (ref !== 'default' && projectMeta) {
+    try {
+      const meta = JSON.parse(projectMeta as string)
+      return res.status(200).json({
+        ...meta,
+        connectionString: '',
+        restUrl: PROJECT_REST_URL,
+      })
+    } catch {}
+  }
+
   const response = {
     ...DEFAULT_PROJECT,
     connectionString: '',
