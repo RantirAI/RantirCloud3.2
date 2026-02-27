@@ -1,7 +1,9 @@
 import Link from 'next/link'
+import { ReactNode } from 'react'
 
 import { DocsButton } from 'components/ui/DocsButton'
 import {
+  Badge,
   BreadcrumbItem_Shadcn_ as BreadcrumbItem,
   BreadcrumbLink_Shadcn_ as BreadcrumbLink,
   BreadcrumbList_Shadcn_ as BreadcrumbList,
@@ -23,6 +25,8 @@ interface PlatformWebhooksHeaderProps {
   hasSelectedEndpoint: boolean
   headerTitle: string
   headerDescription: string
+  endpointStatus?: 'enabled' | 'disabled'
+  endpointActions?: ReactNode
   webhooksHref: string
 }
 
@@ -30,6 +34,8 @@ export const PlatformWebhooksHeader = ({
   hasSelectedEndpoint,
   headerTitle,
   headerDescription,
+  endpointStatus,
+  endpointActions,
   webhooksHref,
 }: PlatformWebhooksHeaderProps) => {
   return (
@@ -51,16 +57,31 @@ export const PlatformWebhooksHeader = ({
       )}
       <PageHeaderMeta>
         <PageHeaderSummary>
-          <PageHeaderTitle>{headerTitle}</PageHeaderTitle>
+          <PageHeaderTitle>
+            <span className="inline-flex items-center gap-2">
+              <span>{headerTitle}</span>
+              {hasSelectedEndpoint && endpointStatus && (
+                <Badge variant={endpointStatus === 'enabled' ? 'success' : 'default'}>
+                  {endpointStatus === 'enabled' ? 'Enabled' : 'Disabled'}
+                </Badge>
+              )}
+            </span>
+          </PageHeaderTitle>
           <PageHeaderDescription>{headerDescription}</PageHeaderDescription>
         </PageHeaderSummary>
         <PageHeaderAside>
-          <DocsButton href="https://supabase.com/docs" />
-          <Button asChild type="default">
-            <a target="_blank" rel="noopener noreferrer" href="https://supabase.com">
-              Leave feedback
-            </a>
-          </Button>
+          {hasSelectedEndpoint ? (
+            endpointActions
+          ) : (
+            <>
+              <DocsButton href="https://supabase.com/docs" />
+              <Button asChild type="default">
+                <a target="_blank" rel="noopener noreferrer" href="https://supabase.com">
+                  Leave feedback
+                </a>
+              </Button>
+            </>
+          )}
         </PageHeaderAside>
       </PageHeaderMeta>
     </PageHeader>

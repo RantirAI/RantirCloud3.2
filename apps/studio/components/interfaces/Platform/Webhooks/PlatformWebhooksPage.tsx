@@ -1,3 +1,4 @@
+import { useRouter } from 'next/router'
 import { parseAsString, parseAsStringLiteral, useQueryState } from 'nuqs'
 import { useEffect, useMemo, useState } from 'react'
 import { toast } from 'sonner'
@@ -12,6 +13,7 @@ import {
   AlertDialogFooter,
   AlertDialogHeader,
   AlertDialogTitle,
+  Button,
   copyToClipboard,
 } from 'ui'
 import { PageContainer } from 'ui-patterns/PageContainer'
@@ -37,13 +39,14 @@ const PANEL_VALUES = ['create', 'edit'] as const
 
 interface PlatformWebhooksPageProps {
   scope: WebhookScope
+  endpointId?: string
 }
 
-export const PlatformWebhooksPage = ({ scope }: PlatformWebhooksPageProps) => {
+export const PlatformWebhooksPage = ({ scope, endpointId }: PlatformWebhooksPageProps) => {
+  const router = useRouter()
   const { slug, ref } = useParams()
   const { endpoints, deliveries, createEndpoint, updateEndpoint, deleteEndpoint, regenerateSecret } =
     usePlatformWebhooksMockStore(scope)
-  const [endpointId, setEndpointId] = useQueryState('endpointId', parseAsString)
   const [deliveryId, setDeliveryId] = useQueryState('deliveryId', parseAsString)
   const [panel, setPanel] = useQueryState('panel', parseAsStringLiteral(PANEL_VALUES))
   const [search, setSearch] = useQueryState(
@@ -86,9 +89,9 @@ export const PlatformWebhooksPage = ({ scope }: PlatformWebhooksPageProps) => {
   useEffect(() => {
     if (!!endpointId && !selectedEndpoint) {
       toast('Endpoint not found')
-      setEndpointId(null)
+      router.replace(webhooksHref)
     }
-  }, [endpointId, selectedEndpoint, setEndpointId])
+  }, [endpointId, selectedEndpoint, router, webhooksHref])
 
   const filteredEndpoints = useMemo(() => {
     return filterWebhookEndpoints(endpoints, search)
@@ -150,7 +153,7 @@ export const PlatformWebhooksPage = ({ scope }: PlatformWebhooksPageProps) => {
     if (!endpointPendingDelete) return
     deleteEndpoint(endpointPendingDelete.id)
     if (endpointPendingDelete.id === endpointId) {
-      setEndpointId(null)
+      router.push(webhooksHref)
       setDeliverySearch('')
     }
     setEndpointIdPendingDelete(null)
@@ -160,7 +163,7 @@ export const PlatformWebhooksPage = ({ scope }: PlatformWebhooksPageProps) => {
   const handleUpsertEndpoint = (values: EndpointFormValues) => {
     if (panel === 'create') {
       const createdEndpointId = createEndpoint(toEndpointPayload(values))
-      setEndpointId(createdEndpointId)
+      router.push(`${webhooksHref}/${encodeURIComponent(createdEndpointId)}`)
       setPanel(null)
       setEditEnabledOverride(null)
       toast.success('Endpoint created')
@@ -207,6 +210,25 @@ export const PlatformWebhooksPage = ({ scope }: PlatformWebhooksPageProps) => {
         hasSelectedEndpoint={!!selectedEndpoint}
         headerTitle={headerTitle}
         headerDescription={headerDescription}
+        endpointStatus={selectedEndpoint ? (selectedEndpoint.enabled ? 'enabled' : 'disabled') : undefined}
+        endpointActions={
+          selectedEndpoint ? (
+            <>
+              <Button
+                type="default"
+                onClick={() => {
+                  setEditEnabledOverride(null)
+                  setPanel('edit')
+                }}
+              >
+                Edit
+              </Button>
+              <Button type="danger" onClick={() => setEndpointIdPendingDelete(selectedEndpoint.id)}>
+                Delete
+              </Button>
+            </>
+          ) : undefined
+        }
         webhooksHref={webhooksHref}
       />
 
@@ -222,7 +244,7 @@ export const PlatformWebhooksPage = ({ scope }: PlatformWebhooksPageProps) => {
                 onDeleteEndpoint={(id) => setEndpointIdPendingDelete(id)}
                 onSearchChange={setSearch}
                 onViewEndpoint={(id) => {
-                  setEndpointId(id)
+                  router.push(`${webhooksHref}/${encodeURIComponent(id)}`)
                   setPanel(null)
                 }}
               />
@@ -231,12 +253,7 @@ export const PlatformWebhooksPage = ({ scope }: PlatformWebhooksPageProps) => {
                 deliverySearch={deliverySearch}
                 filteredDeliveries={filteredDeliveries}
                 selectedEndpoint={selectedEndpoint}
-                onDeleteEndpoint={() => setEndpointIdPendingDelete(selectedEndpoint.id)}
                 onDeliverySearchChange={setDeliverySearch}
-                onEditEndpoint={() => {
-                  setEditEnabledOverride(null)
-                  setPanel('edit')
-                }}
                 onOpenDelivery={(id) => {
                   setDeliveryDetailsTab('event')
                   setDeliveryId(id)

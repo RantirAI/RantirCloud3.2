@@ -92,6 +92,9 @@ export const generateOrganizationSettingsSections = ({
   showSsoSettings = true,
   showLegalDocuments = true,
 }: OrganizationSettingsSectionsProps): SidebarSection[] => {
+  const isLinkActive = (key: string, href: string) =>
+    key === 'webhooks' ? currentPath === href || currentPath.startsWith(`${href}/`) : currentPath === href
+
   const configurationLinks = [
     {
       key: 'general',
@@ -154,7 +157,7 @@ export const generateOrganizationSettingsSections = ({
       heading: 'Configuration',
       links: configurationLinks.map((item) => ({
         ...item,
-        isActive: currentPath === item.href,
+        isActive: isLinkActive(item.key, item.href),
       })),
     },
     {
@@ -162,7 +165,7 @@ export const generateOrganizationSettingsSections = ({
       heading: 'Connections',
       links: connectionsLinks.map((item) => ({
         ...item,
-        isActive: currentPath === item.href,
+        isActive: isLinkActive(item.key, item.href),
       })),
     },
     {
@@ -170,7 +173,7 @@ export const generateOrganizationSettingsSections = ({
       heading: 'Compliance',
       links: complianceLinks.map((item) => ({
         ...item,
-        isActive: currentPath === item.href,
+        isActive: isLinkActive(item.key, item.href),
       })),
     },
   ]

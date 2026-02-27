@@ -22,9 +22,7 @@ interface PlatformWebhooksEndpointDetailsProps {
   deliverySearch: string
   filteredDeliveries: WebhookDelivery[]
   selectedEndpoint: WebhookEndpoint
-  onDeleteEndpoint: () => void
   onDeliverySearchChange: (value: string) => void
-  onEditEndpoint: () => void
   onOpenDelivery: (deliveryId: string) => void
   onCopySecret: () => void
   onRegenerateSecret: () => void
@@ -34,30 +32,13 @@ export const PlatformWebhooksEndpointDetails = ({
   deliverySearch,
   filteredDeliveries,
   selectedEndpoint,
-  onDeleteEndpoint,
   onDeliverySearchChange,
-  onEditEndpoint,
   onOpenDelivery,
   onCopySecret,
   onRegenerateSecret,
 }: PlatformWebhooksEndpointDetailsProps) => {
   return (
     <div className="space-y-6">
-      <div className="flex items-center justify-end gap-2">
-        <Button type="default" onClick={onEditEndpoint}>
-          Edit
-        </Button>
-        <Button type="danger" onClick={onDeleteEndpoint}>
-          Delete
-        </Button>
-      </div>
-
-      <div>
-        <Badge variant={selectedEndpoint.enabled ? 'success' : 'default'}>
-          {selectedEndpoint.enabled ? 'Enabled' : 'Disabled'}
-        </Badge>
-      </div>
-
       <div className="grid grid-cols-1 xl:grid-cols-2 gap-4">
         <Card className="overflow-hidden">
           <CardHeader>

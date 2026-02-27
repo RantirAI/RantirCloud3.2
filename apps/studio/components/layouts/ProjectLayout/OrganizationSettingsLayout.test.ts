@@ -89,6 +89,20 @@ describe('OrganizationSettingsLayout helpers', () => {
     ).toBe(true)
   })
 
+  it('keeps webhooks nav item active for nested endpoint routes', () => {
+    const sections = generateOrganizationSettingsSections({
+      slug: 'my-org',
+      currentPath: '/org/my-org/webhooks/org-endpoint-1',
+      showSecuritySettings: true,
+      showSsoSettings: true,
+      showLegalDocuments: true,
+    })
+
+    expect(
+      sections.flatMap((section) => section.links).find((item) => item.label === 'Webhooks')?.isActive
+    ).toBe(true)
+  })
+
   it('uses settings as default document title when page title is not provided', () => {
     expect(getOrganizationSettingsDocumentTitle(undefined, 'Supabase')).toBe('Settings | Supabase')
   })

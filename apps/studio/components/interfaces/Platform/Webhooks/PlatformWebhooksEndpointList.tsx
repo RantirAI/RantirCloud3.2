@@ -141,15 +141,15 @@ export const PlatformWebhooksEndpointList = ({
                   key={endpoint.id}
                   className="relative cursor-pointer inset-focus"
                   onClick={createNavigationHandler(
-                    `${webhooksHref}?endpointId=${encodeURIComponent(endpoint.id)}`,
+                    `${webhooksHref}/${encodeURIComponent(endpoint.id)}`,
                     router
                   )}
                   onAuxClick={createNavigationHandler(
-                    `${webhooksHref}?endpointId=${encodeURIComponent(endpoint.id)}`,
+                    `${webhooksHref}/${encodeURIComponent(endpoint.id)}`,
                     router
                   )}
                   onKeyDown={createNavigationHandler(
-                    `${webhooksHref}?endpointId=${encodeURIComponent(endpoint.id)}`,
+                    `${webhooksHref}/${encodeURIComponent(endpoint.id)}`,
                     router
                   )}
                   tabIndex={0}
@@ -178,11 +178,11 @@ export const PlatformWebhooksEndpointList = ({
                       onClick={(event) => event.stopPropagation()}
                       onKeyDown={(event) => event.stopPropagation()}
                     >
-                      <DropdownMenu className="w-40" align="end">
+                      <DropdownMenu>
                         <DropdownMenuTrigger asChild>
                           <Button type="default" icon={<MoreVertical />} className="w-7" />
                         </DropdownMenuTrigger>
-                        <DropdownMenuContent side="left">
+                        <DropdownMenuContent side="bottom" align="end" className="w-40">
                           <DropdownMenuItem
                             className="gap-x-2"
                             onClick={() => {
