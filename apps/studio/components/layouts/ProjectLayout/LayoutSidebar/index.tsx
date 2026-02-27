@@ -38,7 +38,7 @@ export const LayoutSidebar = ({
     return (
       <MobileSheetNav
         shouldCloseOnRouteChange={false}
-        shouldCloseOnWindowResize={false}
+        shouldCloseOnViewportResize={false}
         open={mobileSheetContent !== null}
         onOpenChange={(open: boolean) => {
           if (!open) {

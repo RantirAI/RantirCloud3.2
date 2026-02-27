@@ -13,14 +13,14 @@ const MobileSheetNav: React.FC<{
   onOpenChange(open: boolean): void
   className?: string
   shouldCloseOnRouteChange?: boolean
-  shouldCloseOnWindowResize?: boolean
+  shouldCloseOnViewportResize?: boolean
 }> = ({
   children,
   open = false,
   onOpenChange,
   className,
   shouldCloseOnRouteChange = true,
-  shouldCloseOnWindowResize = true,
+  shouldCloseOnViewportResize = true,
 }) => {
   const router = useRouter()
   const { width } = useWindowSize()
@@ -33,7 +33,7 @@ const MobileSheetNav: React.FC<{
   }, [pathWithoutQuery])
 
   useEffect(() => {
-    if (shouldCloseOnWindowResize) {
+    if (shouldCloseOnViewportResize) {
       onOpenChange(false)
     }
   }, [width])
