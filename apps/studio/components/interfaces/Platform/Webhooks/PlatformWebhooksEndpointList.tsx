@@ -1,0 +1,216 @@
+import { ChevronRight, Eye, MoreVertical, Plus, Search, Trash2 } from 'lucide-react'
+import { useRouter } from 'next/router'
+import { useMemo, useState } from 'react'
+
+import { createNavigationHandler } from 'lib/navigation'
+import {
+  Badge,
+  Button,
+  Card,
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+  Input,
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeadSort,
+  TableHeader,
+  TableRow,
+} from 'ui'
+import { EmptyStatePresentational } from 'ui-patterns'
+import type { WebhookEndpoint } from './PlatformWebhooks.types'
+import { formatDate } from './PlatformWebhooksView.utils'
+
+interface PlatformWebhooksEndpointListProps {
+  filteredEndpoints: WebhookEndpoint[]
+  search: string
+  webhooksHref: string
+  onCreateEndpoint: () => void
+  onDeleteEndpoint: (endpointId: string) => void
+  onSearchChange: (value: string) => void
+  onViewEndpoint: (endpointId: string) => void
+}
+
+export const PlatformWebhooksEndpointList = ({
+  filteredEndpoints,
+  search,
+  webhooksHref,
+  onCreateEndpoint,
+  onDeleteEndpoint,
+  onSearchChange,
+  onViewEndpoint,
+}: PlatformWebhooksEndpointListProps) => {
+  const router = useRouter()
+  const formatEventCount = (eventTypes: string[]) => {
+    if (eventTypes.includes('*')) return 'All events'
+    if (eventTypes.length === 1) return '1 event'
+    return `${eventTypes.length} events`
+  }
+  const [sort, setSort] = useState<'status:asc' | 'status:desc' | 'created:asc' | 'created:desc'>(
+    'created:desc'
+  )
+
+  const [sortColumn, sortDirection] = sort.split(':') as ['status' | 'created', 'asc' | 'desc']
+
+  const getAriaSort = (column: 'status' | 'created') => {
+    if (sortColumn !== column) return 'none'
+    return sortDirection === 'asc' ? 'ascending' : 'descending'
+  }
+
+  const handleSortChange = (column: 'status' | 'created') => {
+    if (sortColumn !== column) {
+      setSort(`${column}:asc`)
+      return
+    }
+
+    setSort(`${column}:${sortDirection === 'asc' ? 'desc' : 'asc'}`)
+  }
+
+  const sortedEndpoints = useMemo(() => {
+    const items = [...filteredEndpoints]
+
+    items.sort((a, b) => {
+      if (sortColumn === 'status') {
+        const statusA = a.enabled ? 'enabled' : 'disabled'
+        const statusB = b.enabled ? 'enabled' : 'disabled'
+        const comparison = statusA.localeCompare(statusB)
+
+        if (comparison !== 0) return sortDirection === 'asc' ? comparison : -comparison
+      }
+
+      const createdComparison = new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime()
+      return sortDirection === 'asc' ? createdComparison : -createdComparison
+    })
+
+    return items
+  }, [filteredEndpoints, sortColumn, sortDirection])
+
+  return (
+    <div className="space-y-4">
+      <div className="flex items-center justify-between gap-2">
+        <h4 className="text-foreground">Endpoints</h4>
+        <Button type="primary" icon={<Plus />} onClick={onCreateEndpoint}>
+          New endpoint
+        </Button>
+      </div>
+      <Input
+        placeholder="Search endpoints"
+        size="tiny"
+        icon={<Search />}
+        value={search}
+        className="w-full lg:w-80"
+        onChange={(event) => onSearchChange(event.target.value)}
+      />
+
+      {filteredEndpoints.length === 0 ? (
+        <EmptyStatePresentational
+          title="No endpoints yet"
+          description="Create an endpoint to start receiving webhook deliveries."
+        >
+          <Button type="default" onClick={onCreateEndpoint}>
+            Create endpoint
+          </Button>
+        </EmptyStatePresentational>
+      ) : (
+        <Card className="overflow-hidden">
+          <Table>
+            <TableHeader>
+              <TableRow>
+                <TableHead aria-sort={getAriaSort('status')}>
+                  <TableHeadSort column="status" currentSort={sort} onSortChange={handleSortChange}>
+                    Status
+                  </TableHeadSort>
+                </TableHead>
+                <TableHead>URL</TableHead>
+                <TableHead>Events</TableHead>
+                <TableHead aria-sort={getAriaSort('created')}>
+                  <TableHeadSort column="created" currentSort={sort} onSortChange={handleSortChange}>
+                    Created
+                  </TableHeadSort>
+                </TableHead>
+                <TableHead className="w-20"></TableHead>
+              </TableRow>
+            </TableHeader>
+            <TableBody>
+              {sortedEndpoints.map((endpoint) => (
+                <TableRow
+                  key={endpoint.id}
+                  className="relative cursor-pointer inset-focus"
+                  onClick={createNavigationHandler(
+                    `${webhooksHref}?endpointId=${encodeURIComponent(endpoint.id)}`,
+                    router
+                  )}
+                  onAuxClick={createNavigationHandler(
+                    `${webhooksHref}?endpointId=${encodeURIComponent(endpoint.id)}`,
+                    router
+                  )}
+                  onKeyDown={createNavigationHandler(
+                    `${webhooksHref}?endpointId=${encodeURIComponent(endpoint.id)}`,
+                    router
+                  )}
+                  tabIndex={0}
+                >
+                  <TableCell>
+                    <Badge variant={endpoint.enabled ? 'success' : 'default'}>
+                      {endpoint.enabled ? 'Enabled' : 'Disabled'}
+                    </Badge>
+                  </TableCell>
+                  <TableCell className="max-w-[420px]">
+                    <p className="truncate">{endpoint.url}</p>
+                    {endpoint.description && (
+                      <p className="text-xs text-foreground-light truncate mt-1">{endpoint.description}</p>
+                    )}
+                  </TableCell>
+                  <TableCell className="max-w-[280px] truncate">
+                    {formatEventCount(endpoint.eventTypes)}
+                  </TableCell>
+                  <TableCell>
+                    <p>{formatDate(endpoint.createdAt)}</p>
+                    <p className="text-xs text-foreground-light mt-1">by {endpoint.createdBy}</p>
+                  </TableCell>
+                  <TableCell className="text-right">
+                    <div
+                      className="flex justify-end items-center h-full gap-3"
+                      onClick={(event) => event.stopPropagation()}
+                      onKeyDown={(event) => event.stopPropagation()}
+                    >
+                      <DropdownMenu className="w-40" align="end">
+                        <DropdownMenuTrigger asChild>
+                          <Button type="default" icon={<MoreVertical />} className="w-7" />
+                        </DropdownMenuTrigger>
+                        <DropdownMenuContent side="left">
+                          <DropdownMenuItem
+                            className="gap-x-2"
+                            onClick={() => {
+                              onViewEndpoint(endpoint.id)
+                            }}
+                          >
+                            <Eye size={14} />
+                            <span>View details</span>
+                          </DropdownMenuItem>
+
+                          <DropdownMenuItem className="gap-x-2" onClick={() => onDeleteEndpoint(endpoint.id)}>
+                            <Trash2 size={14} />
+                            <span>Delete</span>
+                          </DropdownMenuItem>
+                        </DropdownMenuContent>
+                      </DropdownMenu>
+                      <ChevronRight aria-hidden={true} size={14} className="text-foreground-muted/60" />
+                      <button tabIndex={-1} className="sr-only">
+                        Go to endpoint details
+                      </button>
+                    </div>
+                  </TableCell>
+                </TableRow>
+              ))}
+            </TableBody>
+          </Table>
+        </Card>
+      )}
+    </div>
+  )
+}

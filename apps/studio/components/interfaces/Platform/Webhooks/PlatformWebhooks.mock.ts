@@ -25,7 +25,7 @@ export const PLATFORM_WEBHOOKS_MOCK_DATA: Record<WebhookScope, PlatformWebhooksM
           { id: 'org-header-2', key: 'X-Environment', value: 'production' },
         ],
         signingSecret: 'whsec_org_zQ4mWk98J0ayQJ6n',
-        createdBy: 'user@lovable.dev',
+        createdBy: 'user@supabase.io',
         createdAt: '2026-02-15T21:30:00.000Z',
       },
       {
