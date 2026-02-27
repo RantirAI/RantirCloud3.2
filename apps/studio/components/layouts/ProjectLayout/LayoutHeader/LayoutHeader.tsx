@@ -132,7 +132,25 @@ export const LayoutHeader = ({
             'flex items-center justify-between h-full pr-3 flex-1 overflow-x-auto gap-x-8 pl-4'
           )}
         >
-          <div className="flex md:hidden items-center text-sm not-sr-only" />
+          <div className="flex md:hidden items-center text-sm not-sr-only">
+            <AnimatePresence>
+              {headerTitle && (
+                <motion.div
+                  className="flex items-center -ml-1"
+                  initial={{ opacity: 0, x: -20 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  exit={{ opacity: 0, x: -20 }}
+                  transition={{
+                    duration: 0.15,
+                    ease: 'easeOut',
+                  }}
+                >
+                  <LayoutHeaderDivider />
+                  <span className="text-foreground">{headerTitle}</span>
+                </motion.div>
+              )}
+            </AnimatePresence>
+          </div>
           <div className="hidden md:flex items-center text-sm">
             <HomeIcon />
             <div className="flex items-center md:pl-2">
@@ -174,25 +192,24 @@ export const LayoutHeader = ({
                   </motion.div>
                 )}
               </AnimatePresence>
-
-              <AnimatePresence>
-                {headerTitle && (
-                  <motion.div
-                    className="flex items-center"
-                    initial={{ opacity: 0, x: -20 }}
-                    animate={{ opacity: 1, x: 0 }}
-                    exit={{ opacity: 0, x: -20 }}
-                    transition={{
-                      duration: 0.15,
-                      ease: 'easeOut',
-                    }}
-                  >
-                    <LayoutHeaderDivider />
-                    <span className="text-foreground">{headerTitle}</span>
-                  </motion.div>
-                )}
-              </AnimatePresence>
             </div>
+            <AnimatePresence>
+              {headerTitle && (
+                <motion.div
+                  className="flex items-center"
+                  initial={{ opacity: 0, x: -20 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  exit={{ opacity: 0, x: -20 }}
+                  transition={{
+                    duration: 0.15,
+                    ease: 'easeOut',
+                  }}
+                >
+                  <LayoutHeaderDivider />
+                  <span className="text-foreground">{headerTitle}</span>
+                </motion.div>
+              )}
+            </AnimatePresence>
 
             <AnimatePresence>
               {projectRef && (

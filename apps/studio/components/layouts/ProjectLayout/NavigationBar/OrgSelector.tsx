@@ -73,10 +73,12 @@ export function OrgSelector() {
         <div className="truncate text-foreground font-medium leading-tight min-w-[100px] max-w-[250px]">
           {selectedOrganization?.name ?? 'Select organization'}
         </div>
-        <div className="flex items-center gap-1 truncate text-foreground-light leading-tight text-xs">
-          <Boxes className="shrink-0 size-3" strokeWidth={1.5} />
-          <span>{projectsLabel}</span>
-        </div>
+        {selectedOrganization && (
+          <div className="flex items-center gap-1 truncate text-foreground-light leading-tight text-xs">
+            <Boxes className="shrink-0 size-3" strokeWidth={1.5} />
+            <span>{projectsLabel}</span>
+          </div>
+        )}
       </div>
       <ChevronsUpDown
         strokeWidth={1}
