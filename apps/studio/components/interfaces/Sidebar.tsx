@@ -1,10 +1,12 @@
 import { LOCAL_STORAGE_KEYS, useFlag, useIsMFAEnabled, useParams } from 'common'
 import {
+  generateLogicRoutes,
   generateOtherRoutes,
   generateProductRoutes,
   generateSettingsRoutes,
   generateToolRoutes,
 } from 'components/layouts/ProjectLayout/NavigationBar/NavigationBar.utils'
+import { getProjectType } from 'lib/local-projects'
 import { ProjectIndexPageLink } from 'data/prefetchers/project.$ref'
 import { useSendEventMutation } from 'data/telemetry/send-event-mutation'
 import { AnimatePresence, motion, MotionProps } from 'framer-motion'
@@ -242,6 +244,8 @@ const ProjectLinks = () => {
 
   const authOverviewPageEnabled = useFlag('authOverviewPage')
 
+  const projectType = getProjectType(ref ?? 'default')
+
   const toolRoutes = generateToolRoutes(ref, project)
   const productRoutes = generateProductRoutes(ref, project, {
     auth: authEnabled,
@@ -255,8 +259,75 @@ const ProjectLinks = () => {
     showReports,
     apiDocsSidePanel: isNewAPIDocsEnabled,
   })
+  const logicRoutes = generateLogicRoutes(ref, project)
   const settingsRoutes = generateSettingsRoutes(ref, project)
 
+  if (projectType === 'logic') {
+    return (
+      <SidebarMenu>
+        <SidebarGroup className="gap-0.5">
+          <SideBarNavLink
+            key="home"
+            active={isUndefined(activeRoute) && !isUndefined(router.query.ref)}
+            route={{
+              key: 'HOME',
+              label: 'Project Home',
+              icon: <Home size={ICON_SIZE} strokeWidth={ICON_STROKE_WIDTH} />,
+              link: `/project/${ref}`,
+              linkElement: <ProjectIndexPageLink projectRef={ref} />,
+            }}
+          />
+          {logicRoutes.map((route, i) => (
+            <SideBarNavLink
+              key={`logic-routes-${i}`}
+              route={route}
+              active={activeRoute === route.key}
+            />
+          ))}
+        </SidebarGroup>
+        <SidebarGroup className="gap-0.5">
+          {settingsRoutes.map((route, i) => (
+            <SideBarNavLink
+              key={`settings-routes-${i}`}
+              route={route}
+              active={activeRoute === route.key}
+            />
+          ))}
+        </SidebarGroup>
+      </SidebarMenu>
+    )
+  }
+
+  if (projectType === 'visual') {
+    return (
+      <SidebarMenu>
+        <SidebarGroup className="gap-0.5">
+          <SideBarNavLink
+            key="home"
+            active={isUndefined(activeRoute) && !isUndefined(router.query.ref)}
+            route={{
+              key: 'HOME',
+              label: 'Project Home',
+              icon: <Home size={ICON_SIZE} strokeWidth={ICON_STROKE_WIDTH} />,
+              link: `/project/${ref}`,
+              linkElement: <ProjectIndexPageLink projectRef={ref} />,
+            }}
+          />
+        </SidebarGroup>
+        <SidebarGroup className="gap-0.5">
+          {settingsRoutes.map((route, i) => (
+            <SideBarNavLink
+              key={`settings-routes-${i}`}
+              route={route}
+              active={activeRoute === route.key}
+            />
+          ))}
+        </SidebarGroup>
+      </SidebarMenu>
+    )
+  }
+
+  // Data project (default) — full Supabase sidebar
   return (
     <SidebarMenu>
       <SidebarGroup className="gap-0.5">

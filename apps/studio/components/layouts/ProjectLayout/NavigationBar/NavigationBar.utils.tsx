@@ -186,9 +186,18 @@ export const generateOtherRoutes = (
       icon: <Blocks size={ICON_SIZE} strokeWidth={ICON_STROKE_WIDTH} />,
       link: ref && (isProjectBuilding ? buildingUrl : `/project/${ref}/integrations`),
     },
+  ]
+}
+
+export const generateLogicRoutes = (ref?: string, project?: Project): Route[] => {
+  const isProjectActive = project?.status === PROJECT_STATUS.ACTIVE_HEALTHY
+  const isProjectBuilding = project?.status === PROJECT_STATUS.COMING_UP
+  const buildingUrl = `/project/${ref}`
+
+  return [
     {
       key: 'logic',
-      label: 'Logic',
+      label: 'Flow Editor',
       disabled: !isProjectActive,
       icon: <Workflow size={ICON_SIZE} strokeWidth={ICON_STROKE_WIDTH} />,
       link: ref && (isProjectBuilding ? buildingUrl : `/project/${ref}/logic`),
