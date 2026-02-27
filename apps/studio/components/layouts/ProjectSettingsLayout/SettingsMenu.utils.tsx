@@ -22,7 +22,7 @@ export const generateSettingsMenu = (
   if (!IS_PLATFORM) {
     return [
       {
-        title: 'Project Settings',
+        title: 'Configuration',
         items: [
           {
             name: `Log Drains`,
@@ -42,7 +42,7 @@ export const generateSettingsMenu = (
 
   return [
     {
-      title: 'Project Settings',
+      title: 'Configuration',
       items: [
         {
           name: 'General',
@@ -106,7 +106,7 @@ export const generateSettingsMenu = (
       ],
     },
     {
-      title: 'Configuration',
+      title: 'Integrations',
       items: [
         {
           name: 'Data API',
@@ -132,14 +132,14 @@ export const generateSettingsMenu = (
       items: [
         ...(billingEnabled
           ? [
-              {
-                name: 'Subscription',
-                key: 'subscription',
-                url: `/org/${organization?.slug}/billing`,
-                items: [],
-                rightIcon: <ArrowUpRight strokeWidth={1} className="h-4 w-4" />,
-              },
-            ]
+            {
+              name: 'Subscription',
+              key: 'subscription',
+              url: `/org/${organization?.slug}/billing`,
+              items: [],
+              rightIcon: <ArrowUpRight strokeWidth={1} className="h-4 w-4" />,
+            },
+          ]
           : []),
         {
           name: 'Usage',

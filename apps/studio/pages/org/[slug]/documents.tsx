@@ -6,6 +6,7 @@ import OrganizationSettingsLayout from 'components/layouts/ProjectLayout/Organiz
 import {
   ScaffoldContainer,
   ScaffoldDescription,
+  ScaffoldDivider,
   ScaffoldHeader,
   ScaffoldTitle,
 } from 'components/layouts/Scaffold'
@@ -30,6 +31,7 @@ const OrgDocuments: NextPageWithLayout = () => {
           <ScaffoldDescription>Compliance documentation and legal agreements</ScaffoldDescription>
         </ScaffoldHeader>
       </ScaffoldContainer>
+      <ScaffoldDivider />
       <Documents />
     </>
   )
