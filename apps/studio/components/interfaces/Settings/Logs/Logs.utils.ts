@@ -786,6 +786,6 @@ export function buildLogsPrompt(rows: LogData[]): string {
   return (
     header +
     body +
-    '\n\nReply with a concise list that answers these questions: What do these logs indicate, what might be the underlying issue, and what steps can I take to resolve it?'
+    '\n\nWhat do these logs indicate? What steps can I take to resolve it? Keep your answer very concise and actionable. Max 2 or 3 bullet points.'
   )
 }

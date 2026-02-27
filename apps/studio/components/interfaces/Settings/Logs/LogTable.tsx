@@ -1,9 +1,8 @@
 import { PermissionAction } from '@supabase/shared-types/out/constants'
 import { IS_PLATFORM, useParams } from 'common'
 import { SIDEBAR_KEYS } from 'components/layouts/ProjectLayout/LayoutSidebar/LayoutSidebarProvider'
-import { AiAssistantDropdown } from 'components/ui/AiAssistantDropdown'
 import { isEqual } from 'lodash'
-import { Check, ChevronDown, Copy, Eye, EyeOff, Play, X as XIcon } from 'lucide-react'
+import { Copy, Eye, EyeOff, Play, X as XIcon } from 'lucide-react'
 import { Key, ReactNode, useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { Item, Menu, useContextMenu } from 'react-contexify'
 import DataGrid, { Column, RenderRowProps, Row } from 'react-data-grid'
@@ -17,10 +16,6 @@ import {
   Checkbox_Shadcn_,
   cn,
   copyToClipboard,
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
   ResizableHandle,
   ResizablePanel,
   ResizablePanelGroup,
@@ -177,10 +172,9 @@ export const LogTable = ({
   const checkboxColumn: Column<LogData> = {
     key: 'multi-select',
     name: '',
-    width: 36,
-    minWidth: 36,
-    maxWidth: 36,
-    resizable: false,
+    width: 32,
+    maxWidth: 32,
+    minWidth:32,
     renderCell: ({ row }) => {
       const key = getRowKey(row)
       const toggle = () => {
@@ -199,7 +193,7 @@ export const LogTable = ({
       }
       return (
         <div
-          className="absolute group inset-0 flex justify-center items-center cursor-pointer"
+          className="absolute group inset-0 flex justify-center pl-2 items-center cursor-pointer"
           onClick={(e) => {
             e.stopPropagation()
             toggle()
